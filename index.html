@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Frontitude One-Click Translator</title>
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --border: #e2e8f0;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --success: #16a34a;
+      --error: #dc2626;
+      --warning: #d97706;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    header h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+
+    header p {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .card-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+    }
+
+    /* API Key Section */
+    .api-key-row {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .api-key-row input {
+      flex: 1;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .api-key-row input:focus {
+      border-color: var(--primary);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.125rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .badge-free { background: #fef3c7; color: #92400e; }
+    .badge-pro { background: #dbeafe; color: #1e40af; }
+    .badge-none { background: #f1f5f9; color: #64748b; }
+
+    /* Upload Section */
+    .dropzone {
+      border: 2px dashed var(--border);
+      border-radius: 0.75rem;
+      padding: 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .dropzone:hover,
+    .dropzone.dragover {
+      border-color: var(--primary);
+      background: #eef2ff;
+    }
+
+    .dropzone-icon {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .dropzone-text {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+
+    .dropzone-text strong {
+      color: var(--primary);
+    }
+
+    .file-info {
+      margin-top: 0.75rem;
+      padding: 0.75rem;
+      background: #f0fdf4;
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      color: var(--success);
+      display: none;
+    }
+
+    /* Language Selection */
+    .lang-section { display: none; }
+
+    .lang-controls {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .lang-controls button {
+      padding: 0.25rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 0.375rem;
+      background: var(--card);
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .lang-controls button:hover {
+      background: #f1f5f9;
+    }
+
+    .lang-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 0.5rem;
+    }
+
+    .lang-item {
+      display: flex;
+      align-items: center;
+      gap: 0.375rem;
+      padding: 0.375rem 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .lang-item:hover {
+      background: #f8fafc;
+    }
+
+    .lang-item input[type="checkbox"] {
+      accent-color: var(--primary);
+    }
+
+    /* Action Section */
+    .action-section { display: none; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.625rem 1.5rem;
+      border: none;
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, opacity 0.2s;
+      width: 100%;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--primary-hover);
+    }
+
+    .btn-success {
+      background: var(--success);
+      color: white;
+    }
+
+    .btn-success:hover:not(:disabled) {
+      background: #15803d;
+    }
+
+    /* Progress */
+    .progress-section {
+      display: none;
+      margin-top: 1rem;
+    }
+
+    .progress-bar-container {
+      width: 100%;
+      height: 0.5rem;
+      background: #e2e8f0;
+      border-radius: 9999px;
+      overflow: hidden;
+      margin-bottom: 0.5rem;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: var(--primary);
+      border-radius: 9999px;
+      transition: width 0.3s;
+      width: 0%;
+    }
+
+    .progress-text {
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    /* Download */
+    .download-section { display: none; }
+
+    /* Error */
+    .error-msg {
+      display: none;
+      margin-top: 0.75rem;
+      padding: 0.75rem;
+      background: #fef2f2;
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      color: var(--error);
+    }
+
+    /* Warning / disclaimer */
+    .disclaimer {
+      margin-top: 0.5rem;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    .key-options {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-top: 0.5rem;
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+    }
+
+    .key-options label {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      cursor: pointer;
+    }
+
+    /* Provider row */
+    .provider-row {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .provider-row select {
+      padding: 0.5rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      outline: none;
+      background: var(--card);
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+
+    .provider-row select:focus {
+      border-color: var(--primary);
+    }
+
+    .model-row {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      margin-top: 0.5rem;
+    }
+
+    .model-row select {
+      flex: 1;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      outline: none;
+      background: var(--card);
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+
+    .model-row select:focus {
+      border-color: var(--primary);
+    }
+
+    .model-row label {
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .badge-provider { background: #e0e7ff; color: #3730a3; }
+
+    /* Hidden file input */
+    #file-input { display: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Frontitude One-Click Translator</h1>
+      <p>Upload your language.json, pick target languages, translate via DeepL / OpenAI / Gemini.</p>
+    </header>
+
+    <!-- Provider + API Key -->
+    <div class="card">
+      <div class="card-title">Translation Provider</div>
+      <div class="provider-row">
+        <select id="provider-select">
+          <option value="deepl">DeepL</option>
+          <option value="openai">OpenAI</option>
+          <option value="gemini">Gemini</option>
+        </select>
+        <input type="password" id="api-key" placeholder="Paste your DeepL API key here" style="flex:1" />
+        <span class="badge badge-none" id="key-badge">No Key</span>
+      </div>
+      <div class="model-row" id="model-row" style="display:none">
+        <label for="model-select">Model:</label>
+        <select id="model-select"></select>
+      </div>
+      <div class="key-options">
+        <label>
+          <input type="checkbox" id="remember-key" />
+          Remember key across sessions
+        </label>
+        <button id="clear-key" style="border:none;background:none;color:var(--error);cursor:pointer;font-size:0.8125rem;display:none;">Clear saved key</button>
+      </div>
+      <div class="disclaimer" id="disclaimer">
+        Your API key is sent directly from your browser to DeepL and is visible in the browser Network tab. It is never sent to any other server.
+      </div>
+    </div>
+
+    <!-- Upload -->
+    <div class="card">
+      <div class="card-title">Upload JSON</div>
+      <div class="dropzone" id="dropzone">
+        <div class="dropzone-icon">&#128194;</div>
+        <div class="dropzone-text">
+          Drag &amp; drop <strong>language.json</strong> here, or click to browse
+        </div>
+      </div>
+      <input type="file" id="file-input" accept=".json" />
+      <div class="file-info" id="file-info"></div>
+      <div class="error-msg" id="upload-error"></div>
+    </div>
+
+    <!-- Language Selection -->
+    <div class="card lang-section" id="lang-section">
+      <div class="card-title">Target Languages</div>
+      <div class="lang-controls">
+        <button id="select-all">Select All</button>
+        <button id="select-none">Select None</button>
+      </div>
+      <div class="lang-grid" id="lang-grid"></div>
+    </div>
+
+    <!-- Action -->
+    <div class="card action-section" id="action-section">
+      <button class="btn btn-primary" id="translate-btn" disabled>Translate</button>
+      <div class="progress-section" id="progress-section">
+        <div class="progress-bar-container">
+          <div class="progress-bar" id="progress-bar"></div>
+        </div>
+        <div class="progress-text" id="progress-text"></div>
+      </div>
+      <div class="error-msg" id="translate-error"></div>
+    </div>
+
+    <!-- Download -->
+    <div class="card download-section" id="download-section">
+      <button class="btn btn-success" id="download-btn">Download language.json</button>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      // ── Provider config ──
+      var PROVIDER_CONFIG = {
+        deepl: {
+          label: 'DeepL',
+          placeholder: 'Paste your DeepL API key here',
+          disclaimer: 'Your API key is sent directly from your browser to DeepL and is visible in the browser Network tab. It is never sent to any other server.',
+          models: [],
+        },
+        openai: {
+          label: 'OpenAI',
+          placeholder: 'Paste your OpenAI API key here (sk-...)',
+          disclaimer: 'Your API key is sent directly from your browser to OpenAI and is visible in the browser Network tab. It is never sent to any other server.',
+          models: ['gpt-4o-mini', 'gpt-4o', 'gpt-4.1-mini', 'gpt-4.1-nano'],
+        },
+        gemini: {
+          label: 'Gemini',
+          placeholder: 'Paste your Gemini API key here',
+          disclaimer: 'Your API key is sent directly from your browser to Google and is visible in the browser Network tab (as a URL parameter). It is never sent to any other server.',
+          models: ['gemini-2.0-flash', 'gemini-2.5-flash', 'gemini-2.5-pro'],
+        },
+      };
+
+      var LANG_CODE_TO_NAME = {
+        'ar': 'Arabic', 'bg': 'Bulgarian', 'cs': 'Czech', 'da': 'Danish',
+        'de': 'German', 'el': 'Greek', 'en': 'English', 'es': 'Spanish',
+        'et': 'Estonian', 'fi': 'Finnish', 'fr': 'French', 'he': 'Hebrew',
+        'hi': 'Hindi', 'hu': 'Hungarian', 'id': 'Indonesian', 'it': 'Italian',
+        'ja': 'Japanese', 'ko': 'Korean', 'lt': 'Lithuanian', 'lv': 'Latvian',
+        'nb': 'Norwegian Bokmål', 'nl': 'Dutch', 'pl': 'Polish',
+        'pt': 'Portuguese', 'pt-br': 'Brazilian Portuguese', 'pt-pt': 'European Portuguese',
+        'ro': 'Romanian', 'ru': 'Russian', 'sk': 'Slovak', 'sl': 'Slovenian',
+        'sv': 'Swedish', 'th': 'Thai', 'tr': 'Turkish', 'uk': 'Ukrainian',
+        'vi': 'Vietnamese',
+        'zh': 'Chinese Simplified', 'zh-cn': 'Chinese Simplified',
+        'zh-hans': 'Chinese Simplified', 'zh-tw': 'Chinese Traditional',
+        'zh-hant': 'Chinese Traditional',
+      };
+
+      // ── State (immutable updates via reassignment) ──
+      var state = {
+        provider: 'deepl',  // 'deepl' | 'openai' | 'gemini'
+        model: '',           // provider-specific model ID
+        apiKey: '',
+        jsonData: null,   // the parsed JSON object (never mutated)
+        languages: [],    // non-en language codes
+        selected: new Set(),
+        translating: false,
+      };
+
+      function setState(patch) {
+        state = Object.assign({}, state, patch);
+      }
+
+      // ── DOM refs ──
+      var dom = {
+        providerSelect: document.getElementById('provider-select'),
+        modelRow:      document.getElementById('model-row'),
+        modelSelect:   document.getElementById('model-select'),
+        disclaimer:    document.getElementById('disclaimer'),
+        apiKey:        document.getElementById('api-key'),
+        keyBadge:      document.getElementById('key-badge'),
+        rememberKey:   document.getElementById('remember-key'),
+        clearKey:      document.getElementById('clear-key'),
+        dropzone:      document.getElementById('dropzone'),
+        fileInput:     document.getElementById('file-input'),
+        fileInfo:      document.getElementById('file-info'),
+        uploadError:   document.getElementById('upload-error'),
+        langSection:   document.getElementById('lang-section'),
+        langGrid:      document.getElementById('lang-grid'),
+        selectAll:     document.getElementById('select-all'),
+        selectNone:    document.getElementById('select-none'),
+        actionSection: document.getElementById('action-section'),
+        translateBtn:  document.getElementById('translate-btn'),
+        progressSection: document.getElementById('progress-section'),
+        progressBar:   document.getElementById('progress-bar'),
+        progressText:  document.getElementById('progress-text'),
+        translateError: document.getElementById('translate-error'),
+        downloadSection: document.getElementById('download-section'),
+        downloadBtn:   document.getElementById('download-btn'),
+      };
+
+      // ── Provider + API Key ──
+      function storageKeyForProvider(provider) {
+        return 'translate_key_' + provider;
+      }
+
+      function storageKeyForModel(provider) {
+        return 'translate_model_' + provider;
+      }
+
+      function initProvider() {
+        var savedProvider = localStorage.getItem('translate_provider') || 'deepl';
+        dom.providerSelect.value = savedProvider;
+        setState({ provider: savedProvider });
+        applyProviderUI(savedProvider);
+        loadProviderKey(savedProvider);
+        loadProviderModel(savedProvider);
+      }
+
+      function applyProviderUI(provider) {
+        var config = PROVIDER_CONFIG[provider];
+        dom.apiKey.placeholder = config.placeholder;
+        dom.disclaimer.textContent = config.disclaimer;
+
+        // Model selector
+        if (config.models.length === 0) {
+          dom.modelRow.style.display = 'none';
+        } else {
+          dom.modelRow.style.display = 'flex';
+          dom.modelSelect.innerHTML = '';
+          config.models.forEach(function (m) {
+            var opt = document.createElement('option');
+            opt.value = m;
+            opt.textContent = m;
+            dom.modelSelect.appendChild(opt);
+          });
+        }
+      }
+
+      function loadProviderKey(provider) {
+        var saved = localStorage.getItem(storageKeyForProvider(provider));
+        if (saved) {
+          dom.apiKey.value = saved;
+          setState({ apiKey: saved });
+          updateKeyBadge(saved, provider);
+          dom.rememberKey.checked = true;
+          dom.clearKey.style.display = 'inline';
+        } else {
+          dom.apiKey.value = '';
+          setState({ apiKey: '' });
+          updateKeyBadge('', provider);
+          dom.clearKey.style.display = 'none';
+          // Preserve remember checkbox state — user may want to remember for this provider too
+        }
+      }
+
+      function loadProviderModel(provider) {
+        var config = PROVIDER_CONFIG[provider];
+        if (config.models.length === 0) {
+          setState({ model: '' });
+          return;
+        }
+        var saved = localStorage.getItem(storageKeyForModel(provider));
+        var model = (saved && config.models.indexOf(saved) !== -1) ? saved : config.models[0];
+        dom.modelSelect.value = model;
+        setState({ model: model });
+      }
+
+      function updateKeyBadge(key, provider) {
+        var p = provider || state.provider;
+        if (!key) {
+          dom.keyBadge.textContent = 'No Key';
+          dom.keyBadge.className = 'badge badge-none';
+          return;
+        }
+        if (p === 'deepl') {
+          var isFree = key.endsWith(':fx');
+          dom.keyBadge.textContent = isFree ? 'Free' : 'Pro';
+          dom.keyBadge.className = 'badge ' + (isFree ? 'badge-free' : 'badge-pro');
+        } else {
+          dom.keyBadge.textContent = PROVIDER_CONFIG[p].label;
+          dom.keyBadge.className = 'badge badge-provider';
+        }
+      }
+
+      function persistApiKey(key) {
+        if (dom.rememberKey.checked) {
+          localStorage.setItem(storageKeyForProvider(state.provider), key);
+          dom.clearKey.style.display = key ? 'inline' : 'none';
+        }
+      }
+
+      function persistModel(model) {
+        localStorage.setItem(storageKeyForModel(state.provider), model);
+      }
+
+      // Provider change
+      dom.providerSelect.addEventListener('change', function () {
+        var provider = dom.providerSelect.value;
+        localStorage.setItem('translate_provider', provider);
+        setState({ provider: provider });
+        applyProviderUI(provider);
+        loadProviderKey(provider);
+        loadProviderModel(provider);
+        updateTranslateBtn();
+      });
+
+      // Model change
+      dom.modelSelect.addEventListener('change', function () {
+        var model = dom.modelSelect.value;
+        setState({ model: model });
+        persistModel(model);
+      });
+
+      dom.apiKey.addEventListener('input', function () {
+        var key = dom.apiKey.value.trim();
+        setState({ apiKey: key });
+        updateKeyBadge(key);
+        persistApiKey(key);
+        updateTranslateBtn();
+      });
+
+      dom.rememberKey.addEventListener('change', function () {
+        if (dom.rememberKey.checked) {
+          persistApiKey(state.apiKey);
+        } else {
+          localStorage.removeItem(storageKeyForProvider(state.provider));
+          dom.clearKey.style.display = 'none';
+        }
+      });
+
+      dom.clearKey.addEventListener('click', function () {
+        localStorage.removeItem(storageKeyForProvider(state.provider));
+        dom.apiKey.value = '';
+        dom.rememberKey.checked = false;
+        dom.clearKey.style.display = 'none';
+        setState({ apiKey: '' });
+        updateKeyBadge('');
+        updateTranslateBtn();
+      });
+
+      // ── File Upload ──
+      dom.dropzone.addEventListener('click', function () {
+        dom.fileInput.click();
+      });
+
+      dom.dropzone.addEventListener('dragover', function (e) {
+        e.preventDefault();
+        dom.dropzone.classList.add('dragover');
+      });
+
+      dom.dropzone.addEventListener('dragleave', function () {
+        dom.dropzone.classList.remove('dragover');
+      });
+
+      dom.dropzone.addEventListener('drop', function (e) {
+        e.preventDefault();
+        dom.dropzone.classList.remove('dragover');
+        var files = e.dataTransfer.files;
+        if (files.length > 0) {
+          handleFile(files[0]);
+        }
+      });
+
+      dom.fileInput.addEventListener('change', function () {
+        if (dom.fileInput.files.length > 0) {
+          handleFile(dom.fileInput.files[0]);
+        }
+      });
+
+      var MAX_FILE_BYTES = 5 * 1024 * 1024; // 5 MB
+
+      function handleFile(file) {
+        hideError(dom.uploadError);
+        hideError(dom.translateError);
+        dom.downloadSection.style.display = 'none';
+
+        if (!file.name.endsWith('.json')) {
+          showError(dom.uploadError, 'Please upload a .json file.');
+          return;
+        }
+
+        if (file.size > MAX_FILE_BYTES) {
+          showError(dom.uploadError, 'File is too large (max 5 MB).');
+          return;
+        }
+
+        var reader = new FileReader();
+        reader.onload = function (e) {
+          try {
+            var parsed = JSON.parse(e.target.result);
+            processJson(parsed);
+          } catch (err) {
+            showError(dom.uploadError, 'JSON parse error: ' + err.message);
+          }
+        };
+        reader.onerror = function () {
+          showError(dom.uploadError, 'Failed to read file. Please try again.');
+        };
+        reader.readAsText(file);
+      }
+
+      function processJson(parsed) {
+        // Validate structure
+        if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
+          showError(dom.uploadError, 'Invalid format: expected an object with language codes as keys.');
+          return;
+        }
+
+        if (!parsed.en || typeof parsed.en !== 'object') {
+          showError(dom.uploadError, 'Missing "en" key in the JSON. Source language must be English.');
+          return;
+        }
+
+        var invalidKeys = Object.entries(parsed.en)
+          .filter(function (kv) { return typeof kv[1] !== 'string'; })
+          .map(function (kv) { return kv[0]; });
+        if (invalidKeys.length > 0) {
+          showError(dom.uploadError,
+            'Non-string values found in "en" for keys: ' + invalidKeys.slice(0, 5).join(', ') +
+            (invalidKeys.length > 5 ? ' (and ' + (invalidKeys.length - 5) + ' more)' : ''));
+          return;
+        }
+
+        var langs = Object.keys(parsed).filter(function (k) { return k !== 'en'; }).sort();
+        var keyCount = Object.keys(parsed.en).length;
+
+        setState({
+          jsonData: parsed,
+          languages: langs,
+          selected: new Set(langs),
+        });
+
+        // Show file info
+        dom.fileInfo.style.display = 'block';
+        dom.fileInfo.textContent =
+          'Languages: en, ' + langs.join(', ') +
+          '  |  Keys in "en": ' + keyCount;
+
+        renderLanguages();
+        dom.langSection.style.display = 'block';
+        dom.actionSection.style.display = 'block';
+        updateTranslateBtn();
+      }
+
+      // ── Language Selection ──
+      function renderLanguages() {
+        dom.langGrid.innerHTML = '';
+        state.languages.forEach(function (lang) {
+          var label = document.createElement('label');
+          label.className = 'lang-item';
+
+          var cb = document.createElement('input');
+          cb.type = 'checkbox';
+          cb.value = lang;
+          cb.checked = state.selected.has(lang);
+          cb.addEventListener('change', function () {
+            var next = new Set(state.selected);
+            if (cb.checked) {
+              next.add(lang);
+            } else {
+              next.delete(lang);
+            }
+            setState({ selected: next });
+            updateTranslateBtn();
+          });
+
+          var span = document.createElement('span');
+          span.textContent = lang.toUpperCase();
+
+          label.appendChild(cb);
+          label.appendChild(span);
+          dom.langGrid.appendChild(label);
+        });
+      }
+
+      dom.selectAll.addEventListener('click', function () {
+        setState({ selected: new Set(state.languages) });
+        renderLanguages();
+        updateTranslateBtn();
+      });
+
+      dom.selectNone.addEventListener('click', function () {
+        setState({ selected: new Set() });
+        renderLanguages();
+        updateTranslateBtn();
+      });
+
+      function updateTranslateBtn() {
+        var disabled = state.selected.size === 0 || !state.apiKey || state.translating;
+        dom.translateBtn.disabled = disabled;
+      }
+
+      // ── Translation ──
+      dom.translateBtn.addEventListener('click', function () {
+        if (state.translating) return;
+        startTranslation();
+      });
+
+      async function startTranslation() {
+        setState({ translating: true });
+        updateTranslateBtn();
+        hideError(dom.translateError);
+        dom.downloadSection.style.display = 'none';
+        dom.progressSection.style.display = 'block';
+
+        var enEntries = Object.entries(state.jsonData.en);
+        var keys = enEntries.map(function (e) { return e[0]; });
+        var texts = enEntries.map(function (e) { return e[1]; });
+        var targetLangs = Array.from(state.selected);
+
+        var totalSteps = targetLangs.length;
+        var completed = 0;
+
+        // Deep clone to avoid any mutation of original data
+        var result = JSON.parse(JSON.stringify(state.jsonData));
+
+        var batchSize = 50;
+
+        try {
+          for (var i = 0; i < targetLangs.length; i++) {
+            var lang = targetLangs[i];
+
+            dom.progressText.textContent =
+              'Translating ' + lang.toUpperCase() +
+              ' (' + (completed + 1) + '/' + totalSteps + ' languages)...';
+            dom.progressBar.style.width = ((completed / totalSteps) * 100) + '%';
+
+            var translatedTexts = [];
+
+            for (var batchStart = 0; batchStart < texts.length; batchStart += batchSize) {
+              var batch = texts.slice(batchStart, batchStart + batchSize);
+              var translated = await callTranslateAPI(batch, lang);
+              translatedTexts = translatedTexts.concat(translated);
+            }
+
+            // Validate translation count matches source key count
+            if (translatedTexts.length !== keys.length) {
+              throw new Error(
+                PROVIDER_CONFIG[state.provider].label + ' returned ' + translatedTexts.length +
+                ' translations but expected ' + keys.length + ' for language ' + lang.toUpperCase()
+              );
+            }
+
+            // Build new language block (immutable)
+            var langBlock = {};
+            keys.forEach(function (key, idx) {
+              langBlock[key] = translatedTexts[idx];
+            });
+            result[lang] = langBlock;
+
+            completed++;
+            dom.progressBar.style.width = ((completed / totalSteps) * 100) + '%';
+          }
+
+          dom.progressText.textContent = 'Done! All ' + totalSteps + ' language(s) translated.';
+          setState({ jsonData: result });
+          dom.downloadSection.style.display = 'block';
+        } catch (err) {
+          showError(dom.translateError, err.message);
+        } finally {
+          setState({ translating: false });
+          updateTranslateBtn();
+        }
+      }
+
+      // ── API Dispatcher ──
+      function callTranslateAPI(texts, targetLang) {
+        switch (state.provider) {
+          case 'openai': return callOpenAI(texts, targetLang);
+          case 'gemini': return callGemini(texts, targetLang);
+          default:       return callDeepL(texts, mapToDeepLLang(targetLang));
+        }
+      }
+
+      // ── Language helpers ──
+      function mapToDeepLLang(code) {
+        var mapping = {
+          'pt-br': 'PT-BR',
+          'pt': 'PT-PT',
+          'pt-pt': 'PT-PT',
+          'zh': 'ZH-HANS',
+          'zh-cn': 'ZH-HANS',
+          'zh-hans': 'ZH-HANS',
+          'zh-tw': 'ZH-HANT',
+          'zh-hant': 'ZH-HANT',
+          'en-us': 'EN-US',
+          'en-gb': 'EN-GB',
+        };
+        var lower = code.toLowerCase();
+        return mapping[lower] || code.toUpperCase();
+      }
+
+      function langCodeToName(code) {
+        var lower = code.toLowerCase();
+        return LANG_CODE_TO_NAME[lower] || code.toUpperCase();
+      }
+
+      // ── Shared fetch helper ──
+      var FETCH_TIMEOUT_MS = 30000;
+
+      function fetchWithTimeout(url, options) {
+        var controller = new AbortController();
+        var timeoutId = setTimeout(function () { controller.abort(); }, FETCH_TIMEOUT_MS);
+        var opts = Object.assign({}, options, { signal: controller.signal });
+        return fetch(url, opts)
+          .then(function (response) {
+            clearTimeout(timeoutId);
+            return response;
+          })
+          .catch(function (err) {
+            clearTimeout(timeoutId);
+            if (err.name === 'AbortError') {
+              throw new Error('API request timed out after ' + (FETCH_TIMEOUT_MS / 1000) + 's. Please try again.');
+            }
+            throw err;
+          });
+      }
+
+      async function handleAPIError(response, providerName) {
+        var errorBody = '';
+        try {
+          var errJson = await response.json();
+          errorBody = errJson.message || errJson.error?.message || '';
+        } catch (_) {
+          errorBody = await response.text();
+        }
+        throw new Error(
+          providerName + ' API error ' + response.status + ': ' +
+          (errorBody || response.statusText)
+        );
+      }
+
+      // ── DeepL ──
+      async function callDeepL(texts, targetLang) {
+        var isFree = state.apiKey.endsWith(':fx');
+        var baseUrl = isFree
+          ? 'https://api-free.deepl.com/v2/translate'
+          : 'https://api.deepl.com/v2/translate';
+
+        var response = await fetchWithTimeout(baseUrl, {
+          method: 'POST',
+          headers: {
+            'Authorization': 'DeepL-Auth-Key ' + state.apiKey,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            text: texts,
+            source_lang: 'EN',
+            target_lang: targetLang,
+          }),
+        });
+
+        if (!response.ok) {
+          await handleAPIError(response, 'DeepL');
+        }
+
+        var data = await response.json();
+        if (!data || !Array.isArray(data.translations)) {
+          throw new Error('Unexpected DeepL response format for language ' + targetLang);
+        }
+        return data.translations.map(function (t) { return t.text; });
+      }
+
+      // ── OpenAI ──
+      async function callOpenAI(texts, targetLang) {
+        var langName = langCodeToName(targetLang);
+        var response = await fetchWithTimeout('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': 'Bearer ' + state.apiKey,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: state.model,
+            temperature: 0.3,
+            messages: [
+              {
+                role: 'system',
+                content: 'You are a professional translator. Translate the following JSON array of strings from English to ' + langName + '. Return ONLY a JSON array of translated strings in the same order. Do not add explanations.',
+              },
+              {
+                role: 'user',
+                content: JSON.stringify(texts),
+              },
+            ],
+          }),
+        });
+
+        if (!response.ok) {
+          await handleAPIError(response, 'OpenAI');
+        }
+
+        var data = await response.json();
+        if (!data.choices || !data.choices[0] || !data.choices[0].message || !data.choices[0].message.content) {
+          throw new Error('OpenAI returned unexpected response structure for language ' + targetLang.toUpperCase());
+        }
+        var content = data.choices[0].message.content.trim();
+        return parseJSONArrayResponse(content, 'OpenAI', targetLang);
+      }
+
+      // ── Gemini ──
+      async function callGemini(texts, targetLang) {
+        var langName = langCodeToName(targetLang);
+        var url = 'https://generativelanguage.googleapis.com/v1beta/models/' +
+          state.model + ':generateContent?key=' + state.apiKey;
+
+        var response = await fetchWithTimeout(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{
+              parts: [{
+                text: 'You are a professional translator. Translate the following JSON array of strings from English to ' + langName + '. Return ONLY a JSON array of translated strings in the same order. Do not add explanations.\n\n' + JSON.stringify(texts),
+              }],
+            }],
+            generationConfig: { temperature: 0.3 },
+          }),
+        });
+
+        if (!response.ok) {
+          await handleAPIError(response, 'Gemini');
+        }
+
+        var data = await response.json();
+        if (!data.candidates || !data.candidates[0] || !data.candidates[0].content || !data.candidates[0].content.parts || !data.candidates[0].content.parts[0]) {
+          throw new Error('Gemini returned unexpected response structure for language ' + targetLang.toUpperCase());
+        }
+        var content = data.candidates[0].content.parts[0].text.trim();
+        return parseJSONArrayResponse(content, 'Gemini', targetLang);
+      }
+
+      function parseJSONArrayResponse(content, providerName, targetLang) {
+        // Strip markdown code fences if present
+        var cleaned = content.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+        try {
+          var arr = JSON.parse(cleaned);
+          if (!Array.isArray(arr)) {
+            throw new Error('Expected a JSON array');
+          }
+          if (!arr.every(function (item) { return typeof item === 'string'; })) {
+            throw new Error('Expected array of strings, got mixed types');
+          }
+          return arr;
+        } catch (err) {
+          throw new Error(
+            providerName + ' returned invalid JSON for language ' + targetLang.toUpperCase() +
+            ': ' + err.message
+          );
+        }
+      }
+
+      // ── Download ──
+      dom.downloadBtn.addEventListener('click', function () {
+        var json = JSON.stringify(state.jsonData, null, 2);
+        var blob = new Blob([json], { type: 'application/json' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'language.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      });
+
+      // ── Helpers ──
+      function showError(el, msg) {
+        el.textContent = msg;
+        el.style.display = 'block';
+      }
+
+      function hideError(el) {
+        el.textContent = '';
+        el.style.display = 'none';
+      }
+
+      // ── Init ──
+      initProvider();
+    })();
+  </script>
+</body>
+</html>
