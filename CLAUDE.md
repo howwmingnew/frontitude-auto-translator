@@ -16,17 +16,18 @@ A pure static Web App (single `index.html`) for translating Frontitude-exported 
 
 Two-phase interface — upload first, then configure and translate:
 
-1. **Upload phase**: Only the Upload JSON card is visible
-2. **Editor phase** (after upload): Content Preview table, Translation Provider, Target Languages, Translate button, Download
+1. **Upload phase**: Only the Upload JSON card is visible (720px container)
+2. **Editor phase** (after upload): Upload card hides, container expands to 95vw. Shows Content Preview table, Translation Provider (with context prompt), Target Languages, Translate button, Download. A "Re-select JSON" button in the Content Preview header resets back to the upload phase.
 
-The Content Preview is a read-only Excel-like table (rows = keys, columns = languages) with sticky header/first-column, search filter, and max-height 400px scroll. It re-renders after translation completes to show translated values.
+The Content Preview is a read-only Excel-like table (rows = keys, columns = languages) with sticky header/first-column, search filter, and max-height 60vh scroll. It re-renders after translation completes to show translated values.
 
 ## Key Technical Decisions
 
 - **Multi-provider support**: DeepL (direct translation API), OpenAI and Gemini (LLM-based via JSON array prompt)
 - **Batch size**: 50 texts per API call
 - **File size limit**: 5 MB
-- **localStorage**: Opt-in per-provider key storage (`translate_key_{provider}`, `translate_model_{provider}`, `translate_provider`)
+- **Context prompt**: Optional user-supplied domain context (e.g. "dental implant software") injected into OpenAI/Gemini system prompts. Not used by DeepL. Persisted in `translate_context_prompt`.
+- **localStorage**: Opt-in per-provider key storage (`translate_key_{provider}`, `translate_model_{provider}`, `translate_provider`, `translate_context_prompt`)
 - **DeepL endpoint auto-detection**: Free (`:fx` suffix) vs Pro key determines API base URL
 - **Language code mapping**: DeepL requires special codes (e.g. `zh` -> `ZH-HANS`, `pt` -> `PT-PT`)
 
