@@ -8,6 +8,9 @@ A browser-based tool that batch-translates Frontitude `language.json` files usin
 
 - **Multi-provider support** — choose between DeepL, OpenAI, and Gemini
 - **Drag-and-drop upload** — drop your `language.json` and start translating
+- **Content preview** — full-width Excel-like table to inspect keys and translations
+- **Context prompt** — provide domain context (e.g. "dental implant software") for more accurate OpenAI/Gemini translations
+- **Re-select JSON** — switch to a different file without reloading the page
 - **35+ languages** — from Arabic to Vietnamese
 - **Batch translation** — translate all selected languages in one click
 - **Real-time progress tracking** — progress bar with per-language status
@@ -25,8 +28,10 @@ A browser-based tool that batch-translates Frontitude `language.json` files usin
 ## Quick Start
 
 1. **Open** `index.html` in your browser
-2. **Select a provider**, paste your API key, and optionally choose a model
-3. **Upload** your `language.json` → select target languages → click **Translate** → **Download**
+2. **Upload** your `language.json`
+3. **Select a provider**, paste your API key, and optionally choose a model
+4. *(Optional)* Add a **context prompt** to guide translations (OpenAI/Gemini only)
+5. Select target languages → click **Translate** → **Download**
 
 ## JSON Format
 
