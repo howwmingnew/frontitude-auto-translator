@@ -868,6 +868,159 @@
       font-style: italic;
     }
 
+    .editor-table td.empty-cell:not(.col-source) {
+      border: 2px solid var(--error);
+    }
+
+    .editor-table tbody td:not(:first-child):not(.col-source) {
+      cursor: pointer;
+    }
+
+    .editor-table tbody td.cell-loading {
+      position: relative;
+      color: var(--text-disabled);
+      pointer-events: none;
+    }
+
+    @keyframes cell-pulse {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 1; }
+    }
+
+    .editor-table tbody td.cell-loading::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--primary-light);
+      animation: cell-pulse 1.2s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    /* Cell Edit Modal */
+    .cell-edit-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 200ms ease;
+    }
+
+    .cell-edit-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .cell-edit-modal {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      width: 90%;
+      max-width: 480px;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .cell-edit-modal-header {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 0.25rem;
+    }
+
+    .cell-edit-modal-meta {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+    }
+
+    .cell-edit-modal textarea {
+      width: 100%;
+      min-height: 100px;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-family: inherit;
+      font-size: 0.875rem;
+      resize: vertical;
+      outline: none;
+      background: var(--card);
+      color: var(--text);
+      transition: border-color var(--transition-base), box-shadow var(--transition-base);
+    }
+
+    .cell-edit-modal textarea:focus-visible {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: var(--focus-ring);
+    }
+
+    .cell-edit-modal-actions {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: flex-end;
+      margin-top: 0.75rem;
+    }
+
+    .cell-edit-modal-actions button {
+      padding: 0.375rem 1rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.8125rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background var(--transition-base), opacity var(--transition-base);
+    }
+
+    .cell-edit-modal-actions .btn-cancel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+    }
+
+    .cell-edit-modal-actions .btn-cancel:hover {
+      background: var(--bg-alt);
+      color: var(--text);
+    }
+
+    .cell-edit-modal-actions .btn-save {
+      background: var(--primary);
+      border: 1px solid var(--primary);
+      color: white;
+    }
+
+    .cell-edit-modal-actions .btn-save:hover {
+      background: var(--primary-hover);
+    }
+
+    /* Test API Key button */
+    .btn-test-key {
+      padding: 0.375rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--card);
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background var(--transition-base), color var(--transition-base), border-color var(--transition-base);
+    }
+
+    .btn-test-key:hover:not(:disabled) {
+      background: var(--primary-light);
+      color: var(--primary);
+      border-color: var(--primary-border);
+    }
+
+    .btn-test-key:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
     .editor-table tbody tr:hover td {
       background: var(--bg);
     }
@@ -1150,6 +1303,7 @@
             </select>
             <input type="password" id="api-key" placeholder="Paste your DeepL API key here" style="flex:1" />
             <span class="badge badge-none" id="key-badge">No Key</span>
+            <button class="btn-test-key" id="test-api-key-btn" data-i18n="testApiKey" disabled>Test Key</button>
           </div>
           <div class="model-row" id="model-row" style="display:none">
             <label for="model-select" data-i18n="modelLabel">Model:</label>
@@ -1215,6 +1369,19 @@
     <svg class="sidebar-toggle-close" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
   </button>
 
+  <!-- Cell Edit Modal -->
+  <div class="cell-edit-overlay" id="cell-edit-overlay">
+    <div class="cell-edit-modal">
+      <div class="cell-edit-modal-header" id="cell-edit-title"></div>
+      <div class="cell-edit-modal-meta" id="cell-edit-meta"></div>
+      <textarea id="cell-edit-textarea"></textarea>
+      <div class="cell-edit-modal-actions">
+        <button class="btn-cancel" id="cell-edit-cancel" data-i18n="cellEditCancel">Cancel</button>
+        <button class="btn-save" id="cell-edit-save" data-i18n="cellEditSave">Save</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast container -->
   <div id="toast-container" role="alert" aria-live="polite"></div>
 
@@ -1277,6 +1444,18 @@
           toastError: 'Error: {0}',
           sidebarToggle: 'Toggle settings panel',
           sidebarTitle: 'Translation Settings',
+          testApiKey: 'Test Key',
+          testApiKeySuccess: 'API key is valid!',
+          testApiKeyNoKey: 'Please enter an API key first.',
+          testApiKeyTesting: 'Testing...',
+          cellEditConfirm: 'This cell already has a translation. Do you want to modify it?',
+          cellEditTitle: 'Edit Translation',
+          cellEditSave: 'Save',
+          cellEditCancel: 'Cancel',
+          cellTranslating: 'Translating...',
+          cellTranslateSuccess: 'Cell translated successfully.',
+          cellTranslateError: 'Translation failed: {0}',
+          cellEditSuccess: 'Cell updated successfully.',
         },
         'zh-TW': {
           title: 'Frontitude 一鍵翻譯器',
@@ -1331,6 +1510,18 @@
           toastError: '錯誤：{0}',
           sidebarToggle: '開關設定面板',
           sidebarTitle: '翻譯設定',
+          testApiKey: '測試金鑰',
+          testApiKeySuccess: 'API 金鑰有效！',
+          testApiKeyNoKey: '請先輸入 API 金鑰。',
+          testApiKeyTesting: '測試中...',
+          cellEditConfirm: '此儲存格已有翻譯。是否要修改？',
+          cellEditTitle: '編輯翻譯',
+          cellEditSave: '儲存',
+          cellEditCancel: '取消',
+          cellTranslating: '翻譯中...',
+          cellTranslateSuccess: '儲存格翻譯成功。',
+          cellTranslateError: '翻譯失敗：{0}',
+          cellEditSuccess: '儲存格更新成功。',
         },
         ko: {
           title: 'Frontitude 원클릭 번역기',
@@ -1385,6 +1576,18 @@
           toastError: '오류: {0}',
           sidebarToggle: '설정 패널 전환',
           sidebarTitle: '번역 설정',
+          testApiKey: '키 테스트',
+          testApiKeySuccess: 'API 키가 유효합니다!',
+          testApiKeyNoKey: '먼저 API 키를 입력해 주세요.',
+          testApiKeyTesting: '테스트 중...',
+          cellEditConfirm: '이 셀에 이미 번역이 있습니다. 수정하시겠습니까?',
+          cellEditTitle: '번역 편집',
+          cellEditSave: '저장',
+          cellEditCancel: '취소',
+          cellTranslating: '번역 중...',
+          cellTranslateSuccess: '셀 번역 완료.',
+          cellTranslateError: '번역 실패: {0}',
+          cellEditSuccess: '셀 업데이트 완료.',
         },
       };
 
@@ -1556,6 +1759,13 @@
         providerCollapsibleBody: document.getElementById('provider-collapsible-body'),
         langCollapsible: document.getElementById('lang-collapsible'),
         langCollapsibleBody: document.getElementById('lang-collapsible-body'),
+        testApiKeyBtn: document.getElementById('test-api-key-btn'),
+        cellEditOverlay: document.getElementById('cell-edit-overlay'),
+        cellEditTitle: document.getElementById('cell-edit-title'),
+        cellEditMeta: document.getElementById('cell-edit-meta'),
+        cellEditTextarea: document.getElementById('cell-edit-textarea'),
+        cellEditSave: document.getElementById('cell-edit-save'),
+        cellEditCancel: document.getElementById('cell-edit-cancel'),
       };
 
       // ── Theme ──
@@ -1708,6 +1918,7 @@
         applyProviderUI(savedProvider);
         loadProviderKey(savedProvider);
         loadProviderModel(savedProvider);
+        updateTestKeyBtn();
       }
 
       function applyProviderUI(provider) {
@@ -1798,6 +2009,7 @@
         loadProviderKey(provider);
         loadProviderModel(provider);
         updateTranslateBtn();
+        updateTestKeyBtn();
       });
 
       // Model change
@@ -1813,6 +2025,7 @@
         updateKeyBadge(key);
         persistApiKey(key);
         updateTranslateBtn();
+        updateTestKeyBtn();
       });
 
       dom.rememberKey.addEventListener('change', function () {
@@ -1832,6 +2045,7 @@
         setState({ apiKey: '' });
         updateKeyBadge('');
         updateTranslateBtn();
+        updateTestKeyBtn();
       });
 
       dom.contextPrompt.addEventListener('input', function () {
@@ -2369,6 +2583,167 @@
       function hideError(el) {
         el.textContent = '';
         el.style.display = 'none';
+      }
+
+      // ── Test API Key ──
+      function updateTestKeyBtn() {
+        dom.testApiKeyBtn.disabled = !dom.apiKey.value.trim();
+      }
+
+      dom.testApiKeyBtn.addEventListener('click', async function () {
+        var key = dom.apiKey.value.trim();
+        if (!key) {
+          showToast(t('testApiKeyNoKey'), 'error');
+          return;
+        }
+
+        var btn = dom.testApiKeyBtn;
+        var originalText = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = t('testApiKeyTesting');
+
+        try {
+          await callTranslateAPI(['hello'], 'de');
+          showToast(t('testApiKeySuccess'), 'success');
+        } catch (err) {
+          showToast(t('toastError', err.message), 'error');
+        } finally {
+          btn.textContent = originalText;
+          updateTestKeyBtn();
+        }
+      });
+
+      // ── Cell Click Interaction ──
+      var cellTranslatingKeys = {}; // track cells currently being translated
+
+      dom.editorTable.addEventListener('click', function (e) {
+        // Guard: ignore text selection
+        var sel = window.getSelection();
+        if (sel && sel.toString().length > 0) return;
+
+        var td = e.target.closest('td');
+        if (!td) return;
+
+        var tr = td.closest('tr');
+        if (!tr || !tr.parentElement || tr.parentElement.tagName !== 'TBODY') return;
+
+        // Determine column index (0 = Key, 1+ = languages)
+        var cells = Array.prototype.slice.call(tr.children);
+        var colIndex = cells.indexOf(td);
+        if (colIndex <= 0) return; // ignore Key column
+
+        // Build langs array matching table columns
+        var langs = ['en'].concat(
+          Object.keys(state.jsonData).filter(function (k) { return k !== 'en'; }).sort()
+        );
+        var lang = langs[colIndex - 1]; // -1 because column 0 is Key
+        if (!lang || lang === 'en') return; // ignore source column
+
+        // Get the key from the first cell of this row
+        var keyCell = tr.children[0];
+        var key = keyCell.getAttribute('title') || keyCell.textContent;
+
+        var currentVal = state.jsonData[lang] ? state.jsonData[lang][key] : undefined;
+        var isEmpty = currentVal === undefined || currentVal === '';
+
+        if (isEmpty) {
+          handleCellTranslate(td, key, lang);
+        } else {
+          handleCellEdit(td, key, lang, currentVal);
+        }
+      });
+
+      function handleCellEdit(td, key, lang, currentVal) {
+        if (!confirm(t('cellEditConfirm'))) return;
+        openEditModal(key, lang, currentVal);
+      }
+
+      // ── Edit Modal ──
+      var editModalState = { key: null, lang: null };
+
+      function openEditModal(key, lang, value) {
+        editModalState = { key: key, lang: lang };
+        dom.cellEditTitle.textContent = t('cellEditTitle');
+        dom.cellEditMeta.textContent = key + ' \u2014 ' + lang.toUpperCase();
+        dom.cellEditTextarea.value = value || '';
+        dom.cellEditOverlay.classList.add('active');
+        dom.cellEditTextarea.focus();
+      }
+
+      function closeEditModal() {
+        dom.cellEditOverlay.classList.remove('active');
+        editModalState = { key: null, lang: null };
+      }
+
+      dom.cellEditCancel.addEventListener('click', closeEditModal);
+
+      dom.cellEditOverlay.addEventListener('click', function (e) {
+        if (e.target === dom.cellEditOverlay) closeEditModal();
+      });
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && dom.cellEditOverlay.classList.contains('active')) {
+          closeEditModal();
+        }
+      });
+
+      dom.cellEditSave.addEventListener('click', function () {
+        var key = editModalState.key;
+        var lang = editModalState.lang;
+        if (!key || !lang) return;
+
+        var newVal = dom.cellEditTextarea.value;
+
+        // Immutable update
+        var newJsonData = JSON.parse(JSON.stringify(state.jsonData));
+        if (!newJsonData[lang]) {
+          newJsonData[lang] = {};
+        }
+        newJsonData[lang][key] = newVal;
+        setState({ jsonData: newJsonData });
+        renderEditorTable();
+        closeEditModal();
+        showToast(t('cellEditSuccess'), 'success');
+      });
+
+      // ── Click-to-Translate (untranslated cell) ──
+      async function handleCellTranslate(td, key, lang) {
+        if (!state.apiKey) {
+          showToast(t('testApiKeyNoKey'), 'error');
+          return;
+        }
+
+        var cellId = lang + ':' + key;
+        if (cellTranslatingKeys[cellId]) return; // already translating
+        cellTranslatingKeys[cellId] = true;
+
+        // Show loading state
+        td.classList.add('cell-loading');
+        td.textContent = t('cellTranslating');
+
+        var sourceText = state.jsonData.en[key];
+
+        try {
+          var results = await callTranslateAPI([sourceText], lang);
+          var translated = results[0];
+
+          // Immutable update
+          var newJsonData = JSON.parse(JSON.stringify(state.jsonData));
+          if (!newJsonData[lang]) {
+            newJsonData[lang] = {};
+          }
+          newJsonData[lang][key] = translated;
+          setState({ jsonData: newJsonData });
+          renderEditorTable();
+          showToast(t('cellTranslateSuccess'), 'success');
+        } catch (err) {
+          td.classList.remove('cell-loading');
+          td.textContent = '\u2014';
+          td.classList.add('empty-cell');
+          showToast(t('cellTranslateError', err.message), 'error');
+        } finally {
+          delete cellTranslatingKeys[cellId];
+        }
       }
 
       // ── Language Switcher ──
