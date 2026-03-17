@@ -684,6 +684,13 @@
       align-items: center;
     }
 
+    .api-key-actions {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      margin-top: 0.5rem;
+    }
+
     .provider-row select {
       padding: 0.5rem 2rem 0.5rem 0.75rem;
       border: 1px solid var(--border);
@@ -936,6 +943,31 @@
       font-size: 0.75rem;
       color: var(--text-muted);
       margin-bottom: 0.75rem;
+    }
+
+    .cell-edit-source {
+      margin-bottom: 0.75rem;
+      padding: 0.5rem 0.75rem;
+      background: var(--bg-alt);
+      border-left: 3px solid var(--primary);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    }
+
+    .cell-edit-source-label {
+      font-size: 0.6875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+      margin-bottom: 0.25rem;
+    }
+
+    .cell-edit-source-text {
+      font-size: 0.8125rem;
+      color: var(--text);
+      line-height: 1.5;
+      word-break: break-word;
+      white-space: pre-wrap;
     }
 
     .cell-edit-modal textarea {
@@ -1302,6 +1334,8 @@
               <option value="gemini">Gemini</option>
             </select>
             <input type="password" id="api-key" placeholder="Paste your DeepL API key here" style="flex:1" />
+          </div>
+          <div class="api-key-actions">
             <span class="badge badge-none" id="key-badge">No Key</span>
             <button class="btn-test-key" id="test-api-key-btn" data-i18n="testApiKey" disabled>Test Key</button>
           </div>
@@ -1374,6 +1408,10 @@
     <div class="cell-edit-modal">
       <div class="cell-edit-modal-header" id="cell-edit-title"></div>
       <div class="cell-edit-modal-meta" id="cell-edit-meta"></div>
+      <div class="cell-edit-source">
+        <div class="cell-edit-source-label" id="cell-edit-source-label" data-i18n="cellEditSource">Source (EN):</div>
+        <div class="cell-edit-source-text" id="cell-edit-source"></div>
+      </div>
       <textarea id="cell-edit-textarea"></textarea>
       <div class="cell-edit-modal-actions">
         <button class="btn-cancel" id="cell-edit-cancel" data-i18n="cellEditCancel">Cancel</button>
@@ -1456,6 +1494,7 @@
           cellTranslateSuccess: 'Cell translated successfully.',
           cellTranslateError: 'Translation failed: {0}',
           cellEditSuccess: 'Cell updated successfully.',
+          cellEditSource: 'Source (EN):',
         },
         'zh-TW': {
           title: 'Frontitude 一鍵翻譯器',
@@ -1522,6 +1561,7 @@
           cellTranslateSuccess: '儲存格翻譯成功。',
           cellTranslateError: '翻譯失敗：{0}',
           cellEditSuccess: '儲存格更新成功。',
+          cellEditSource: '原文 (EN)：',
         },
         ko: {
           title: 'Frontitude 원클릭 번역기',
@@ -1588,6 +1628,7 @@
           cellTranslateSuccess: '셀 번역 완료.',
           cellTranslateError: '번역 실패: {0}',
           cellEditSuccess: '셀 업데이트 완료.',
+          cellEditSource: '원문 (EN):',
         },
       };
 
@@ -1764,6 +1805,8 @@
         cellEditTitle: document.getElementById('cell-edit-title'),
         cellEditMeta: document.getElementById('cell-edit-meta'),
         cellEditTextarea: document.getElementById('cell-edit-textarea'),
+        cellEditSource: document.getElementById('cell-edit-source'),
+        cellEditSourceLabel: document.getElementById('cell-edit-source-label'),
         cellEditSave: document.getElementById('cell-edit-save'),
         cellEditCancel: document.getElementById('cell-edit-cancel'),
       };
@@ -2655,16 +2698,18 @@
 
       function handleCellEdit(td, key, lang, currentVal) {
         if (!confirm(t('cellEditConfirm'))) return;
-        openEditModal(key, lang, currentVal);
+        var sourceText = state.jsonData.en[key] || '';
+        openEditModal(key, lang, currentVal, sourceText);
       }
 
       // ── Edit Modal ──
       var editModalState = { key: null, lang: null };
 
-      function openEditModal(key, lang, value) {
+      function openEditModal(key, lang, value, sourceText) {
         editModalState = { key: key, lang: lang };
         dom.cellEditTitle.textContent = t('cellEditTitle');
         dom.cellEditMeta.textContent = key + ' \u2014 ' + lang.toUpperCase();
+        dom.cellEditSource.textContent = sourceText || '';
         dom.cellEditTextarea.value = value || '';
         dom.cellEditOverlay.classList.add('active');
         dom.cellEditTextarea.focus();
@@ -2776,10 +2821,14 @@
         applyI18n();
       })();
       (function initContextPrompt() {
+        var DEFAULT_CONTEXT = '齒科植牙軟體介面多國語系翻譯';
         var saved = localStorage.getItem('translate_context_prompt');
         if (saved !== null) {
           dom.contextPrompt.value = saved;
           setState({ contextPrompt: saved });
+        } else {
+          dom.contextPrompt.value = DEFAULT_CONTEXT;
+          setState({ contextPrompt: DEFAULT_CONTEXT });
         }
       })();
       initProvider();
