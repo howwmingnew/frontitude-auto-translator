@@ -2,6 +2,8 @@
 
 # Frontitude 一鍵翻譯器
 
+> **[線上試用](https://howwmingnew.github.io/frontitude-auto-translator/)** — 免安裝，完全在瀏覽器中運行。
+
 一款基於瀏覽器的工具，使用 DeepL、OpenAI 或 Gemini 批次翻譯 Frontitude `language.json` 檔案——無需後端伺服器、無需建置步驟、完全在客戶端運行。
 
 ## 功能特色

@@ -2,6 +2,8 @@ English | [中文](README.zh-TW.md) | [한국어](README.ko.md)
 
 # Frontitude One-Click Translator
 
+> **[Try it online](https://howwmingnew.github.io/frontitude-auto-translator/)** — no install needed, runs entirely in your browser.
+
 A browser-based tool that batch-translates Frontitude `language.json` files using DeepL, OpenAI, or Gemini — no backend, no build step, fully client-side.
 
 ## Features

@@ -2,6 +2,8 @@
 
 # Frontitude 원클릭 번역기
 
+> **[온라인에서 사용해보기](https://howwmingnew.github.io/frontitude-auto-translator/)** — 설치 없이 브라우저에서 바로 실행됩니다.
+
 DeepL, OpenAI 또는 Gemini를 사용하여 Frontitude `language.json` 파일을 일괄 번역하는 브라우저 기반 도구입니다. 백엔드 서버 없음, 빌드 과정 없음, 완전한 클라이언트 사이드 실행.
 
 ## 주요 기능
