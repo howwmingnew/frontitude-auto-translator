@@ -113,6 +113,16 @@
       --chip-error-text: #f87171;
     }
 
+    [data-theme="dark"] .sidebar-overlay {
+      background: rgba(0, 0, 0, 0.5);
+    }
+    [data-theme="dark"] .sidebar-drawer {
+      box-shadow: -4px 0 20px rgba(0, 0, 0, 0.3);
+    }
+    [data-theme="dark"] .sidebar-toggle {
+      box-shadow: -2px 0 8px rgba(0, 0, 0, 0.3);
+    }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     *:focus-visible {
@@ -876,36 +886,117 @@
       margin-top: 0.5rem;
     }
 
-    /* Two-column editor grid */
-    .editor-grid {
+    /* Sidebar Drawer */
+    .sidebar-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.3);
+      z-index: 999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 300ms ease;
+    }
+
+    .sidebar-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .sidebar-drawer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 400px;
+      height: 100vh;
+      background: var(--card);
+      border-left: 1px solid var(--border);
+      box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1);
+      transform: translateX(100%);
+      transition: transform 300ms ease;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar-drawer.open {
+      transform: translateX(0);
+    }
+
+    .sidebar-drawer-inner {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.5rem;
+      padding-top: 1rem;
+    }
+
+    .sidebar-drawer-inner .card {
+      margin-bottom: 1rem;
+      box-shadow: none;
+      border: 1px solid var(--border);
+    }
+
+    .sidebar-drawer-inner .card:last-child {
+      margin-bottom: 0;
+    }
+
+    /* Cards inside drawer don't need provider-section/lang-section/action-section display toggling - they're always visible when drawer exists */
+    .sidebar-drawer .provider-section,
+    .sidebar-drawer .lang-section,
+    .sidebar-drawer .action-section {
+      display: block !important;
+    }
+
+    .sidebar-toggle {
+      position: fixed;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 44px;
+      height: 44px;
+      border: 1px solid var(--border);
+      border-right: none;
+      border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+      background: var(--card);
+      color: var(--text-muted);
+      cursor: pointer;
+      z-index: 1001;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+      transition: background var(--transition-base), color var(--transition-base), right 300ms ease;
+    }
+
+    .sidebar-toggle:hover {
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+
+    .sidebar-toggle .sidebar-toggle-close {
+      display: none;
+    }
+
+    .sidebar-drawer.open ~ .sidebar-toggle {
+      right: 400px;
+    }
+
+    .sidebar-drawer.open ~ .sidebar-toggle .sidebar-toggle-open {
+      display: none;
+    }
+
+    .sidebar-drawer.open ~ .sidebar-toggle .sidebar-toggle-close {
       display: block;
     }
 
-    .editor-grid-sidebar {
-      display: block;
-    }
-
-    @media (min-width: 1200px) {
-      .editor-grid {
-        display: grid;
-        grid-template-columns: 1fr 400px;
-        gap: 1rem;
-        align-items: start;
+    @media (max-width: 500px) {
+      .sidebar-drawer {
+        width: 85vw;
       }
-      .editor-grid > .card {
-        margin-bottom: 0;
-      }
-      .editor-grid-sidebar > .card:last-child {
-        margin-bottom: 0;
-      }
-      .editor-grid .editor-table-wrap {
-        max-height: calc(100vh - 200px);
-      }
-      .editor-grid > * {
-        min-height: 0;
-      }
-      .editor-grid-sidebar > * {
-        min-height: 0;
+      .sidebar-drawer.open ~ .sidebar-toggle {
+        right: 85vw;
       }
     }
 
@@ -1026,97 +1117,103 @@
       <div class="error-msg" id="upload-error"></div>
     </div>
 
-    <!-- Editor Grid (two-column on wide screens) -->
-    <div class="editor-grid" id="editor-grid" style="display:none">
-      <!-- Editor Table (left / main) -->
-      <div class="card editor-section" id="editor-section" style="display:block">
-        <div class="card-title-row">
-          <div class="card-title" data-i18n="contentPreview">Content Preview</div>
-          <button class="btn-reselect" id="reselect-btn" data-i18n="reselectJson">Re-select JSON</button>
+    <!-- Editor Section (full width) -->
+    <div class="card editor-section" id="editor-section" style="display:none">
+      <div class="card-title-row">
+        <div class="card-title" data-i18n="contentPreview">Content Preview</div>
+        <button class="btn-reselect" id="reselect-btn" data-i18n="reselectJson">Re-select JSON</button>
+      </div>
+      <input type="text" class="editor-search" id="editor-search" data-i18n-placeholder="searchPlaceholder" placeholder="Search by key name..." />
+      <div class="editor-table-wrap" id="editor-table-wrap">
+        <table class="editor-table" id="editor-table"></table>
+      </div>
+      <div class="editor-count" id="editor-count"></div>
+    </div>
+  </div>
+
+  <!-- Sidebar Drawer -->
+  <div id="sidebar-overlay" class="sidebar-overlay"></div>
+  <div id="sidebar-drawer" class="sidebar-drawer" role="dialog" aria-label="Translation settings">
+    <div class="sidebar-drawer-inner">
+      <!-- Provider + API Key -->
+      <div class="card provider-section" id="provider-section">
+        <div class="card-title-collapsible" id="provider-collapsible">
+          <div class="card-title" data-i18n="providerTitle">Translation Provider</div>
+          <svg class="chevron-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
         </div>
-        <input type="text" class="editor-search" id="editor-search" data-i18n-placeholder="searchPlaceholder" placeholder="Search by key name..." />
-        <div class="editor-table-wrap" id="editor-table-wrap">
-          <table class="editor-table" id="editor-table"></table>
+        <div class="collapsible-body" id="provider-collapsible-body">
+          <div class="provider-row">
+            <select id="provider-select">
+              <option value="deepl">DeepL</option>
+              <option value="openai">OpenAI</option>
+              <option value="gemini">Gemini</option>
+            </select>
+            <input type="password" id="api-key" placeholder="Paste your DeepL API key here" style="flex:1" />
+            <span class="badge badge-none" id="key-badge">No Key</span>
+          </div>
+          <div class="model-row" id="model-row" style="display:none">
+            <label for="model-select" data-i18n="modelLabel">Model:</label>
+            <select id="model-select"></select>
+          </div>
+          <div class="key-options">
+            <label>
+              <input type="checkbox" id="remember-key" />
+              <span data-i18n="rememberKey">Remember key across sessions</span>
+            </label>
+            <button id="clear-key" data-i18n="clearSavedKey" style="border:none;background:none;color:var(--error);cursor:pointer;font-size:0.8125rem;display:none;">Clear saved key</button>
+          </div>
+          <div class="disclaimer" id="disclaimer">
+            Your API key is sent directly from your browser to DeepL and is visible in the browser Network tab. It is never sent to any other server.
+          </div>
+          <div class="prompt-row" id="prompt-row">
+            <label class="prompt-label" data-i18n="contextPromptLabel">Context Prompt</label>
+            <textarea id="context-prompt" class="context-prompt" rows="2" data-i18n-placeholder="contextPromptPlaceholder" placeholder="e.g. dental implant software"></textarea>
+            <div class="deepl-note" id="deepl-note" data-i18n="contextPromptDeeplNote">Context prompt is only used with OpenAI and Gemini.</div>
+          </div>
         </div>
-        <div class="editor-count" id="editor-count"></div>
       </div>
 
-      <!-- Sidebar (right on wide, stacked on narrow) -->
-      <div class="editor-grid-sidebar">
-        <!-- Provider + API Key -->
-        <div class="card provider-section" id="provider-section">
-          <div class="card-title-collapsible" id="provider-collapsible">
-            <div class="card-title" data-i18n="providerTitle">Translation Provider</div>
-            <svg class="chevron-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-          </div>
-          <div class="collapsible-body" id="provider-collapsible-body">
-            <div class="provider-row">
-              <select id="provider-select">
-                <option value="deepl">DeepL</option>
-                <option value="openai">OpenAI</option>
-                <option value="gemini">Gemini</option>
-              </select>
-              <input type="password" id="api-key" placeholder="Paste your DeepL API key here" style="flex:1" />
-              <span class="badge badge-none" id="key-badge">No Key</span>
-            </div>
-            <div class="model-row" id="model-row" style="display:none">
-              <label for="model-select" data-i18n="modelLabel">Model:</label>
-              <select id="model-select"></select>
-            </div>
-            <div class="key-options">
-              <label>
-                <input type="checkbox" id="remember-key" />
-                <span data-i18n="rememberKey">Remember key across sessions</span>
-              </label>
-              <button id="clear-key" data-i18n="clearSavedKey" style="border:none;background:none;color:var(--error);cursor:pointer;font-size:0.8125rem;display:none;">Clear saved key</button>
-            </div>
-            <div class="disclaimer" id="disclaimer">
-              Your API key is sent directly from your browser to DeepL and is visible in the browser Network tab. It is never sent to any other server.
-            </div>
-            <div class="prompt-row" id="prompt-row">
-              <label class="prompt-label" data-i18n="contextPromptLabel">Context Prompt</label>
-              <textarea id="context-prompt" class="context-prompt" rows="2" data-i18n-placeholder="contextPromptPlaceholder" placeholder="e.g. dental implant software"></textarea>
-              <div class="deepl-note" id="deepl-note" data-i18n="contextPromptDeeplNote">Context prompt is only used with OpenAI and Gemini.</div>
-            </div>
-          </div>
+      <!-- Language Selection -->
+      <div class="card lang-section" id="lang-section">
+        <div class="card-title-collapsible" id="lang-collapsible">
+          <div class="card-title" data-i18n="targetLangs">Target Languages</div>
+          <svg class="chevron-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
         </div>
+        <div class="collapsible-body" id="lang-collapsible-body">
+          <div class="lang-controls">
+            <button id="select-all" data-i18n="selectAll">Select All</button>
+            <button id="select-none" data-i18n="selectNone">Select None</button>
+          </div>
+          <div class="lang-grid" id="lang-grid"></div>
+        </div>
+      </div>
 
-        <!-- Language Selection -->
-        <div class="card lang-section" id="lang-section">
-          <div class="card-title-collapsible" id="lang-collapsible">
-            <div class="card-title" data-i18n="targetLangs">Target Languages</div>
-            <svg class="chevron-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+      <!-- Action -->
+      <div class="card action-section" id="action-section">
+        <button class="btn btn-primary" id="translate-btn" data-i18n="translateBtn" disabled>Translate</button>
+        <div class="progress-section" id="progress-section">
+          <div class="progress-label" id="progress-label">0%</div>
+          <div class="progress-bar-container">
+            <div class="progress-bar" id="progress-bar"></div>
           </div>
-          <div class="collapsible-body" id="lang-collapsible-body">
-            <div class="lang-controls">
-              <button id="select-all" data-i18n="selectAll">Select All</button>
-              <button id="select-none" data-i18n="selectNone">Select None</button>
-            </div>
-            <div class="lang-grid" id="lang-grid"></div>
-          </div>
+          <div class="progress-text" id="progress-text"></div>
+          <div class="progress-chips" id="progress-chips"></div>
         </div>
+        <div class="error-msg" id="translate-error"></div>
+      </div>
 
-        <!-- Action -->
-        <div class="card action-section" id="action-section">
-          <button class="btn btn-primary" id="translate-btn" data-i18n="translateBtn" disabled>Translate</button>
-          <div class="progress-section" id="progress-section">
-            <div class="progress-label" id="progress-label">0%</div>
-            <div class="progress-bar-container">
-              <div class="progress-bar" id="progress-bar"></div>
-            </div>
-            <div class="progress-text" id="progress-text"></div>
-            <div class="progress-chips" id="progress-chips"></div>
-          </div>
-          <div class="error-msg" id="translate-error"></div>
-        </div>
-
-        <!-- Download -->
-        <div class="card download-section" id="download-section">
-          <button class="btn btn-success" id="download-btn" data-i18n="downloadBtn">Download language.json</button>
-        </div>
+      <!-- Download -->
+      <div class="card download-section" id="download-section">
+        <button class="btn btn-success" id="download-btn" data-i18n="downloadBtn">Download language.json</button>
       </div>
     </div>
   </div>
+
+  <!-- Sidebar Toggle Button -->
+  <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle settings panel" style="display:none">
+    <svg class="sidebar-toggle-open" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+    <svg class="sidebar-toggle-close" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+  </button>
 
   <!-- Toast container -->
   <div id="toast-container" role="alert" aria-live="polite"></div>
@@ -1178,6 +1275,8 @@
           toastFileLoaded: 'File loaded: {0} keys, {1} languages',
           toastTranslateComplete: 'Translation complete! {0} languages translated.',
           toastError: 'Error: {0}',
+          sidebarToggle: 'Toggle settings panel',
+          sidebarTitle: 'Translation Settings',
         },
         'zh-TW': {
           title: 'Frontitude 一鍵翻譯器',
@@ -1230,6 +1329,8 @@
           toastFileLoaded: '檔案已載入：{0} 個鍵，{1} 種語言',
           toastTranslateComplete: '翻譯完成！已翻譯 {0} 種語言。',
           toastError: '錯誤：{0}',
+          sidebarToggle: '開關設定面板',
+          sidebarTitle: '翻譯設定',
         },
         ko: {
           title: 'Frontitude 원클릭 번역기',
@@ -1282,6 +1383,8 @@
           toastFileLoaded: '파일 로드됨: {0}개 키, {1}개 언어',
           toastTranslateComplete: '번역 완료! {0}개 언어 번역됨.',
           toastError: '오류: {0}',
+          sidebarToggle: '설정 패널 전환',
+          sidebarTitle: '번역 설정',
         },
       };
 
@@ -1417,7 +1520,9 @@
         keyBadge:      document.getElementById('key-badge'),
         rememberKey:   document.getElementById('remember-key'),
         clearKey:      document.getElementById('clear-key'),
-        editorGrid:    document.getElementById('editor-grid'),
+        sidebarDrawer: document.getElementById('sidebar-drawer'),
+        sidebarOverlay: document.getElementById('sidebar-overlay'),
+        sidebarToggle: document.getElementById('sidebar-toggle'),
         editorSection: document.getElementById('editor-section'),
         editorSearch:  document.getElementById('editor-search'),
         editorTable:   document.getElementById('editor-table'),
@@ -1537,6 +1642,35 @@
 
       initCollapsible(dom.providerCollapsible, dom.providerCollapsibleBody, 'collapse_provider');
       initCollapsible(dom.langCollapsible, dom.langCollapsibleBody, 'collapse_lang');
+
+      // ── Sidebar Drawer ──
+      function openDrawer() {
+        dom.sidebarDrawer.classList.add('open');
+        dom.sidebarOverlay.classList.add('active');
+      }
+
+      function closeDrawer() {
+        dom.sidebarDrawer.classList.remove('open');
+        dom.sidebarOverlay.classList.remove('active');
+      }
+
+      dom.sidebarToggle.addEventListener('click', function () {
+        if (dom.sidebarDrawer.classList.contains('open')) {
+          closeDrawer();
+        } else {
+          openDrawer();
+        }
+      });
+
+      dom.sidebarOverlay.addEventListener('click', function () {
+        closeDrawer();
+      });
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && dom.sidebarDrawer.classList.contains('open')) {
+          closeDrawer();
+        }
+      });
 
       // ── Progress Chips ──
       function renderProgressChips(languages) {
@@ -1710,7 +1844,9 @@
         dom.fileInput.value = '';
         dom.fileInfo.style.display = 'none';
         dom.uploadError.style.display = 'none';
-        dom.editorGrid.style.display = 'none';
+        dom.editorSection.style.display = 'none';
+        closeDrawer();
+        dom.sidebarToggle.style.display = 'none';
         dom.progressSection.style.display = 'none';
         dom.translateError.style.display = 'none';
         dom.downloadSection.classList.remove('download-section--visible');
@@ -1827,11 +1963,8 @@
         renderLanguages();
         dom.editorSearch.value = '';
         renderEditorTable();
-        dom.editorGrid.style.display = '';
         dom.editorSection.style.display = 'block';
-        dom.providerSection.style.display = 'block';
-        dom.langSection.style.display = 'block';
-        dom.actionSection.style.display = 'block';
+        dom.sidebarToggle.style.display = 'flex';
         updateTranslateBtn();
 
         // Toast notification for file load

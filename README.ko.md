@@ -75,6 +75,10 @@ DeepL, OpenAI 또는 Gemini를 사용하여 Frontitude `language.json` 파일을
 - **의존성 제로** — 프레임워크 없음, npm 없음, 빌드 과정 없음
 - 모든 최신 브라우저에서 작동 — `index.html`을 열기만 하면 됩니다
 
+## 변경 이력
+
+과거 설계 문서, 스펙, 작업 목록은 [openspec/changes/archive/](openspec/changes/archive/)를 참조하세요.
+
 ## 라이선스
 
 MIT

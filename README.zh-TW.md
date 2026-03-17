@@ -75,6 +75,10 @@
 - **零依賴** — 無框架、無 npm、無建置步驟
 - 可在任何現代瀏覽器中運行 — 只需開啟 `index.html`
 
+## 變更紀錄
+
+參見 [openspec/changes/archive/](openspec/changes/archive/) 查看過往的設計文件、規格與任務清單。
+
 ## 授權條款
 
 MIT

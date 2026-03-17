@@ -75,6 +75,10 @@ The translator fills in each empty target-language value using the corresponding
 - **Zero dependencies** — no frameworks, no npm, no build step
 - Works in any modern browser — just open `index.html`
 
+## Change History
+
+See [openspec/changes/archive/](openspec/changes/archive/) for past design documents, specs, and task lists.
+
 ## License
 
 MIT
