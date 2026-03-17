@@ -68,9 +68,13 @@ When a user clicks on an empty/untranslated cell, the system SHALL automatically
 - **THEN** the system SHALL display the error message in a toast notification
 - **AND** the cell SHALL return to its untranslated state (red border)
 
-#### Scenario: Clicking source language (en) or key column cells has no effect
-- **WHEN** user clicks a cell in the "en" (source) column or the "Key" column
-- **THEN** no action SHALL be taken (no edit modal, no translation trigger)
+#### Scenario: Clicking Key column cells has no effect
+- **WHEN** user clicks a cell in the "Key" column
+- **THEN** no action SHALL be taken
+
+#### Scenario: Clicking English source (en) column cells triggers edit flow
+- **WHEN** user clicks a cell in the "en" (source) column
+- **THEN** the edit-source-text interaction flow SHALL be triggered (confirmation dialog for non-empty cells, direct edit modal for empty cells)
 
 ### Requirement: Cell click interaction SHALL not interfere with table scrolling or text selection
 The cell click behavior SHALL only trigger on clean left-clicks, not during text selection or scrolling.

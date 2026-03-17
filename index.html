@@ -862,12 +862,32 @@
       z-index: 3;
     }
 
+    .editor-table th:nth-child(2),
+    .editor-table td:nth-child(2) {
+      position: sticky;
+      left: 260px;
+      z-index: 1;
+      border-right: 2px solid var(--border);
+    }
+
+    .editor-table th:nth-child(2) {
+      z-index: 3;
+    }
+
     .editor-table .col-source {
       background: var(--primary-light);
     }
 
     .editor-table th.col-source {
       background: var(--primary-muted);
+    }
+
+    .editor-table td.cell-edited {
+      background: #fef9c3 !important;
+    }
+
+    [data-theme="dark"] .editor-table td.cell-edited {
+      background: #422006 !important;
     }
 
     .editor-table td.empty-cell {
@@ -879,7 +899,7 @@
       border: 2px solid var(--error);
     }
 
-    .editor-table tbody td:not(:first-child):not(.col-source) {
+    .editor-table tbody td:not(:first-child) {
       cursor: pointer;
     }
 
@@ -1061,6 +1081,7 @@
       background: var(--bg-alt);
     }
 
+    .editor-table tbody tr:hover td:nth-child(2),
     .editor-table tbody tr:hover td.col-source {
       background: var(--primary-light-hover);
     }
@@ -1313,6 +1334,7 @@
         <table class="editor-table" id="editor-table"></table>
       </div>
       <div class="editor-count" id="editor-count"></div>
+      <button class="btn btn-success" id="export-btn" data-i18n="exportBtn" style="margin-top:0.75rem">Export Language File</button>
     </div>
   </div>
 
@@ -1495,6 +1517,8 @@
           cellTranslateError: 'Translation failed: {0}',
           cellEditSuccess: 'Cell updated successfully.',
           cellEditSource: 'Source (EN):',
+          exportBtn: 'Export Language File',
+          cellEditSourceCurrent: 'English Source (Current):',
         },
         'zh-TW': {
           title: 'Frontitude 一鍵翻譯器',
@@ -1562,6 +1586,8 @@
           cellTranslateError: '翻譯失敗：{0}',
           cellEditSuccess: '儲存格更新成功。',
           cellEditSource: '原文 (EN)：',
+          exportBtn: '匯出語言檔',
+          cellEditSourceCurrent: '英文原文（目前）：',
         },
         ko: {
           title: 'Frontitude 원클릭 번역기',
@@ -1629,6 +1655,8 @@
           cellTranslateError: '번역 실패: {0}',
           cellEditSuccess: '셀 업데이트 완료.',
           cellEditSource: '원문 (EN):',
+          exportBtn: '언어 파일 내보내기',
+          cellEditSourceCurrent: '영문 원문 (현재):',
         },
       };
 
@@ -1747,6 +1775,7 @@
         translating: false,
         contextPrompt: '',
         theme: 'light',
+        editedCells: new Set(),
       };
 
       function setState(patch) {
@@ -1809,6 +1838,7 @@
         cellEditSourceLabel: document.getElementById('cell-edit-source-label'),
         cellEditSave: document.getElementById('cell-edit-save'),
         cellEditCancel: document.getElementById('cell-edit-cancel'),
+        exportBtn: document.getElementById('export-btn'),
       };
 
       // ── Theme ──
@@ -2097,7 +2127,7 @@
       });
 
       dom.reselectBtn.addEventListener('click', function () {
-        setState({ jsonData: null, languages: [], selected: new Set() });
+        setState({ jsonData: null, languages: [], selected: new Set(), editedCells: new Set() });
         dom.fileInput.value = '';
         dom.fileInfo.style.display = 'none';
         dom.uploadError.style.display = 'none';
@@ -2254,10 +2284,11 @@
           langs.forEach(function (lang) {
             var val = state.jsonData[lang] ? state.jsonData[lang][key] : undefined;
             var cls = lang === 'en' ? ' col-source' : '';
+            var editedCls = state.editedCells.has(key + '::' + lang) ? ' cell-edited' : '';
             if (val !== undefined && val !== '') {
-              html += '<td class="' + cls + '" title="' + escapeHtml(val).replace(/"/g, '&quot;') + '">' + escapeHtml(val) + '</td>';
+              html += '<td class="' + cls + editedCls + '" title="' + escapeHtml(val).replace(/"/g, '&quot;') + '">' + escapeHtml(val) + '</td>';
             } else {
-              html += '<td class="empty-cell' + cls + '">&mdash;</td>';
+              html += '<td class="empty-cell' + cls + editedCls + '">&mdash;</td>';
             }
           });
           html += '</tr>';
@@ -2604,7 +2635,7 @@
       }
 
       // ── Download ──
-      dom.downloadBtn.addEventListener('click', function () {
+      function downloadJsonData() {
         var json = JSON.stringify(state.jsonData, null, 2);
         var blob = new Blob([json], { type: 'application/json' });
         var url = URL.createObjectURL(blob);
@@ -2615,7 +2646,10 @@
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-      });
+      }
+
+      dom.downloadBtn.addEventListener('click', downloadJsonData);
+      dom.exportBtn.addEventListener('click', downloadJsonData);
 
       // ── Helpers ──
       function showError(el, msg) {
@@ -2680,7 +2714,7 @@
           Object.keys(state.jsonData).filter(function (k) { return k !== 'en'; }).sort()
         );
         var lang = langs[colIndex - 1]; // -1 because column 0 is Key
-        if (!lang || lang === 'en') return; // ignore source column
+        if (!lang) return;
 
         // Get the key from the first cell of this row
         var keyCell = tr.children[0];
@@ -2689,7 +2723,14 @@
         var currentVal = state.jsonData[lang] ? state.jsonData[lang][key] : undefined;
         var isEmpty = currentVal === undefined || currentVal === '';
 
-        if (isEmpty) {
+        if (lang === 'en') {
+          // English source editing
+          if (isEmpty) {
+            openEditModal(key, lang, '', '', true);
+          } else {
+            handleCellEdit(td, key, lang, currentVal);
+          }
+        } else if (isEmpty) {
           handleCellTranslate(td, key, lang);
         } else {
           handleCellEdit(td, key, lang, currentVal);
@@ -2698,18 +2739,29 @@
 
       function handleCellEdit(td, key, lang, currentVal) {
         if (!confirm(t('cellEditConfirm'))) return;
-        var sourceText = state.jsonData.en[key] || '';
-        openEditModal(key, lang, currentVal, sourceText);
+        var isSourceEdit = (lang === 'en');
+        var sourceText = isSourceEdit ? '' : (state.jsonData.en[key] || '');
+        openEditModal(key, lang, currentVal, sourceText, isSourceEdit);
       }
 
       // ── Edit Modal ──
       var editModalState = { key: null, lang: null };
 
-      function openEditModal(key, lang, value, sourceText) {
+      function openEditModal(key, lang, value, sourceText, isSourceEdit) {
         editModalState = { key: key, lang: lang };
         dom.cellEditTitle.textContent = t('cellEditTitle');
-        dom.cellEditMeta.textContent = key + ' \u2014 ' + lang.toUpperCase();
-        dom.cellEditSource.textContent = sourceText || '';
+
+        var sourceBlock = dom.cellEditSourceLabel.parentElement;
+        if (isSourceEdit) {
+          dom.cellEditMeta.textContent = key + ' \u2014 ' + t('cellEditSourceCurrent');
+          sourceBlock.style.display = 'none';
+        } else {
+          dom.cellEditMeta.textContent = key + ' \u2014 ' + lang.toUpperCase();
+          sourceBlock.style.display = '';
+          dom.cellEditSourceLabel.textContent = t('cellEditSource');
+          dom.cellEditSource.textContent = sourceText || '';
+        }
+
         dom.cellEditTextarea.value = value || '';
         dom.cellEditOverlay.classList.add('active');
         dom.cellEditTextarea.focus();
@@ -2718,6 +2770,8 @@
       function closeEditModal() {
         dom.cellEditOverlay.classList.remove('active');
         editModalState = { key: null, lang: null };
+        // Reset source block visibility
+        dom.cellEditSourceLabel.parentElement.style.display = '';
       }
 
       dom.cellEditCancel.addEventListener('click', closeEditModal);
@@ -2745,7 +2799,11 @@
           newJsonData[lang] = {};
         }
         newJsonData[lang][key] = newVal;
-        setState({ jsonData: newJsonData });
+
+        // Track edited cell
+        var newEditedCells = new Set(state.editedCells);
+        newEditedCells.add(key + '::' + lang);
+        setState({ jsonData: newJsonData, editedCells: newEditedCells });
         renderEditorTable();
         closeEditModal();
         showToast(t('cellEditSuccess'), 'success');
