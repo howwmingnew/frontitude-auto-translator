@@ -12,18 +12,31 @@
       --primary: #4f46e5;
       --primary-hover: #4338ca;
       --primary-light: #eef2ff;
+      --primary-light-hover: #e8edff;
+      --primary-muted: #e0e7ff;
+      --primary-border: #c7d2fe;
       --primary-gradient: linear-gradient(135deg, #6366f1, #4f46e5);
       --bg: #f8fafc;
+      --bg-alt: #f1f5f9;
       --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #eef2ff 50%, #f8fafc 100%);
       --card: #ffffff;
       --border: #e2e8f0;
       --text: #1e293b;
       --text-muted: #64748b;
+      --text-disabled: #cbd5e1;
       --success: #16a34a;
       --success-light: #f0fdf4;
       --error: #dc2626;
       --error-light: #fef2f2;
       --warning: #d97706;
+      --badge-free-bg: #fef3c7;
+      --badge-free-text: #92400e;
+      --badge-pro-bg: #dbeafe;
+      --badge-pro-text: #1e40af;
+      --badge-none-bg: #f1f5f9;
+      --badge-none-text: #64748b;
+      --badge-provider-bg: #e0e7ff;
+      --badge-provider-text: #3730a3;
       --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
       --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
       --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
@@ -33,6 +46,71 @@
       --transition-fast: 150ms ease;
       --transition-base: 200ms ease;
       --focus-ring: 0 0 0 3px rgba(79, 70, 229, 0.3);
+      --toast-success-bg: #f0fdf4;
+      --toast-success-border: #16a34a;
+      --toast-error-bg: #fef2f2;
+      --toast-error-border: #dc2626;
+      --toast-info-bg: #eff6ff;
+      --toast-info-border: #3b82f6;
+      --toast-text: #1e293b;
+      --chip-pending-bg: #f1f5f9;
+      --chip-pending-text: #64748b;
+      --chip-translating-bg: #dbeafe;
+      --chip-translating-text: #1e40af;
+      --chip-done-bg: #dcfce7;
+      --chip-done-text: #16a34a;
+      --chip-error-bg: #fef2f2;
+      --chip-error-text: #dc2626;
+    }
+
+    [data-theme="dark"] {
+      --primary: #818cf8;
+      --primary-hover: #6366f1;
+      --primary-light: #1e1b4b;
+      --primary-light-hover: #272361;
+      --primary-muted: #312e81;
+      --primary-border: #4338ca;
+      --primary-gradient: linear-gradient(135deg, #818cf8, #6366f1);
+      --bg: #0f172a;
+      --bg-alt: #1e293b;
+      --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+      --card: #1e293b;
+      --border: #334155;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-disabled: #475569;
+      --success: #4ade80;
+      --success-light: #052e16;
+      --error: #f87171;
+      --error-light: #450a0a;
+      --warning: #fbbf24;
+      --badge-free-bg: #422006;
+      --badge-free-text: #fbbf24;
+      --badge-pro-bg: #172554;
+      --badge-pro-text: #93c5fd;
+      --badge-none-bg: #1e293b;
+      --badge-none-text: #94a3b8;
+      --badge-provider-bg: #312e81;
+      --badge-provider-text: #a5b4fc;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -4px rgba(0, 0, 0, 0.4);
+      --focus-ring: 0 0 0 3px rgba(129, 140, 248, 0.3);
+      --toast-success-bg: #052e16;
+      --toast-success-border: #4ade80;
+      --toast-error-bg: #450a0a;
+      --toast-error-border: #f87171;
+      --toast-info-bg: #172554;
+      --toast-info-border: #60a5fa;
+      --toast-text: #f1f5f9;
+      --chip-pending-bg: #1e293b;
+      --chip-pending-text: #94a3b8;
+      --chip-translating-bg: #172554;
+      --chip-translating-text: #93c5fd;
+      --chip-done-bg: #052e16;
+      --chip-done-text: #4ade80;
+      --chip-error-bg: #450a0a;
+      --chip-error-text: #f87171;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -49,6 +127,7 @@
       color: var(--text);
       line-height: 1.6;
       min-height: 100vh;
+      transition: background-color 200ms, color 200ms;
     }
 
     input, select, button, textarea {
@@ -63,6 +142,21 @@
     @keyframes slide-up-fade {
       from { opacity: 0; transform: translateY(8px); }
       to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse-chip {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
+    @keyframes toast-slide-in {
+      from { transform: translateX(120%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    @keyframes toast-fade-out {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(120%); opacity: 0; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -83,6 +177,45 @@
       text-align: center;
       margin-bottom: 2rem;
     }
+
+    .header-top {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+
+    .theme-toggle {
+      position: absolute;
+      right: 0;
+      top: 0;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.375rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background var(--transition-base), border-color var(--transition-base);
+      color: var(--text-muted);
+    }
+
+    .theme-toggle:hover {
+      background: var(--bg-alt);
+      border-color: var(--text-muted);
+      color: var(--text);
+    }
+
+    .theme-toggle svg {
+      width: 1.25rem;
+      height: 1.25rem;
+    }
+
+    .theme-toggle .icon-moon { display: none; }
+
+    [data-theme="dark"] .theme-toggle .icon-sun { display: none; }
+    [data-theme="dark"] .theme-toggle .icon-moon { display: block; }
 
     header h1 {
       font-size: 1.75rem;
@@ -108,7 +241,7 @@
       padding: 1.5rem;
       margin-bottom: 1rem;
       box-shadow: var(--shadow-md);
-      transition: box-shadow var(--transition-base);
+      transition: box-shadow var(--transition-base), background-color 200ms, color 200ms;
     }
 
     .card:hover {
@@ -146,6 +279,45 @@
       border-color: var(--text-muted);
     }
 
+    /* Collapsible sections for mobile */
+    .card-title-collapsible {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+      cursor: default;
+    }
+    .card-title-collapsible .card-title { margin-bottom: 0; }
+    .card-title-collapsible .chevron-icon {
+      display: none;
+      width: 1.25rem;
+      height: 1.25rem;
+      color: var(--text-muted);
+      transition: transform var(--transition-base);
+      flex-shrink: 0;
+    }
+    .card-title-collapsible.collapsed .chevron-icon {
+      transform: rotate(-90deg);
+    }
+    .collapsible-body {
+      overflow: hidden;
+      transition: max-height 300ms ease, opacity 200ms ease;
+    }
+    .collapsible-body.collapsed {
+      max-height: 0 !important;
+      opacity: 0;
+      overflow: hidden;
+    }
+
+    @media (max-width: 767px) {
+      .card-title-collapsible {
+        cursor: pointer;
+      }
+      .card-title-collapsible .chevron-icon {
+        display: block;
+      }
+    }
+
     /* API Key Section */
     .api-key-row {
       display: flex;
@@ -161,6 +333,8 @@
       font-size: 0.875rem;
       outline: none;
       transition: border-color var(--transition-base), box-shadow var(--transition-base);
+      background: var(--card);
+      color: var(--text);
     }
 
     .api-key-row input:focus-visible {
@@ -178,9 +352,9 @@
       white-space: nowrap;
     }
 
-    .badge-free { background: #fef3c7; color: #92400e; }
-    .badge-pro { background: #dbeafe; color: #1e40af; }
-    .badge-none { background: #f1f5f9; color: #64748b; }
+    .badge-free { background: var(--badge-free-bg); color: var(--badge-free-text); }
+    .badge-pro { background: var(--badge-pro-bg); color: var(--badge-pro-text); }
+    .badge-none { background: var(--badge-none-bg); color: var(--badge-none-text); }
 
     /* Upload Section */
     .dropzone {
@@ -228,7 +402,7 @@
     .file-info {
       margin-top: 0.75rem;
       padding: 0.75rem;
-      background: #f0fdf4;
+      background: var(--success-light);
       border-radius: 0.5rem;
       font-size: 0.875rem;
       color: var(--success);
@@ -252,13 +426,14 @@
       font-size: 0.75rem;
       font-weight: 500;
       cursor: pointer;
+      color: var(--text);
       transition: background var(--transition-base), color var(--transition-base), border-color var(--transition-base);
     }
 
     .lang-controls button:hover {
       background: var(--primary-light);
       color: var(--primary);
-      border-color: #c7d2fe;
+      border-color: var(--primary-border);
     }
 
     .lang-controls button:focus-visible {
@@ -282,12 +457,13 @@
       font-size: 0.875rem;
       cursor: pointer;
       user-select: none;
+      color: var(--text);
       transition: background var(--transition-base), border-color var(--transition-base), box-shadow var(--transition-base);
     }
 
     .lang-item:hover {
       background: var(--primary-light);
-      border-color: #c7d2fe;
+      border-color: var(--primary-border);
     }
 
     .lang-item:has(input:checked),
@@ -367,10 +543,11 @@
     .progress-bar-container {
       width: 100%;
       height: 0.5rem;
-      background: #e2e8f0;
+      background: var(--border);
       border-radius: 9999px;
       overflow: hidden;
       margin-bottom: 0.5rem;
+      position: relative;
     }
 
     .progress-bar {
@@ -379,14 +556,67 @@
       background-size: 200% 100%;
       animation: progress-shimmer 2s linear infinite;
       border-radius: 9999px;
-      transition: width 0.3s;
+      transition: width 300ms ease;
       width: 0%;
+    }
+
+    .progress-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--primary);
+      text-align: right;
+      margin-bottom: 0.25rem;
     }
 
     .progress-text {
       font-size: 0.8125rem;
       color: var(--text-muted);
       text-align: center;
+    }
+
+    /* Progress chips */
+    .progress-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.375rem;
+      margin-top: 0.75rem;
+    }
+
+    .progress-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.1875rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      transition: background 200ms, color 200ms;
+    }
+
+    .progress-chip--pending {
+      background: var(--chip-pending-bg);
+      color: var(--chip-pending-text);
+    }
+
+    .progress-chip--translating {
+      background: var(--chip-translating-bg);
+      color: var(--chip-translating-text);
+      animation: pulse-chip 1.5s ease-in-out infinite;
+    }
+
+    .progress-chip--done {
+      background: var(--chip-done-bg);
+      color: var(--chip-done-text);
+    }
+
+    .progress-chip--error {
+      background: var(--chip-error-bg);
+      color: var(--chip-error-text);
+    }
+
+    .progress-chip svg {
+      width: 0.75rem;
+      height: 0.75rem;
     }
 
     /* Download */
@@ -407,7 +637,7 @@
       display: none;
       margin-top: 0.75rem;
       padding: 0.75rem;
-      background: #fef2f2;
+      background: var(--error-light);
       border-radius: 0.5rem;
       font-size: 0.875rem;
       color: var(--error);
@@ -451,6 +681,7 @@
       font-size: 0.875rem;
       outline: none;
       background: var(--card);
+      color: var(--text);
       cursor: pointer;
       transition: border-color var(--transition-base), box-shadow var(--transition-base);
       appearance: none;
@@ -480,6 +711,7 @@
       font-size: 0.875rem;
       outline: none;
       background: var(--card);
+      color: var(--text);
       cursor: pointer;
       transition: border-color var(--transition-base), box-shadow var(--transition-base);
       appearance: none;
@@ -500,7 +732,7 @@
       white-space: nowrap;
     }
 
-    .badge-provider { background: #e0e7ff; color: #3730a3; }
+    .badge-provider { background: var(--badge-provider-bg); color: var(--badge-provider-text); }
 
     /* Editor Table */
     .editor-section { display: none; }
@@ -524,6 +756,8 @@
       font-size: 0.875rem;
       resize: vertical;
       outline: none;
+      background: var(--card);
+      color: var(--text);
       transition: border-color var(--transition-base), box-shadow var(--transition-base);
     }
     .context-prompt:focus-visible {
@@ -546,6 +780,8 @@
       font-size: 0.875rem;
       outline: none;
       margin-bottom: 0.75rem;
+      background: var(--card);
+      color: var(--text);
       transition: border-color var(--transition-base), box-shadow var(--transition-base);
     }
 
@@ -585,7 +821,7 @@
     .editor-table th {
       position: sticky;
       top: 0;
-      background: #f1f5f9;
+      background: var(--bg-alt);
       font-weight: 600;
       font-size: 0.75rem;
       text-transform: uppercase;
@@ -598,7 +834,7 @@
     .editor-table td:first-child {
       position: sticky;
       left: 0;
-      background: #f8fafc;
+      background: var(--bg);
       z-index: 1;
       font-weight: 500;
       color: var(--text-muted);
@@ -610,34 +846,67 @@
     }
 
     .editor-table .col-source {
-      background: #eef2ff;
+      background: var(--primary-light);
     }
 
     .editor-table th.col-source {
-      background: #e0e7ff;
+      background: var(--primary-muted);
     }
 
     .editor-table td.empty-cell {
-      color: #cbd5e1;
+      color: var(--text-disabled);
       font-style: italic;
     }
 
     .editor-table tbody tr:hover td {
-      background: #f8fafc;
+      background: var(--bg);
     }
 
     .editor-table tbody tr:hover td:first-child {
-      background: #f1f5f9;
+      background: var(--bg-alt);
     }
 
     .editor-table tbody tr:hover td.col-source {
-      background: #e8edff;
+      background: var(--primary-light-hover);
     }
 
     .editor-count {
       font-size: 0.75rem;
       color: var(--text-muted);
       margin-top: 0.5rem;
+    }
+
+    /* Two-column editor grid */
+    .editor-grid {
+      display: block;
+    }
+
+    .editor-grid-sidebar {
+      display: block;
+    }
+
+    @media (min-width: 1200px) {
+      .editor-grid {
+        display: grid;
+        grid-template-columns: 1fr 400px;
+        gap: 1rem;
+        align-items: start;
+      }
+      .editor-grid > .card {
+        margin-bottom: 0;
+      }
+      .editor-grid-sidebar > .card:last-child {
+        margin-bottom: 0;
+      }
+      .editor-grid .editor-table-wrap {
+        max-height: calc(100vh - 200px);
+      }
+      .editor-grid > * {
+        min-height: 0;
+      }
+      .editor-grid-sidebar > * {
+        min-height: 0;
+      }
     }
 
     /* Language switcher */
@@ -676,6 +945,50 @@
       color: white;
     }
 
+    /* Toast notifications */
+    #toast-container {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      max-width: 380px;
+    }
+
+    .toast {
+      padding: 0.75rem 1rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.8125rem;
+      line-height: 1.4;
+      color: var(--toast-text);
+      cursor: pointer;
+      animation: toast-slide-in 300ms ease-out forwards;
+      border-left: 4px solid;
+      box-shadow: var(--shadow-md);
+      background: var(--card);
+    }
+
+    .toast.toast-dismissing {
+      animation: toast-fade-out 300ms ease-in forwards;
+    }
+
+    .toast--success {
+      background: var(--toast-success-bg);
+      border-left-color: var(--toast-success-border);
+    }
+
+    .toast--error {
+      background: var(--toast-error-bg);
+      border-left-color: var(--toast-error-border);
+    }
+
+    .toast--info {
+      background: var(--toast-info-bg);
+      border-left-color: var(--toast-info-border);
+    }
+
     /* Hidden file input */
     #file-input { display: none; }
   </style>
@@ -683,6 +996,13 @@
 <body>
   <div class="container">
     <header>
+      <div class="header-top">
+        <div></div>
+        <button class="theme-toggle" id="theme-toggle" data-i18n-title="themeToggle" title="Toggle theme">
+          <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+      </div>
       <h1 data-i18n="title">Frontitude One-Click Translator</h1>
       <p data-i18n="subtitle">Upload your language.json, pick target languages, translate via DeepL / OpenAI / Gemini.</p>
       <div class="lang-switcher" id="lang-switcher">
@@ -706,79 +1026,100 @@
       <div class="error-msg" id="upload-error"></div>
     </div>
 
-    <!-- Editor Table -->
-    <div class="card editor-section" id="editor-section">
-      <div class="card-title-row">
-        <div class="card-title" data-i18n="contentPreview">Content Preview</div>
-        <button class="btn-reselect" id="reselect-btn" data-i18n="reselectJson">Re-select JSON</button>
-      </div>
-      <input type="text" class="editor-search" id="editor-search" data-i18n-placeholder="searchPlaceholder" placeholder="Search by key name..." />
-      <div class="editor-table-wrap" id="editor-table-wrap">
-        <table class="editor-table" id="editor-table"></table>
-      </div>
-      <div class="editor-count" id="editor-count"></div>
-    </div>
-
-    <!-- Provider + API Key -->
-    <div class="card provider-section" id="provider-section" style="display:none">
-      <div class="card-title" data-i18n="providerTitle">Translation Provider</div>
-      <div class="provider-row">
-        <select id="provider-select">
-          <option value="deepl">DeepL</option>
-          <option value="openai">OpenAI</option>
-          <option value="gemini">Gemini</option>
-        </select>
-        <input type="password" id="api-key" placeholder="Paste your DeepL API key here" style="flex:1" />
-        <span class="badge badge-none" id="key-badge">No Key</span>
-      </div>
-      <div class="model-row" id="model-row" style="display:none">
-        <label for="model-select" data-i18n="modelLabel">Model:</label>
-        <select id="model-select"></select>
-      </div>
-      <div class="key-options">
-        <label>
-          <input type="checkbox" id="remember-key" />
-          <span data-i18n="rememberKey">Remember key across sessions</span>
-        </label>
-        <button id="clear-key" data-i18n="clearSavedKey" style="border:none;background:none;color:var(--error);cursor:pointer;font-size:0.8125rem;display:none;">Clear saved key</button>
-      </div>
-      <div class="disclaimer" id="disclaimer">
-        Your API key is sent directly from your browser to DeepL and is visible in the browser Network tab. It is never sent to any other server.
-      </div>
-      <div class="prompt-row" id="prompt-row">
-        <label class="prompt-label" data-i18n="contextPromptLabel">Context Prompt</label>
-        <textarea id="context-prompt" class="context-prompt" rows="2" data-i18n-placeholder="contextPromptPlaceholder" placeholder="e.g. dental implant software"></textarea>
-        <div class="deepl-note" id="deepl-note" data-i18n="contextPromptDeeplNote">Context prompt is only used with OpenAI and Gemini.</div>
-      </div>
-    </div>
-
-    <!-- Language Selection -->
-    <div class="card lang-section" id="lang-section">
-      <div class="card-title" data-i18n="targetLangs">Target Languages</div>
-      <div class="lang-controls">
-        <button id="select-all" data-i18n="selectAll">Select All</button>
-        <button id="select-none" data-i18n="selectNone">Select None</button>
-      </div>
-      <div class="lang-grid" id="lang-grid"></div>
-    </div>
-
-    <!-- Action -->
-    <div class="card action-section" id="action-section">
-      <button class="btn btn-primary" id="translate-btn" data-i18n="translateBtn" disabled>Translate</button>
-      <div class="progress-section" id="progress-section">
-        <div class="progress-bar-container">
-          <div class="progress-bar" id="progress-bar"></div>
+    <!-- Editor Grid (two-column on wide screens) -->
+    <div class="editor-grid" id="editor-grid" style="display:none">
+      <!-- Editor Table (left / main) -->
+      <div class="card editor-section" id="editor-section" style="display:block">
+        <div class="card-title-row">
+          <div class="card-title" data-i18n="contentPreview">Content Preview</div>
+          <button class="btn-reselect" id="reselect-btn" data-i18n="reselectJson">Re-select JSON</button>
         </div>
-        <div class="progress-text" id="progress-text"></div>
+        <input type="text" class="editor-search" id="editor-search" data-i18n-placeholder="searchPlaceholder" placeholder="Search by key name..." />
+        <div class="editor-table-wrap" id="editor-table-wrap">
+          <table class="editor-table" id="editor-table"></table>
+        </div>
+        <div class="editor-count" id="editor-count"></div>
       </div>
-      <div class="error-msg" id="translate-error"></div>
-    </div>
 
-    <!-- Download -->
-    <div class="card download-section" id="download-section">
-      <button class="btn btn-success" id="download-btn" data-i18n="downloadBtn">Download language.json</button>
+      <!-- Sidebar (right on wide, stacked on narrow) -->
+      <div class="editor-grid-sidebar">
+        <!-- Provider + API Key -->
+        <div class="card provider-section" id="provider-section">
+          <div class="card-title-collapsible" id="provider-collapsible">
+            <div class="card-title" data-i18n="providerTitle">Translation Provider</div>
+            <svg class="chevron-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+          </div>
+          <div class="collapsible-body" id="provider-collapsible-body">
+            <div class="provider-row">
+              <select id="provider-select">
+                <option value="deepl">DeepL</option>
+                <option value="openai">OpenAI</option>
+                <option value="gemini">Gemini</option>
+              </select>
+              <input type="password" id="api-key" placeholder="Paste your DeepL API key here" style="flex:1" />
+              <span class="badge badge-none" id="key-badge">No Key</span>
+            </div>
+            <div class="model-row" id="model-row" style="display:none">
+              <label for="model-select" data-i18n="modelLabel">Model:</label>
+              <select id="model-select"></select>
+            </div>
+            <div class="key-options">
+              <label>
+                <input type="checkbox" id="remember-key" />
+                <span data-i18n="rememberKey">Remember key across sessions</span>
+              </label>
+              <button id="clear-key" data-i18n="clearSavedKey" style="border:none;background:none;color:var(--error);cursor:pointer;font-size:0.8125rem;display:none;">Clear saved key</button>
+            </div>
+            <div class="disclaimer" id="disclaimer">
+              Your API key is sent directly from your browser to DeepL and is visible in the browser Network tab. It is never sent to any other server.
+            </div>
+            <div class="prompt-row" id="prompt-row">
+              <label class="prompt-label" data-i18n="contextPromptLabel">Context Prompt</label>
+              <textarea id="context-prompt" class="context-prompt" rows="2" data-i18n-placeholder="contextPromptPlaceholder" placeholder="e.g. dental implant software"></textarea>
+              <div class="deepl-note" id="deepl-note" data-i18n="contextPromptDeeplNote">Context prompt is only used with OpenAI and Gemini.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Language Selection -->
+        <div class="card lang-section" id="lang-section">
+          <div class="card-title-collapsible" id="lang-collapsible">
+            <div class="card-title" data-i18n="targetLangs">Target Languages</div>
+            <svg class="chevron-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+          </div>
+          <div class="collapsible-body" id="lang-collapsible-body">
+            <div class="lang-controls">
+              <button id="select-all" data-i18n="selectAll">Select All</button>
+              <button id="select-none" data-i18n="selectNone">Select None</button>
+            </div>
+            <div class="lang-grid" id="lang-grid"></div>
+          </div>
+        </div>
+
+        <!-- Action -->
+        <div class="card action-section" id="action-section">
+          <button class="btn btn-primary" id="translate-btn" data-i18n="translateBtn" disabled>Translate</button>
+          <div class="progress-section" id="progress-section">
+            <div class="progress-label" id="progress-label">0%</div>
+            <div class="progress-bar-container">
+              <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            <div class="progress-text" id="progress-text"></div>
+            <div class="progress-chips" id="progress-chips"></div>
+          </div>
+          <div class="error-msg" id="translate-error"></div>
+        </div>
+
+        <!-- Download -->
+        <div class="card download-section" id="download-section">
+          <button class="btn btn-success" id="download-btn" data-i18n="downloadBtn">Download language.json</button>
+        </div>
+      </div>
     </div>
   </div>
+
+  <!-- Toast container -->
+  <div id="toast-container" role="alert" aria-live="polite"></div>
 
   <script>
     (function () {
@@ -833,6 +1174,10 @@
           contextPromptPlaceholder: 'e.g. dental implant software',
           contextPromptDeeplNote: 'Context prompt is only used with OpenAI and Gemini.',
           reselectJson: 'Re-select JSON',
+          themeToggle: 'Toggle theme',
+          toastFileLoaded: 'File loaded: {0} keys, {1} languages',
+          toastTranslateComplete: 'Translation complete! {0} languages translated.',
+          toastError: 'Error: {0}',
         },
         'zh-TW': {
           title: 'Frontitude 一鍵翻譯器',
@@ -881,6 +1226,10 @@
           contextPromptPlaceholder: '例如：齒科植牙軟體',
           contextPromptDeeplNote: '情境提示僅適用於 OpenAI 和 Gemini。',
           reselectJson: '重新選擇 JSON',
+          themeToggle: '切換主題',
+          toastFileLoaded: '檔案已載入：{0} 個鍵，{1} 種語言',
+          toastTranslateComplete: '翻譯完成！已翻譯 {0} 種語言。',
+          toastError: '錯誤：{0}',
         },
         ko: {
           title: 'Frontitude 원클릭 번역기',
@@ -929,6 +1278,10 @@
           contextPromptPlaceholder: '예: 치과 임플란트 소프트웨어',
           contextPromptDeeplNote: '컨텍스트 프롬프트는 OpenAI 및 Gemini에서만 사용됩니다.',
           reselectJson: 'JSON 다시 선택',
+          themeToggle: '테마 전환',
+          toastFileLoaded: '파일 로드됨: {0}개 키, {1}개 언어',
+          toastTranslateComplete: '번역 완료! {0}개 언어 번역됨.',
+          toastError: '오류: {0}',
         },
       };
 
@@ -964,6 +1317,12 @@
         var phEls = document.querySelectorAll('[data-i18n-placeholder]');
         for (var k = 0; k < phEls.length; k++) {
           phEls[k].placeholder = t(phEls[k].getAttribute('data-i18n-placeholder'));
+        }
+
+        // title elements
+        var titleEls = document.querySelectorAll('[data-i18n-title]');
+        for (var ti = 0; ti < titleEls.length; ti++) {
+          titleEls[ti].title = t(titleEls[ti].getAttribute('data-i18n-title'));
         }
 
         // Update language switcher active state
@@ -1019,7 +1378,7 @@
         'et': 'Estonian', 'fi': 'Finnish', 'fr': 'French', 'he': 'Hebrew',
         'hi': 'Hindi', 'hu': 'Hungarian', 'id': 'Indonesian', 'it': 'Italian',
         'ja': 'Japanese', 'ko': 'Korean', 'lt': 'Lithuanian', 'lv': 'Latvian',
-        'nb': 'Norwegian Bokmål', 'nl': 'Dutch', 'pl': 'Polish',
+        'nb': 'Norwegian Bokm\u00e5l', 'nl': 'Dutch', 'pl': 'Polish',
         'pt': 'Portuguese', 'pt-br': 'Brazilian Portuguese', 'pt-pt': 'European Portuguese',
         'ro': 'Romanian', 'ru': 'Russian', 'sk': 'Slovak', 'sl': 'Slovenian',
         'sv': 'Swedish', 'th': 'Thai', 'tr': 'Turkish', 'uk': 'Ukrainian',
@@ -1040,6 +1399,7 @@
         selected: new Set(),
         translating: false,
         contextPrompt: '',
+        theme: 'light',
       };
 
       function setState(patch) {
@@ -1057,6 +1417,7 @@
         keyBadge:      document.getElementById('key-badge'),
         rememberKey:   document.getElementById('remember-key'),
         clearKey:      document.getElementById('clear-key'),
+        editorGrid:    document.getElementById('editor-grid'),
         editorSection: document.getElementById('editor-section'),
         editorSearch:  document.getElementById('editor-search'),
         editorTable:   document.getElementById('editor-table'),
@@ -1078,11 +1439,124 @@
         translateBtn:  document.getElementById('translate-btn'),
         progressSection: document.getElementById('progress-section'),
         progressBar:   document.getElementById('progress-bar'),
+        progressLabel: document.getElementById('progress-label'),
         progressText:  document.getElementById('progress-text'),
+        progressChips: document.getElementById('progress-chips'),
         translateError: document.getElementById('translate-error'),
         downloadSection: document.getElementById('download-section'),
         downloadBtn:   document.getElementById('download-btn'),
+        themeToggle:   document.getElementById('theme-toggle'),
+        toastContainer: document.getElementById('toast-container'),
+        providerCollapsible: document.getElementById('provider-collapsible'),
+        providerCollapsibleBody: document.getElementById('provider-collapsible-body'),
+        langCollapsible: document.getElementById('lang-collapsible'),
+        langCollapsibleBody: document.getElementById('lang-collapsible-body'),
       };
+
+      // ── Theme ──
+      function getPreferredTheme() {
+        var saved = localStorage.getItem('translate_theme');
+        if (saved === 'dark' || saved === 'light') return saved;
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          return 'dark';
+        }
+        return 'light';
+      }
+
+      function applyTheme(theme) {
+        setState({ theme: theme });
+        if (theme === 'dark') {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        } else {
+          document.documentElement.removeAttribute('data-theme');
+        }
+      }
+
+      dom.themeToggle.addEventListener('click', function () {
+        var next = state.theme === 'dark' ? 'light' : 'dark';
+        applyTheme(next);
+        localStorage.setItem('translate_theme', next);
+      });
+
+      // ── Toast Notifications ──
+      function showToast(message, type) {
+        type = type || 'info';
+        var toast = document.createElement('div');
+        toast.className = 'toast toast--' + type;
+        toast.textContent = message;
+
+        var dismissTimeout;
+
+        function dismiss() {
+          clearTimeout(dismissTimeout);
+          toast.classList.add('toast-dismissing');
+          setTimeout(function () {
+            if (toast.parentNode) toast.parentNode.removeChild(toast);
+          }, 300);
+        }
+
+        toast.addEventListener('click', dismiss);
+        dom.toastContainer.appendChild(toast);
+
+        dismissTimeout = setTimeout(dismiss, 4000);
+      }
+
+      // ── Collapsible Sections (mobile) ──
+      function initCollapsible(headerEl, bodyEl, storageKey) {
+        var savedState = sessionStorage.getItem(storageKey);
+        if (savedState === 'collapsed') {
+          headerEl.classList.add('collapsed');
+          bodyEl.classList.add('collapsed');
+          bodyEl.style.maxHeight = '0';
+        } else {
+          bodyEl.style.maxHeight = 'none';
+        }
+
+        headerEl.addEventListener('click', function () {
+          // Only act as collapsible on mobile
+          if (window.innerWidth >= 768) return;
+
+          var isCollapsed = headerEl.classList.contains('collapsed');
+          if (isCollapsed) {
+            headerEl.classList.remove('collapsed');
+            bodyEl.classList.remove('collapsed');
+            bodyEl.style.maxHeight = bodyEl.scrollHeight + 'px';
+            setTimeout(function () { bodyEl.style.maxHeight = 'none'; }, 300);
+            sessionStorage.setItem(storageKey, 'expanded');
+          } else {
+            bodyEl.style.maxHeight = bodyEl.scrollHeight + 'px';
+            // Force reflow
+            bodyEl.offsetHeight;
+            bodyEl.style.maxHeight = '0';
+            headerEl.classList.add('collapsed');
+            bodyEl.classList.add('collapsed');
+            sessionStorage.setItem(storageKey, 'collapsed');
+          }
+        });
+      }
+
+      initCollapsible(dom.providerCollapsible, dom.providerCollapsibleBody, 'collapse_provider');
+      initCollapsible(dom.langCollapsible, dom.langCollapsibleBody, 'collapse_lang');
+
+      // ── Progress Chips ──
+      function renderProgressChips(languages) {
+        var html = '';
+        for (var i = 0; i < languages.length; i++) {
+          html += '<span class="progress-chip progress-chip--pending" data-chip-lang="' + languages[i] + '">' + languages[i].toUpperCase() + '</span>';
+        }
+        dom.progressChips.innerHTML = html;
+      }
+
+      function updateProgressChip(lang, status) {
+        var chip = dom.progressChips.querySelector('[data-chip-lang="' + lang + '"]');
+        if (!chip) return;
+        chip.className = 'progress-chip progress-chip--' + status;
+        if (status === 'done') {
+          chip.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>' + lang.toUpperCase();
+        } else if (status === 'error') {
+          chip.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' + lang.toUpperCase();
+        }
+      }
 
       // ── Provider + API Key ──
       function storageKeyForProvider(provider) {
@@ -1138,7 +1612,6 @@
           setState({ apiKey: '' });
           updateKeyBadge('', provider);
           dom.clearKey.style.display = 'none';
-          // Preserve remember checkbox state — user may want to remember for this provider too
         }
       }
 
@@ -1237,13 +1710,10 @@
         dom.fileInput.value = '';
         dom.fileInfo.style.display = 'none';
         dom.uploadError.style.display = 'none';
-        dom.editorSection.style.display = 'none';
-        dom.providerSection.style.display = 'none';
-        dom.langSection.style.display = 'none';
-        dom.actionSection.style.display = 'none';
-        dom.downloadSection.style.display = 'none';
+        dom.editorGrid.style.display = 'none';
         dom.progressSection.style.display = 'none';
         dom.translateError.style.display = 'none';
+        dom.downloadSection.classList.remove('download-section--visible');
         dom.uploadCard.style.display = '';
         dom.container.classList.remove('container--wide');
       });
@@ -1286,11 +1756,13 @@
 
         if (!file.name.endsWith('.json')) {
           showError(dom.uploadError, t('errJsonFile'));
+          showToast(t('toastError', t('errJsonFile')), 'error');
           return;
         }
 
         if (file.size > MAX_FILE_BYTES) {
           showError(dom.uploadError, t('errFileTooLarge'));
+          showToast(t('toastError', t('errFileTooLarge')), 'error');
           return;
         }
 
@@ -1301,10 +1773,12 @@
             processJson(parsed);
           } catch (err) {
             showError(dom.uploadError, t('errJsonParse', err.message));
+            showToast(t('toastError', t('errJsonParse', err.message)), 'error');
           }
         };
         reader.onerror = function () {
           showError(dom.uploadError, t('errReadFile'));
+          showToast(t('toastError', t('errReadFile')), 'error');
         };
         reader.readAsText(file);
       }
@@ -1313,11 +1787,13 @@
         // Validate structure
         if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
           showError(dom.uploadError, t('errInvalidFormat'));
+          showToast(t('toastError', t('errInvalidFormat')), 'error');
           return;
         }
 
         if (!parsed.en || typeof parsed.en !== 'object') {
           showError(dom.uploadError, t('errMissingEn'));
+          showToast(t('toastError', t('errMissingEn')), 'error');
           return;
         }
 
@@ -1328,6 +1804,7 @@
           var keyList = invalidKeys.slice(0, 5).join(', ');
           var more = invalidKeys.length > 5 ? t('errNonStringMore', invalidKeys.length - 5) : '';
           showError(dom.uploadError, t('errNonString', keyList + more));
+          showToast(t('toastError', t('errNonString', keyList + more)), 'error');
           return;
         }
 
@@ -1350,11 +1827,15 @@
         renderLanguages();
         dom.editorSearch.value = '';
         renderEditorTable();
+        dom.editorGrid.style.display = '';
         dom.editorSection.style.display = 'block';
         dom.providerSection.style.display = 'block';
         dom.langSection.style.display = 'block';
         dom.actionSection.style.display = 'block';
         updateTranslateBtn();
+
+        // Toast notification for file load
+        showToast(t('toastFileLoaded', keyCount, langs.length + 1), 'info');
       }
 
       // ── Editor Table ──
@@ -1481,45 +1962,65 @@
 
         var batchSize = 50;
 
+        // Render progress chips
+        renderProgressChips(targetLangs);
+        dom.progressLabel.textContent = '0%';
+        dom.progressBar.style.width = '0%';
+
         try {
           for (var i = 0; i < targetLangs.length; i++) {
             var lang = targetLangs[i];
 
+            updateProgressChip(lang, 'translating');
             dom.progressText.textContent = t('progressTranslating', lang.toUpperCase(), completed + 1, totalSteps);
-            dom.progressBar.style.width = ((completed / totalSteps) * 100) + '%';
+            var pct = Math.round((completed / totalSteps) * 100);
+            dom.progressBar.style.width = pct + '%';
+            dom.progressLabel.textContent = pct + '%';
 
             var translatedTexts = [];
 
-            for (var batchStart = 0; batchStart < texts.length; batchStart += batchSize) {
-              var batch = texts.slice(batchStart, batchStart + batchSize);
-              var translated = await callTranslateAPI(batch, lang);
-              translatedTexts = translatedTexts.concat(translated);
+            try {
+              for (var batchStart = 0; batchStart < texts.length; batchStart += batchSize) {
+                var batch = texts.slice(batchStart, batchStart + batchSize);
+                var translated = await callTranslateAPI(batch, lang);
+                translatedTexts = translatedTexts.concat(translated);
+              }
+
+              // Validate translation count matches source key count
+              if (translatedTexts.length !== keys.length) {
+                throw new Error(t('errReturnedCount',
+                  PROVIDER_CONFIG[state.provider].label,
+                  translatedTexts.length, keys.length, lang.toUpperCase()));
+              }
+
+              // Build new language block (immutable)
+              var langBlock = {};
+              keys.forEach(function (key, idx) {
+                langBlock[key] = translatedTexts[idx];
+              });
+              result[lang] = langBlock;
+
+              completed++;
+              var donePct = Math.round((completed / totalSteps) * 100);
+              dom.progressBar.style.width = donePct + '%';
+              dom.progressLabel.textContent = donePct + '%';
+              updateProgressChip(lang, 'done');
+            } catch (langErr) {
+              updateProgressChip(lang, 'error');
+              throw langErr;
             }
-
-            // Validate translation count matches source key count
-            if (translatedTexts.length !== keys.length) {
-              throw new Error(t('errReturnedCount',
-                PROVIDER_CONFIG[state.provider].label,
-                translatedTexts.length, keys.length, lang.toUpperCase()));
-            }
-
-            // Build new language block (immutable)
-            var langBlock = {};
-            keys.forEach(function (key, idx) {
-              langBlock[key] = translatedTexts[idx];
-            });
-            result[lang] = langBlock;
-
-            completed++;
-            dom.progressBar.style.width = ((completed / totalSteps) * 100) + '%';
           }
 
           dom.progressText.textContent = t('progressDone', totalSteps);
+          dom.progressLabel.textContent = '100%';
+          dom.progressBar.style.width = '100%';
           setState({ jsonData: result });
           renderEditorTable();
           dom.downloadSection.classList.add('download-section--visible');
+          showToast(t('toastTranslateComplete', totalSteps), 'success');
         } catch (err) {
           showError(dom.translateError, err.message);
+          showToast(t('toastError', err.message), 'error');
         } finally {
           setState({ translating: false });
           updateTranslateBtn();
@@ -1748,6 +2249,10 @@
       });
 
       // ── Init ──
+      (function initTheme() {
+        var theme = getPreferredTheme();
+        applyTheme(theme);
+      })();
       (function initUiLang() {
         var saved = localStorage.getItem('ui_lang');
         if (saved && UI_TRANSLATIONS[saved]) {
