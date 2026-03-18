@@ -1,3 +1,5 @@
+## MODIFIED Requirements
+
 ### Requirement: Manually edited cells SHALL be visually highlighted with a distinct background color
 Cells that have been manually edited via the edit modal SHALL display a distinct background color (e.g., light amber/yellow) to differentiate them from AI-translated cells and original values. The highlighting SHALL persist for the duration of the session (not saved to localStorage). The highlight status is determined by the presence of the cell's key in the `state.editedCells` Map.
 

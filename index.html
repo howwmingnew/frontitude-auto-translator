@@ -1032,6 +1032,32 @@
       margin-top: 0.75rem;
     }
 
+    .cell-edit-modal-actions:has(.cell-edit-modal-actions-left) {
+      justify-content: space-between;
+    }
+
+    .cell-edit-modal-actions-left,
+    .cell-edit-modal-actions-right {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .cell-edit-modal-actions .btn-outline {
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+    }
+
+    .cell-edit-modal-actions .btn-outline:hover:not(:disabled) {
+      background: var(--bg-alt);
+      color: var(--text);
+    }
+
+    .cell-edit-modal-actions .btn-outline:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
     .cell-edit-modal-actions button {
       padding: 0.375rem 1rem;
       border-radius: var(--radius-sm);
@@ -1484,8 +1510,14 @@
       </div>
       <textarea id="cell-edit-textarea"></textarea>
       <div class="cell-edit-modal-actions">
-        <button class="btn-cancel" id="cell-edit-cancel" data-i18n="cellEditCancel">Cancel</button>
-        <button class="btn-save" id="cell-edit-save" data-i18n="cellEditSave">Save</button>
+        <div class="cell-edit-modal-actions-left">
+          <button class="btn-outline" id="cell-edit-revert" data-i18n="cellEditRevert" disabled>Revert</button>
+          <button class="btn-outline" id="cell-edit-ai-translate" data-i18n="cellEditAiTranslate">AI Translate</button>
+        </div>
+        <div class="cell-edit-modal-actions-right">
+          <button class="btn-cancel" id="cell-edit-cancel" data-i18n="cellEditCancel">Cancel</button>
+          <button class="btn-save" id="cell-edit-save" data-i18n="cellEditSave">Save</button>
+        </div>
       </div>
     </div>
   </div>
@@ -1591,6 +1623,10 @@
           cellTranslateError: 'Translation failed: {0}',
           cellEditSuccess: 'Cell updated successfully.',
           cellEditSource: 'Source (EN):',
+          cellEditRevert: 'Revert',
+          cellEditAiTranslate: 'AI Translate',
+          cellEditRevertSuccess: 'Cell reverted to original value.',
+          cellEditAiTranslating: 'Translating...',
           exportBtn: 'Export Language File',
           cellEditSourceCurrent: 'Editing Original Text',
         },
@@ -1674,6 +1710,10 @@
           cellTranslateError: '翻譯失敗：{0}',
           cellEditSuccess: '儲存格更新成功。',
           cellEditSource: '原文 (EN)：',
+          cellEditRevert: '復原',
+          cellEditAiTranslate: 'AI 翻譯',
+          cellEditRevertSuccess: '儲存格已復原為原始值。',
+          cellEditAiTranslating: '翻譯中...',
           exportBtn: '匯出語言檔',
           cellEditSourceCurrent: '編輯原文',
         },
@@ -1757,6 +1797,10 @@
           cellTranslateError: '번역 실패: {0}',
           cellEditSuccess: '셀 업데이트 완료.',
           cellEditSource: '원문 (EN):',
+          cellEditRevert: '되돌리기',
+          cellEditAiTranslate: 'AI 번역',
+          cellEditRevertSuccess: '셀이 원래 값으로 복원되었습니다.',
+          cellEditAiTranslating: '번역 중...',
           exportBtn: '언어 파일 내보내기',
           cellEditSourceCurrent: '원문 편집',
         },
@@ -1939,7 +1983,7 @@
         translating: false,
         contextPrompt: '',
         theme: 'light',
-        editedCells: new Set(),
+        editedCells: new Map(),
         fullyTranslatedLangs: new Set(),
       };
 
@@ -2001,6 +2045,8 @@
         cellEditSourceLabel: document.getElementById('cell-edit-source-label'),
         cellEditSave: document.getElementById('cell-edit-save'),
         cellEditCancel: document.getElementById('cell-edit-cancel'),
+        cellEditRevert: document.getElementById('cell-edit-revert'),
+        cellEditAiTranslate: document.getElementById('cell-edit-ai-translate'),
         exportBtn: document.getElementById('export-btn'),
         getApiKeyLink: document.getElementById('get-api-key-link'),
         translateConfirmOverlay: document.getElementById('translate-confirm-overlay'),
@@ -2306,7 +2352,7 @@
       });
 
       dom.reselectBtn.addEventListener('click', function () {
-        setState({ jsonData: null, languages: [], selected: new Set(), editedCells: new Set(), fullyTranslatedLangs: new Set() });
+        setState({ jsonData: null, languages: [], selected: new Set(), editedCells: new Map(), fullyTranslatedLangs: new Set() });
         dom.fileInput.value = '';
         dom.fileInfo.style.display = 'none';
         dom.uploadError.style.display = 'none';
@@ -3063,6 +3109,19 @@
         }
 
         dom.cellEditTextarea.value = value || '';
+
+        // Revert button: enabled only if cell was previously edited
+        var cellKey = key + '::' + lang;
+        dom.cellEditRevert.disabled = !state.editedCells.has(cellKey);
+
+        // AI Translate button: hidden for source lang, disabled without API key
+        if (isSourceEdit) {
+          dom.cellEditAiTranslate.style.display = 'none';
+        } else {
+          dom.cellEditAiTranslate.style.display = '';
+          dom.cellEditAiTranslate.disabled = !state.apiKey;
+        }
+
         dom.cellEditOverlay.classList.add('active');
         dom.cellEditTextarea.focus();
       }
@@ -3098,15 +3157,80 @@
         if (!newJsonData[lang]) {
           newJsonData[lang] = {};
         }
-        newJsonData[lang][key] = newVal;
 
-        // Track edited cell
-        var newEditedCells = new Set(state.editedCells);
-        newEditedCells.add(key + '::' + lang);
+        // Track edited cell — record original value only on first edit
+        var cellKey = key + '::' + lang;
+        var newEditedCells = new Map(state.editedCells);
+        if (!newEditedCells.has(cellKey)) {
+          newEditedCells.set(cellKey, newJsonData[lang][key] !== undefined ? newJsonData[lang][key] : '');
+        }
+
+        newJsonData[lang][key] = newVal;
         setState({ jsonData: newJsonData, editedCells: newEditedCells });
         renderEditorTable();
         closeEditModal();
         showToast(t('cellEditSuccess'), 'success');
+      });
+
+      // ── Revert button handler ──
+      dom.cellEditRevert.addEventListener('click', function () {
+        var key = editModalState.key;
+        var lang = editModalState.lang;
+        if (!key || !lang) return;
+
+        var cellKey = key + '::' + lang;
+        if (!state.editedCells.has(cellKey)) return;
+
+        var originalVal = state.editedCells.get(cellKey);
+
+        // Immutable update
+        var newJsonData = JSON.parse(JSON.stringify(state.jsonData));
+        if (!newJsonData[lang]) newJsonData[lang] = {};
+        newJsonData[lang][key] = originalVal;
+
+        var newEditedCells = new Map(state.editedCells);
+        newEditedCells.delete(cellKey);
+
+        setState({ jsonData: newJsonData, editedCells: newEditedCells });
+        renderEditorTable();
+        closeEditModal();
+        showToast(t('cellEditRevertSuccess'), 'success');
+      });
+
+      // ── Single text translation helper ──
+      async function translateSingleText(text, targetLang) {
+        var results = await callTranslateAPI([text], targetLang);
+        return results[0];
+      }
+
+      // ── AI Translate button handler (in Edit Modal) ──
+      dom.cellEditAiTranslate.addEventListener('click', async function () {
+        var key = editModalState.key;
+        var lang = editModalState.lang;
+        if (!key || !lang) return;
+        if (!state.apiKey) {
+          showToast(t('testApiKeyNoKey'), 'error');
+          return;
+        }
+
+        var sourceText = state.jsonData.en ? (state.jsonData.en[key] || '') : '';
+        if (!sourceText) return;
+
+        // Loading state
+        var btn = dom.cellEditAiTranslate;
+        var originalText = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = t('cellEditAiTranslating');
+
+        try {
+          var translated = await translateSingleText(sourceText, lang);
+          dom.cellEditTextarea.value = translated;
+        } catch (err) {
+          showToast(t('cellTranslateError', err.message), 'error');
+        } finally {
+          btn.disabled = false;
+          btn.textContent = originalText;
+        }
       });
 
       // ── Click-to-Translate (untranslated cell) ──
@@ -3127,8 +3251,7 @@
         var sourceText = state.jsonData.en[key];
 
         try {
-          var results = await callTranslateAPI([sourceText], lang);
-          var translated = results[0];
+          var translated = await translateSingleText(sourceText, lang);
 
           // Immutable update
           var newJsonData = JSON.parse(JSON.stringify(state.jsonData));
