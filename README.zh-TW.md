@@ -15,7 +15,10 @@
 - **重新選擇 JSON** — 無需重新載入頁面即可切換不同檔案
 - **35+ 種語言** — 從阿拉伯語到越南語
 - **批次翻譯** — 一鍵翻譯所有已選語言
-- **即時進度追蹤** — 含每種語言狀態的進度條
+- **智慧差異翻譯** — 僅翻譯缺失的文本，保留現有翻譯
+- **AI 翻譯標記** — 藍色背景標示預覽表格中被 AI 翻譯的儲存格
+- **復原支援** — 可將任何儲存格復原回匯入時的原始值
+- **即時進度追蹤** — 逐批次更新的進度條，顯示已翻譯文本數
 - **100% 客戶端** — API 呼叫直接從瀏覽器發送到供應商
 - **API 金鑰持久化** — 可選擇將金鑰儲存在 `localStorage`
 
@@ -24,8 +27,8 @@
 | 供應商 | 模型 | 金鑰格式 |
 |--------|------|----------|
 | DeepL | —（單一端點） | DeepL API 金鑰 |
-| OpenAI | `gpt-4o-mini`、`gpt-4o`、`gpt-4.1-mini`、`gpt-4.1-nano` | `sk-...` |
-| Gemini | `gemini-2.0-flash`、`gemini-2.5-flash`、`gemini-2.5-pro` | Gemini API 金鑰 |
+| OpenAI | `gpt-5.4-mini`、`gpt-5.4`、`gpt-5.3-instant`、`gpt-5-mini` | `sk-...` |
+| Gemini | `gemini-3-flash`、`gemini-3.1-flash-lite`、`gemini-2.5-flash`、`gemini-3.1-pro-preview` | Gemini API 金鑰 |
 
 ## 快速開始
 

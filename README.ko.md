@@ -15,7 +15,10 @@ DeepL, OpenAI 또는 Gemini를 사용하여 Frontitude `language.json` 파일을
 - **JSON 다시 선택** — 페이지를 새로고침하지 않고 다른 파일로 전환
 - **35개 이상의 언어** — 아랍어부터 베트남어까지
 - **일괄 번역** — 선택한 모든 언어를 한 번에 번역
-- **실시간 진행 상황 추적** — 언어별 상태가 포함된 진행 바
+- **스마트 차등 번역** — 누락된 텍스트만 번역하여 기존 번역 보존
+- **AI 번역 하이라이트** — 미리보기 테이블에서 AI 번역된 셀을 파란 배경으로 표시
+- **되돌리기 지원** — 모든 셀을 가져올 당시의 원래 값으로 되돌리기 가능
+- **실시간 진행 상황 추적** — 배치별 업데이트 진행 바와 번역된 텍스트 수 표시
 - **100% 클라이언트 사이드** — API 호출이 브라우저에서 공급자에게 직접 전송
 - **API 키 유지** — 선택적으로 `localStorage`에 키 저장 가능
 
@@ -24,8 +27,8 @@ DeepL, OpenAI 또는 Gemini를 사용하여 Frontitude `language.json` 파일을
 | 공급자 | 모델 | 키 형식 |
 |--------|------|---------|
 | DeepL | — (단일 엔드포인트) | DeepL API 키 |
-| OpenAI | `gpt-4o-mini`, `gpt-4o`, `gpt-4.1-mini`, `gpt-4.1-nano` | `sk-...` |
-| Gemini | `gemini-2.0-flash`, `gemini-2.5-flash`, `gemini-2.5-pro` | Gemini API 키 |
+| OpenAI | `gpt-5.4-mini`, `gpt-5.4`, `gpt-5.3-instant`, `gpt-5-mini` | `sk-...` |
+| Gemini | `gemini-3-flash`, `gemini-3.1-flash-lite`, `gemini-2.5-flash`, `gemini-3.1-pro-preview` | Gemini API 키 |
 
 ## 빠른 시작
 

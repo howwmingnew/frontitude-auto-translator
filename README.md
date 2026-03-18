@@ -15,7 +15,10 @@ A browser-based tool that batch-translates Frontitude `language.json` files usin
 - **Re-select JSON** — switch to a different file without reloading the page
 - **35+ languages** — from Arabic to Vietnamese
 - **Batch translation** — translate all selected languages in one click
-- **Real-time progress tracking** — progress bar with per-language status
+- **Smart differential translation** — only translates missing texts, preserving existing translations
+- **AI translation highlight** — blue background marks AI-translated cells in the preview table
+- **Revert support** — revert any cell back to its original imported value
+- **Real-time progress tracking** — progress bar with per-batch updates and translated text count
 - **100% client-side** — API calls go directly from your browser to the provider
 - **API key persistence** — optionally save your key in `localStorage`
 
@@ -24,8 +27,8 @@ A browser-based tool that batch-translates Frontitude `language.json` files usin
 | Provider | Models | Key Format |
 |----------|--------|------------|
 | DeepL | — (single endpoint) | DeepL API key |
-| OpenAI | `gpt-4o-mini`, `gpt-4o`, `gpt-4.1-mini`, `gpt-4.1-nano` | `sk-...` |
-| Gemini | `gemini-2.0-flash`, `gemini-2.5-flash`, `gemini-2.5-pro` | Gemini API key |
+| OpenAI | `gpt-5.4-mini`, `gpt-5.4`, `gpt-5.3-instant`, `gpt-5-mini` | `sk-...` |
+| Gemini | `gemini-3-flash`, `gemini-3.1-flash-lite`, `gemini-2.5-flash`, `gemini-3.1-pro-preview` | Gemini API key |
 
 ## Quick Start
 
