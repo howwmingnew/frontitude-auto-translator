@@ -27,7 +27,7 @@ A browser-based tool that batch-translates Frontitude `language.json` files usin
 | Provider | Models | Key Format |
 |----------|--------|------------|
 | DeepL | — (single endpoint) | DeepL API key |
-| OpenAI | `gpt-5.4-mini`, `gpt-5.4`, `gpt-5.3-instant`, `gpt-5-mini` | `sk-...` |
+| OpenAI | `gpt-5.4-mini`, `gpt-5.4`, `gpt-5.4-nano`, `gpt-5-mini` | `sk-...` |
 | Gemini | `gemini-3-flash`, `gemini-3.1-flash-lite`, `gemini-2.5-flash`, `gemini-3.1-pro-preview` | Gemini API key |
 
 ## Quick Start

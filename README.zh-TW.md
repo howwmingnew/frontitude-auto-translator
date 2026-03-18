@@ -27,7 +27,7 @@
 | 供應商 | 模型 | 金鑰格式 |
 |--------|------|----------|
 | DeepL | —（單一端點） | DeepL API 金鑰 |
-| OpenAI | `gpt-5.4-mini`、`gpt-5.4`、`gpt-5.3-instant`、`gpt-5-mini` | `sk-...` |
+| OpenAI | `gpt-5.4-mini`、`gpt-5.4`、`gpt-5.4-nano`、`gpt-5-mini` | `sk-...` |
 | Gemini | `gemini-3-flash`、`gemini-3.1-flash-lite`、`gemini-2.5-flash`、`gemini-3.1-pro-preview` | Gemini API 金鑰 |
 
 ## 快速開始

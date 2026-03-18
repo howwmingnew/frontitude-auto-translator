@@ -27,7 +27,7 @@ DeepL, OpenAI 또는 Gemini를 사용하여 Frontitude `language.json` 파일을
 | 공급자 | 모델 | 키 형식 |
 |--------|------|---------|
 | DeepL | — (단일 엔드포인트) | DeepL API 키 |
-| OpenAI | `gpt-5.4-mini`, `gpt-5.4`, `gpt-5.3-instant`, `gpt-5-mini` | `sk-...` |
+| OpenAI | `gpt-5.4-mini`, `gpt-5.4`, `gpt-5.4-nano`, `gpt-5-mini` | `sk-...` |
 | Gemini | `gemini-3-flash`, `gemini-3.1-flash-lite`, `gemini-2.5-flash`, `gemini-3.1-pro-preview` | Gemini API 키 |
 
 ## 빠른 시작
