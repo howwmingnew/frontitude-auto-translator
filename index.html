@@ -598,6 +598,14 @@
       text-align: center;
     }
 
+    .progress-translated-count {
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      text-align: center;
+      margin-top: 0.25rem;
+      font-variant-numeric: tabular-nums;
+    }
+
     /* Progress chips */
     .progress-chips {
       display: flex;
@@ -902,6 +910,16 @@
 
     [data-theme="dark"] .editor-table td.cell-edited {
       background: #422006 !important;
+    }
+
+    .editor-table td.ai-translated {
+      background: #eff6ff !important;
+      border-left: 2px solid #3b82f6;
+    }
+
+    [data-theme="dark"] .editor-table td.ai-translated {
+      background: #172554 !important;
+      border-left: 2px solid #60a5fa;
     }
 
     .editor-table td.empty-cell {
@@ -1484,6 +1502,7 @@
             <div class="progress-bar" id="progress-bar"></div>
           </div>
           <div class="progress-text" id="progress-text"></div>
+          <div class="progress-translated-count" id="progress-translated-count"></div>
           <div class="progress-chips" id="progress-chips"></div>
         </div>
         <div class="error-msg" id="translate-error"></div>
@@ -1574,6 +1593,7 @@
           errNonStringMore: ' (and {0} more)',
           progressTranslating: 'Translating {0} ({1}/{2} languages)...',
           progressDone: 'Done! All {0} language(s) translated.',
+          progressTranslatedCount: 'Translated: {0} / {1} texts',
           errTimeout: 'API request timed out after {0}s. Please try again.',
           errReturnedCount: '{0} returned {1} translations but expected {2} for language {3}',
           errUnexpectedDeepL: 'Unexpected DeepL response format for language {0}',
@@ -1661,6 +1681,7 @@
           errNonStringMore: '（另有 {0} 個）',
           progressTranslating: '正在翻譯 {0}（{1}/{2} 種語言）...',
           progressDone: '完成！已翻譯全部 {0} 種語言。',
+          progressTranslatedCount: '已翻譯：{0} / {1} 個文本',
           errTimeout: 'API 請求逾時（{0} 秒），請重試。',
           errReturnedCount: '{0} 回傳了 {1} 筆翻譯，但語言 {3} 預期為 {2} 筆',
           errUnexpectedDeepL: 'DeepL 回傳了語言 {0} 的非預期格式',
@@ -1748,6 +1769,7 @@
           errNonStringMore: ' (외 {0}개)',
           progressTranslating: '{0} 번역 중 ({1}/{2} 언어)...',
           progressDone: '완료! {0}개 언어 모두 번역되었습니다.',
+          progressTranslatedCount: '번역됨: {0} / {1} 텍스트',
           errTimeout: 'API 요청 시간 초과 ({0}초). 다시 시도해 주세요.',
           errReturnedCount: '{0}이(가) {3} 언어에 대해 {1}개의 번역을 반환했지만 {2}개가 예상되었습니다',
           errUnexpectedDeepL: '언어 {0}에 대한 예기치 않은 DeepL 응답 형식',
@@ -1985,6 +2007,9 @@
         theme: 'light',
         editedCells: new Map(),
         fullyTranslatedLangs: new Set(),
+        aiTranslatedCells: new Set(),
+        originalTranslations: {},
+        importedJsonData: null,
       };
 
       function setState(patch) {
@@ -2028,6 +2053,7 @@
         progressBar:   document.getElementById('progress-bar'),
         progressLabel: document.getElementById('progress-label'),
         progressText:  document.getElementById('progress-text'),
+        progressTranslatedCount: document.getElementById('progress-translated-count'),
         progressChips: document.getElementById('progress-chips'),
         translateError: document.getElementById('translate-error'),
         themeToggle:   document.getElementById('theme-toggle'),
@@ -2143,6 +2169,25 @@
 
       // ── Sidebar Drawer ──
       function openDrawer() {
+        if (state.jsonData) {
+          var prevFullyDone = state.fullyTranslatedLangs;
+          var fullyDone = getFullyTranslatedLanguages(state.jsonData);
+          var newSelected = new Set(state.selected);
+          state.languages.forEach(function (lang) {
+            var wasFull = prevFullyDone.has(lang);
+            var isFull = fullyDone.has(lang);
+            if (!wasFull && isFull) {
+              // Newly fully translated → uncheck
+              newSelected.delete(lang);
+            } else if (wasFull && !isFull) {
+              // Was fully translated but now has missing texts → check
+              newSelected.add(lang);
+            }
+          });
+          setState({ fullyTranslatedLangs: fullyDone, selected: newSelected });
+          renderLanguages();
+          updateTranslateBtn();
+        }
         dom.sidebarDrawer.classList.add('open');
         dom.sidebarOverlay.classList.add('active');
       }
@@ -2352,7 +2397,7 @@
       });
 
       dom.reselectBtn.addEventListener('click', function () {
-        setState({ jsonData: null, languages: [], selected: new Set(), editedCells: new Map(), fullyTranslatedLangs: new Set() });
+        setState({ jsonData: null, importedJsonData: null, languages: [], selected: new Set(), editedCells: new Map(), fullyTranslatedLangs: new Set(), aiTranslatedCells: new Set(), originalTranslations: {} });
         dom.fileInput.value = '';
         dom.fileInfo.style.display = 'none';
         dom.uploadError.style.display = 'none';
@@ -2463,6 +2508,7 @@
         var defaultSelected = langs.filter(function (l) { return !fullyDone.has(l); });
         setState({
           jsonData: parsed,
+          importedJsonData: JSON.parse(JSON.stringify(parsed)),
           languages: langs,
           selected: new Set(defaultSelected),
           fullyTranslatedLangs: fullyDone,
@@ -2513,8 +2559,9 @@
             var val = state.jsonData[lang] ? state.jsonData[lang][key] : undefined;
             var cls = lang === 'en' ? ' col-source' : '';
             var editedCls = state.editedCells.has(key + '::' + lang) ? ' cell-edited' : '';
+            var aiCls = state.aiTranslatedCells.has(lang + ':' + key) ? ' ai-translated' : '';
             if (val !== undefined && val !== '') {
-              html += '<td class="' + cls + editedCls + '" title="' + escapeHtml(val).replace(/"/g, '&quot;') + '">' + escapeHtml(val) + '</td>';
+              html += '<td class="' + cls + editedCls + aiCls + '" title="' + escapeHtml(val).replace(/"/g, '&quot;') + '">' + escapeHtml(val) + '</td>';
             } else {
               html += '<td class="empty-cell' + cls + editedCls + '">&mdash;</td>';
             }
@@ -2705,61 +2752,124 @@
 
         dom.progressSection.style.display = 'block';
 
-        var enEntries = Object.entries(state.jsonData.en);
-        var keys = enEntries.map(function (e) { return e[0]; });
-        var texts = enEntries.map(function (e) { return e[1]; });
+        var enKeys = Object.keys(state.jsonData.en).filter(function (k) {
+          return state.jsonData.en[k] !== undefined && state.jsonData.en[k] !== '';
+        });
         var targetLangs = Array.from(state.selected);
-
-        var totalSteps = targetLangs.length;
-        var completed = 0;
 
         // Deep clone to avoid any mutation of original data
         var result = JSON.parse(JSON.stringify(state.jsonData));
+        var newAiCells = new Set(state.aiTranslatedCells);
+        var newOriginals = Object.assign({}, state.originalTranslations);
 
-        var batchSize = 50;
+        var batchSize = 10;
+
+        // Pre-calculate total batches for fine-grained progress
+        var langBatchInfo = [];
+        var totalBatches = 0;
+        for (var li = 0; li < targetLangs.length; li++) {
+          var l = targetLangs[li];
+          var isRe = state.fullyTranslatedLangs.has(l);
+          var ld = state.jsonData[l] || {};
+          var ktKeys = isRe ? enKeys : enKeys.filter(function (k) { return ld[k] === undefined || ld[k] === ''; });
+          var batches = ktKeys.length === 0 ? 0 : Math.ceil(ktKeys.length / batchSize);
+          langBatchInfo.push({ lang: l, isRetranslate: isRe, keys: ktKeys, batches: batches });
+          totalBatches += Math.max(batches, 1); // at least 1 step per lang for chip update
+        }
+
+        var totalTexts = langBatchInfo.reduce(function (sum, info) { return sum + info.keys.length; }, 0);
+        var translatedCount = 0;
+        var completedBatches = 0;
+        var simulatedPct = 0;
+        var simTimer = null;
+
+        function updateProgress(jumpTo) {
+          if (simTimer) { clearInterval(simTimer); simTimer = null; }
+          var realPct = totalBatches === 0 ? 100 : Math.round((completedBatches / totalBatches) * 100);
+          realPct = Math.min(realPct, 100);
+          if (jumpTo !== undefined) {
+            simulatedPct = jumpTo;
+          }
+          simulatedPct = Math.max(simulatedPct, realPct);
+          dom.progressBar.style.width = simulatedPct + '%';
+          dom.progressLabel.textContent = simulatedPct + '%';
+        }
+
+        // Simulate gradual progress while waiting for API response
+        function startSimulatedProgress(targetPct) {
+          if (simTimer) { clearInterval(simTimer); simTimer = null; }
+          simTimer = setInterval(function () {
+            if (simulatedPct < targetPct) {
+              simulatedPct += 1;
+              dom.progressBar.style.width = simulatedPct + '%';
+              dom.progressLabel.textContent = simulatedPct + '%';
+            } else {
+              clearInterval(simTimer);
+              simTimer = null;
+            }
+          }, 300);
+        }
 
         // Render progress chips
         renderProgressChips(targetLangs);
         dom.progressLabel.textContent = '0%';
         dom.progressBar.style.width = '0%';
+        dom.progressTranslatedCount.textContent = t('progressTranslatedCount', 0, totalTexts);
 
         try {
-          for (var i = 0; i < targetLangs.length; i++) {
-            var lang = targetLangs[i];
+          for (var i = 0; i < langBatchInfo.length; i++) {
+            var info = langBatchInfo[i];
+            var lang = info.lang;
+            var isRetranslate = info.isRetranslate;
+            var langData = state.jsonData[lang] || {};
+            var keysToTranslate = info.keys;
+            var textsToTranslate = keysToTranslate.map(function (k) { return state.jsonData.en[k]; });
+
+            if (isRetranslate) {
+              newOriginals[lang] = JSON.parse(JSON.stringify(langData));
+            }
 
             updateProgressChip(lang, 'translating');
-            dom.progressText.textContent = t('progressTranslating', lang.toUpperCase(), completed + 1, totalSteps);
-            var pct = Math.round((completed / totalSteps) * 100);
-            dom.progressBar.style.width = pct + '%';
-            dom.progressLabel.textContent = pct + '%';
+            dom.progressText.textContent = t('progressTranslating', lang.toUpperCase(), i + 1, targetLangs.length);
+            updateProgress();
 
             var translatedTexts = [];
 
             try {
-              for (var batchStart = 0; batchStart < texts.length; batchStart += batchSize) {
-                var batch = texts.slice(batchStart, batchStart + batchSize);
-                var translated = await callTranslateAPI(batch, lang);
-                translatedTexts = translatedTexts.concat(translated);
+              if (textsToTranslate.length === 0) {
+                completedBatches += 1;
+                updateProgress();
+              } else {
+                for (var batchStart = 0; batchStart < textsToTranslate.length; batchStart += batchSize) {
+                  var batch = textsToTranslate.slice(batchStart, batchStart + batchSize);
+                  // Simulate progress up to ~90% of next batch's share while waiting
+                  var nextRealPct = totalBatches === 0 ? 100 : Math.round(((completedBatches + 1) / totalBatches) * 100);
+                  var simTarget = simulatedPct + Math.round((nextRealPct - simulatedPct) * 0.85);
+                  startSimulatedProgress(simTarget);
+                  var translated = await callTranslateAPI(batch, lang);
+                  translatedTexts = translatedTexts.concat(translated);
+                  translatedCount += batch.length;
+                  completedBatches++;
+                  updateProgress();
+                  dom.progressTranslatedCount.textContent = t('progressTranslatedCount', translatedCount, totalTexts);
+                }
+
+                // Validate translation count
+                if (translatedTexts.length !== keysToTranslate.length) {
+                  throw new Error(t('errReturnedCount',
+                    PROVIDER_CONFIG[state.provider].label,
+                    translatedTexts.length, keysToTranslate.length, lang.toUpperCase()));
+                }
               }
 
-              // Validate translation count matches source key count
-              if (translatedTexts.length !== keys.length) {
-                throw new Error(t('errReturnedCount',
-                  PROVIDER_CONFIG[state.provider].label,
-                  translatedTexts.length, keys.length, lang.toUpperCase()));
-              }
-
-              // Build new language block (immutable)
-              var langBlock = {};
-              keys.forEach(function (key, idx) {
+              // Build language block: merge with existing data
+              var langBlock = isRetranslate ? {} : Object.assign({}, result[lang] || {});
+              keysToTranslate.forEach(function (key, idx) {
                 langBlock[key] = translatedTexts[idx];
+                newAiCells.add(lang + ':' + key);
               });
               result[lang] = langBlock;
 
-              completed++;
-              var donePct = Math.round((completed / totalSteps) * 100);
-              dom.progressBar.style.width = donePct + '%';
-              dom.progressLabel.textContent = donePct + '%';
               updateProgressChip(lang, 'done');
             } catch (langErr) {
               updateProgressChip(lang, 'error');
@@ -2767,16 +2877,18 @@
             }
           }
 
-          dom.progressText.textContent = t('progressDone', totalSteps);
+          if (simTimer) { clearInterval(simTimer); simTimer = null; }
+          dom.progressText.textContent = t('progressDone', targetLangs.length);
           dom.progressLabel.textContent = '100%';
           dom.progressBar.style.width = '100%';
-          setState({ jsonData: result });
+          setState({ jsonData: result, aiTranslatedCells: newAiCells, originalTranslations: newOriginals });
           renderEditorTable();
-          showToast(t('toastTranslateComplete', totalSteps), 'success');
+          showToast(t('toastTranslateComplete', targetLangs.length), 'success');
         } catch (err) {
           showError(dom.translateError, err.message);
           showToast(t('toastError', err.message), 'error');
         } finally {
+          if (simTimer) { clearInterval(simTimer); simTimer = null; }
           setState({ translating: false });
           updateTranslateBtn();
         }
@@ -2825,7 +2937,7 @@
       }
 
       // ── Shared fetch helper ──
-      var FETCH_TIMEOUT_MS = 30000;
+      var FETCH_TIMEOUT_MS = 90000;
 
       function fetchWithTimeout(url, options) {
         var controller = new AbortController();
@@ -2891,20 +3003,15 @@
       var TRANSLATION_RULES = '\n\nRULES:\n1. Preserve all placeholders exactly as-is: {0}, {1}, {{name}}, %s, %d, ${variable}, etc.\n2. Use natural, formal-polite register for the target language. Do not use slang.\n3. Do not add punctuation, words, or content that is not present in the source text.';
 
       // ── OpenAI ──
+      var OPENAI_NO_CUSTOM_TEMP = ['gpt-5-mini'];
+
       async function callOpenAI(texts, targetLang) {
         var langName = langCodeToName(targetLang);
         var contextPrefix = state.contextPrompt.trim()
           ? 'The content is from: ' + state.contextPrompt.trim() + '. '
           : '';
-        var response = await fetchWithTimeout('https://api.openai.com/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Authorization': 'Bearer ' + state.apiKey,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
+        var requestBody = {
             model: state.model,
-            temperature: 0.3,
             messages: [
               {
                 role: 'system',
@@ -2915,7 +3022,17 @@
                 content: JSON.stringify(texts),
               },
             ],
-          }),
+        };
+        if (OPENAI_NO_CUSTOM_TEMP.indexOf(state.model) === -1) {
+          requestBody.temperature = 0.3;
+        }
+        var response = await fetchWithTimeout('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': 'Bearer ' + state.apiKey,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(requestBody),
         });
 
         if (!response.ok) {
@@ -3093,6 +3210,22 @@
       // ── Edit Modal ──
       var editModalState = { key: null, lang: null };
 
+      function getImportedValue(key, lang) {
+        return (state.importedJsonData && state.importedJsonData[lang])
+          ? (state.importedJsonData[lang][key] || '')
+          : '';
+      }
+
+      function updateRevertBtn() {
+        var key = editModalState.key;
+        var lang = editModalState.lang;
+        if (!key || !lang) { dom.cellEditRevert.disabled = true; return; }
+        var importedVal = getImportedValue(key, lang);
+        dom.cellEditRevert.disabled = dom.cellEditTextarea.value === importedVal;
+      }
+
+      dom.cellEditTextarea.addEventListener('input', updateRevertBtn);
+
       function openEditModal(key, lang, value, sourceText, isSourceEdit) {
         editModalState = { key: key, lang: lang };
         dom.cellEditTitle.textContent = t('cellEditTitle');
@@ -3110,9 +3243,8 @@
 
         dom.cellEditTextarea.value = value || '';
 
-        // Revert button: enabled only if cell was previously edited
-        var cellKey = key + '::' + lang;
-        dom.cellEditRevert.disabled = !state.editedCells.has(cellKey);
+        // Revert button: enabled if textarea differs from imported value
+        updateRevertBtn();
 
         // AI Translate button: hidden for source lang, disabled without API key
         if (isSourceEdit) {
@@ -3135,8 +3267,8 @@
 
       dom.cellEditCancel.addEventListener('click', closeEditModal);
 
-      dom.cellEditOverlay.addEventListener('click', function (e) {
-        if (e.target === dom.cellEditOverlay) closeEditModal();
+      dom.cellEditOverlay.addEventListener('mousedown', function (e) {
+        if (e.target === dom.cellEditOverlay) e.preventDefault();
       });
 
       document.addEventListener('keydown', function (e) {
@@ -3178,23 +3310,10 @@
         var lang = editModalState.lang;
         if (!key || !lang) return;
 
-        var cellKey = key + '::' + lang;
-        if (!state.editedCells.has(cellKey)) return;
-
-        var originalVal = state.editedCells.get(cellKey);
-
-        // Immutable update
-        var newJsonData = JSON.parse(JSON.stringify(state.jsonData));
-        if (!newJsonData[lang]) newJsonData[lang] = {};
-        newJsonData[lang][key] = originalVal;
-
-        var newEditedCells = new Map(state.editedCells);
-        newEditedCells.delete(cellKey);
-
-        setState({ jsonData: newJsonData, editedCells: newEditedCells });
-        renderEditorTable();
-        closeEditModal();
-        showToast(t('cellEditRevertSuccess'), 'success');
+        var originalVal = getImportedValue(key, lang);
+        dom.cellEditTextarea.value = originalVal;
+        updateRevertBtn();
+        dom.cellEditTextarea.focus();
       });
 
       // ── Single text translation helper ──
