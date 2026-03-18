@@ -664,6 +664,7 @@
 
     .key-options {
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
       gap: 0.75rem;
       margin-top: 0.5rem;
@@ -685,12 +686,18 @@
     /* Provider row */
     .provider-row {
       display: flex;
+      flex-wrap: wrap;
       gap: 0.5rem;
       align-items: center;
     }
 
+    .provider-row input {
+      min-width: 0;
+    }
+
     .api-key-actions {
       display: flex;
+      flex-wrap: wrap;
       gap: 0.5rem;
       align-items: center;
       margin-top: 0.5rem;
@@ -723,10 +730,12 @@
       gap: 0.5rem;
       align-items: center;
       margin-top: 0.5rem;
+      min-width: 0;
     }
 
     .model-row select {
       flex: 1;
+      min-width: 0;
       padding: 0.5rem 2rem 0.5rem 0.75rem;
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
@@ -1078,6 +1087,12 @@
       cursor: not-allowed;
     }
 
+    a.btn-test-key {
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+    }
+
     .editor-table tbody tr:hover td {
       background: var(--bg);
     }
@@ -1291,6 +1306,36 @@
       border-left-color: var(--toast-info-border);
     }
 
+    /* Translate confirmation table */
+    .translate-confirm-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8125rem;
+      margin-top: 0.5rem;
+    }
+
+    .translate-confirm-table th {
+      text-align: left;
+      font-weight: 600;
+      font-size: 0.6875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+      padding: 0.375rem 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .translate-confirm-table td {
+      padding: 0.375rem 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .translate-confirm-table .retranslate-badge {
+      font-size: 0.6875rem;
+      color: var(--warning);
+      margin-left: 0.375rem;
+    }
+
     /* Hidden file input */
     #file-input { display: none; }
   </style>
@@ -1365,6 +1410,7 @@
           <div class="api-key-actions">
             <span class="badge badge-none" id="key-badge">No Key</span>
             <button class="btn-test-key" id="test-api-key-btn" data-i18n="testApiKey" disabled>Test Key</button>
+            <a class="btn-test-key" id="get-api-key-link" href="https://www.deepl.com/pro#developer" target="_blank" rel="noopener noreferrer" data-i18n="getApiKey">Get API Key</a>
           </div>
           <div class="model-row" id="model-row" style="display:none">
             <label for="model-select" data-i18n="modelLabel">Model:</label>
@@ -1444,6 +1490,18 @@
     </div>
   </div>
 
+  <!-- Translate Confirmation Modal -->
+  <div class="cell-edit-overlay" id="translate-confirm-overlay">
+    <div class="cell-edit-modal" style="max-width:420px">
+      <div class="cell-edit-modal-header" id="translate-confirm-title"></div>
+      <div class="translate-confirm-body" id="translate-confirm-body"></div>
+      <div class="cell-edit-modal-actions">
+        <button class="btn-cancel" id="translate-confirm-cancel"></button>
+        <button class="btn-save" id="translate-confirm-ok"></button>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast container -->
   <div id="toast-container" role="alert" aria-live="polite"></div>
 
@@ -1501,6 +1559,18 @@
           contextPromptDeeplNote: 'Context prompt is only used with OpenAI and Gemini.',
           defaultContextPrompt: 'Multilingual translation for dental implant software UI',
           langFullyTranslated: 'Fully translated. Re-translating will overwrite all content.',
+          modelFastLowCost: 'Fast, low cost',
+          modelHighQuality: 'High quality',
+          modelUltraFast: 'Ultra fast',
+          modelEconomical: 'Economical',
+          modelBalanced: 'Balanced',
+          getApiKey: 'Get API Key',
+          confirmTranslateTitle: 'Confirm Translation',
+          confirmLangHeader: 'Language',
+          confirmCountHeader: 'Texts',
+          confirmRetranslateAll: 'Re-translate all',
+          confirmCancel: 'Cancel',
+          confirmTranslate: 'Translate',
           reselectJson: 'Re-select JSON',
           themeToggle: 'Toggle theme',
           toastFileLoaded: 'File loaded: {0} keys, {1} languages',
@@ -1572,6 +1642,18 @@
           contextPromptDeeplNote: '情境提示僅適用於 OpenAI 和 Gemini。',
           defaultContextPrompt: '齒科植牙軟體介面多國語系翻譯',
           langFullyTranslated: '已翻譯完成，重新翻譯將覆蓋全部內容。',
+          modelFastLowCost: '快速、低成本',
+          modelHighQuality: '高品質',
+          modelUltraFast: '極速',
+          modelEconomical: '經濟實惠',
+          modelBalanced: '平衡',
+          getApiKey: '取得 API Key',
+          confirmTranslateTitle: '確認翻譯',
+          confirmLangHeader: '語言',
+          confirmCountHeader: '文本數',
+          confirmRetranslateAll: '全部重新翻譯',
+          confirmCancel: '取消',
+          confirmTranslate: '翻譯',
           reselectJson: '重新選擇 JSON',
           themeToggle: '切換主題',
           toastFileLoaded: '檔案已載入：{0} 個鍵，{1} 種語言',
@@ -1643,6 +1725,18 @@
           contextPromptDeeplNote: '컨텍스트 프롬프트는 OpenAI 및 Gemini에서만 사용됩니다.',
           defaultContextPrompt: '치과 임플란트 소프트웨어 UI 다국어 번역',
           langFullyTranslated: '번역 완료됨. 재번역 시 모든 내용을 덮어씁니다.',
+          modelFastLowCost: '빠름, 저비용',
+          modelHighQuality: '고품질',
+          modelUltraFast: '초고속',
+          modelEconomical: '경제적',
+          modelBalanced: '균형',
+          getApiKey: 'API Key 받기',
+          confirmTranslateTitle: '번역 확인',
+          confirmLangHeader: '언어',
+          confirmCountHeader: '텍스트',
+          confirmRetranslateAll: '전체 재번역',
+          confirmCancel: '취소',
+          confirmTranslate: '번역',
           reselectJson: 'JSON 다시 선택',
           themeToggle: '테마 전환',
           toastFileLoaded: '파일 로드됨: {0}개 키, {1}개 언어',
@@ -1725,6 +1819,14 @@
         // Re-apply provider-specific dynamic strings
         applyProviderUI(state.provider);
 
+        // Re-render model dropdown annotations
+        var provConfig = PROVIDER_CONFIG[state.provider];
+        if (provConfig.models.length > 0) {
+          var currentModel = state.model;
+          renderModelDropdown(provConfig);
+          dom.modelSelect.value = currentModel;
+        }
+
         // Re-apply key badge
         updateKeyBadge(state.apiKey);
 
@@ -1749,35 +1851,80 @@
           placeholder: 'Paste your DeepL API key here',
           disclaimer: 'Your API key is sent directly from your browser to DeepL and is visible in the browser Network tab. It is never sent to any other server.',
           models: [],
+          keyUrl: 'https://www.deepl.com/pro#developer',
         },
         openai: {
           label: 'OpenAI',
           placeholder: 'Paste your OpenAI API key here (sk-...)',
           disclaimer: 'Your API key is sent directly from your browser to OpenAI and is visible in the browser Network tab. It is never sent to any other server.',
-          models: ['gpt-4o-mini', 'gpt-4o', 'gpt-4.1-mini', 'gpt-4.1-nano'],
+          models: [
+            { id: 'gpt-5.4-mini', annotationKey: 'modelFastLowCost' },
+            { id: 'gpt-5.4', annotationKey: 'modelHighQuality' },
+            { id: 'gpt-5.3-instant', annotationKey: 'modelUltraFast' },
+            { id: 'gpt-5-mini', annotationKey: 'modelEconomical' },
+          ],
+          keyUrl: 'https://platform.openai.com/api-keys',
         },
         gemini: {
           label: 'Gemini',
           placeholder: 'Paste your Gemini API key here',
           disclaimer: 'Your API key is sent directly from your browser to Google and is visible in the browser Network tab (as a URL parameter). It is never sent to any other server.',
-          models: ['gemini-2.0-flash', 'gemini-2.5-flash', 'gemini-2.5-pro'],
+          models: [
+            { id: 'gemini-3-flash', annotationKey: 'modelFastLowCost' },
+            { id: 'gemini-3.1-flash-lite', annotationKey: 'modelUltraFast' },
+            { id: 'gemini-2.5-flash', annotationKey: 'modelBalanced' },
+            { id: 'gemini-3.1-pro-preview', annotationKey: 'modelHighQuality' },
+          ],
+          keyUrl: 'https://aistudio.google.com/apikey',
         },
       };
 
       var LANG_CODE_TO_NAME = {
-        'ar': 'Arabic', 'bg': 'Bulgarian', 'cs': 'Czech', 'da': 'Danish',
-        'de': 'German', 'el': 'Greek', 'en': 'English', 'es': 'Spanish',
-        'et': 'Estonian', 'fi': 'Finnish', 'fr': 'French', 'he': 'Hebrew',
-        'hi': 'Hindi', 'hu': 'Hungarian', 'id': 'Indonesian', 'it': 'Italian',
-        'ja': 'Japanese', 'ko': 'Korean', 'lt': 'Lithuanian', 'lv': 'Latvian',
-        'nb': 'Norwegian Bokm\u00e5l', 'nl': 'Dutch', 'pl': 'Polish',
-        'pt': 'Portuguese', 'pt-br': 'Brazilian Portuguese', 'pt-pt': 'European Portuguese',
-        'ro': 'Romanian', 'ru': 'Russian', 'sk': 'Slovak', 'sl': 'Slovenian',
-        'sv': 'Swedish', 'th': 'Thai', 'tr': 'Turkish', 'uk': 'Ukrainian',
-        'vi': 'Vietnamese',
-        'zh': 'Chinese Simplified', 'zh-cn': 'Chinese Simplified',
-        'zh-hans': 'Chinese Simplified', 'zh-tw': 'Chinese Traditional',
-        'zh-hant': 'Chinese Traditional',
+        en: {
+          'ar': 'Arabic', 'bg': 'Bulgarian', 'cs': 'Czech', 'da': 'Danish',
+          'de': 'German', 'el': 'Greek', 'en': 'English', 'es': 'Spanish',
+          'et': 'Estonian', 'fi': 'Finnish', 'fr': 'French', 'he': 'Hebrew',
+          'hi': 'Hindi', 'hu': 'Hungarian', 'id': 'Indonesian', 'it': 'Italian',
+          'ja': 'Japanese', 'ko': 'Korean', 'lt': 'Lithuanian', 'lv': 'Latvian',
+          'nb': 'Norwegian Bokm\u00e5l', 'nl': 'Dutch', 'pl': 'Polish',
+          'pt': 'Portuguese', 'pt-br': 'Brazilian Portuguese', 'pt-pt': 'European Portuguese',
+          'ro': 'Romanian', 'ru': 'Russian', 'sk': 'Slovak', 'sl': 'Slovenian',
+          'sv': 'Swedish', 'th': 'Thai', 'tr': 'Turkish', 'uk': 'Ukrainian',
+          'vi': 'Vietnamese',
+          'zh': 'Chinese Simplified', 'zh-cn': 'Chinese Simplified',
+          'zh-hans': 'Chinese Simplified', 'zh-tw': 'Chinese Traditional',
+          'zh-hant': 'Chinese Traditional',
+        },
+        'zh-TW': {
+          'ar': '\u963f\u62c9\u4f2f\u6587', 'bg': '\u4fdd\u52a0\u5229\u4e9e\u6587', 'cs': '\u6377\u514b\u6587', 'da': '\u4e39\u9ea5\u6587',
+          'de': '\u5fb7\u6587', 'el': '\u5e0c\u81d8\u6587', 'en': '\u82f1\u6587', 'es': '\u897f\u73ed\u7259\u6587',
+          'et': '\u611b\u6c99\u5c3c\u4e9e\u6587', 'fi': '\u82ac\u862d\u6587', 'fr': '\u6cd5\u6587', 'he': '\u5e0c\u4f2f\u4f86\u6587',
+          'hi': '\u5370\u5730\u6587', 'hu': '\u5308\u7259\u5229\u6587', 'id': '\u5370\u5c3c\u6587', 'it': '\u7fa9\u5927\u5229\u6587',
+          'ja': '\u65e5\u6587', 'ko': '\u97d3\u6587', 'lt': '\u7acb\u9676\u5b9b\u6587', 'lv': '\u62c9\u812b\u7dad\u4e9e\u6587',
+          'nb': '\u632a\u5a01\u6587', 'nl': '\u8377\u862d\u6587', 'pl': '\u6ce2\u862d\u6587',
+          'pt': '\u8461\u8404\u7259\u6587', 'pt-br': '\u5df4\u897f\u8461\u8404\u7259\u6587', 'pt-pt': '\u6b50\u6d32\u8461\u8404\u7259\u6587',
+          'ro': '\u7f85\u99ac\u5c3c\u4e9e\u6587', 'ru': '\u4fc4\u6587', 'sk': '\u65af\u6d1b\u4f10\u514b\u6587', 'sl': '\u65af\u6d1b\u7dad\u5c3c\u4e9e\u6587',
+          'sv': '\u745e\u5178\u6587', 'th': '\u6cf0\u6587', 'tr': '\u571f\u8033\u5176\u6587', 'uk': '\u70cf\u514b\u862d\u6587',
+          'vi': '\u8d8a\u5357\u6587',
+          'zh': '\u7c21\u9ad4\u4e2d\u6587', 'zh-cn': '\u7c21\u9ad4\u4e2d\u6587',
+          'zh-hans': '\u7c21\u9ad4\u4e2d\u6587', 'zh-tw': '\u7e41\u9ad4\u4e2d\u6587',
+          'zh-hant': '\u7e41\u9ad4\u4e2d\u6587',
+        },
+        ko: {
+          'ar': '\uc544\ub78d\uc5b4', 'bg': '\ubd88\uac00\ub9ac\uc544\uc5b4', 'cs': '\uccb4\ucf54\uc5b4', 'da': '\ub374\ub9c8\ud06c\uc5b4',
+          'de': '\ub3c5\uc77c\uc5b4', 'el': '\uadf8\ub9ac\uc2a4\uc5b4', 'en': '\uc601\uc5b4', 'es': '\uc2a4\ud398\uc778\uc5b4',
+          'et': '\uc5d0\uc2a4\ud1a0\ub2c8\uc544\uc5b4', 'fi': '\ud540\ub780\ub4dc\uc5b4', 'fr': '\ud504\ub791\uc2a4\uc5b4', 'he': '\ud5e4\ube0c\ub9ac\uc5b4',
+          'hi': '\ud78c\ub514\uc5b4', 'hu': '\ud5dd\uac00\ub9ac\uc5b4', 'id': '\uc778\ub3c4\ub124\uc2dc\uc544\uc5b4', 'it': '\uc774\ud0c8\ub9ac\uc544\uc5b4',
+          'ja': '\uc77c\ubcf8\uc5b4', 'ko': '\ud55c\uad6d\uc5b4', 'lt': '\ub9ac\ud22c\uc544\ub2c8\uc544\uc5b4', 'lv': '\ub77c\ud2b8\ube44\uc544\uc5b4',
+          'nb': '\ub178\ub974\uc6e8\uc774\uc5b4', 'nl': '\ub124\ub35c\ub780\ub4dc\uc5b4', 'pl': '\ud3f4\ub780\ub4dc\uc5b4',
+          'pt': '\ud3ec\ub974\ud22c\uac08\uc5b4', 'pt-br': '\ube0c\ub77c\uc9c8 \ud3ec\ub974\ud22c\uac08\uc5b4', 'pt-pt': '\uc720\ub7fd \ud3ec\ub974\ud22c\uac08\uc5b4',
+          'ro': '\ub8e8\ub9c8\ub2c8\uc544\uc5b4', 'ru': '\ub7ec\uc2dc\uc544\uc5b4', 'sk': '\uc2ac\ub85c\ubc14\ud0a4\uc544\uc5b4', 'sl': '\uc2ac\ub85c\ubca0\ub2c8\uc544\uc5b4',
+          'sv': '\uc2a4\uc6e8\ub374\uc5b4', 'th': '\ud0dc\uad6d\uc5b4', 'tr': '\ud130\ud0a4\uc5b4', 'uk': '\uc6b0\ud06c\ub77c\uc774\ub098\uc5b4',
+          'vi': '\ubca0\ud2b8\ub0a8\uc5b4',
+          'zh': '\uc911\uad6d\uc5b4 \uac04\uccb4', 'zh-cn': '\uc911\uad6d\uc5b4 \uac04\uccb4',
+          'zh-hans': '\uc911\uad6d\uc5b4 \uac04\uccb4', 'zh-tw': '\uc911\uad6d\uc5b4 \ubc88\uccb4',
+          'zh-hant': '\uc911\uad6d\uc5b4 \ubc88\uccb4',
+        },
       };
 
       // ── State (immutable updates via reassignment) ──
@@ -1855,6 +2002,12 @@
         cellEditSave: document.getElementById('cell-edit-save'),
         cellEditCancel: document.getElementById('cell-edit-cancel'),
         exportBtn: document.getElementById('export-btn'),
+        getApiKeyLink: document.getElementById('get-api-key-link'),
+        translateConfirmOverlay: document.getElementById('translate-confirm-overlay'),
+        translateConfirmTitle: document.getElementById('translate-confirm-title'),
+        translateConfirmBody: document.getElementById('translate-confirm-body'),
+        translateConfirmCancel: document.getElementById('translate-confirm-cancel'),
+        translateConfirmOk: document.getElementById('translate-confirm-ok'),
       };
 
       // ── Theme ──
@@ -2023,14 +2176,23 @@
           dom.modelRow.style.display = 'none';
         } else {
           dom.modelRow.style.display = 'flex';
-          dom.modelSelect.innerHTML = '';
-          config.models.forEach(function (m) {
-            var opt = document.createElement('option');
-            opt.value = m;
-            opt.textContent = m;
-            dom.modelSelect.appendChild(opt);
-          });
+          renderModelDropdown(config);
         }
+
+        // Update Get API Key link
+        if (dom.getApiKeyLink) {
+          dom.getApiKeyLink.href = config.keyUrl;
+        }
+      }
+
+      function renderModelDropdown(config) {
+        dom.modelSelect.innerHTML = '';
+        config.models.forEach(function (m) {
+          var opt = document.createElement('option');
+          opt.value = m.id;
+          opt.textContent = m.id + ' \u2014 ' + t(m.annotationKey);
+          dom.modelSelect.appendChild(opt);
+        });
       }
 
       function loadProviderKey(provider) {
@@ -2056,7 +2218,8 @@
           return;
         }
         var saved = localStorage.getItem(storageKeyForModel(provider));
-        var model = (saved && config.models.indexOf(saved) !== -1) ? saved : config.models[0];
+        var modelIds = config.models.map(function (m) { return m.id; });
+        var model = (saved && modelIds.indexOf(saved) !== -1) ? saved : config.models[0].id;
         dom.modelSelect.value = model;
         setState({ model: model });
       }
@@ -2422,10 +2585,71 @@
         dom.translateBtn.disabled = disabled;
       }
 
+      // ── Translation Confirmation ──
+      function buildTranslationSummary() {
+        var enKeys = Object.keys(state.jsonData.en).filter(function (k) {
+          return state.jsonData.en[k] !== undefined && state.jsonData.en[k] !== '';
+        });
+        var totalKeys = enKeys.length;
+        var targetLangs = Array.from(state.selected);
+        return targetLangs.map(function (lang) {
+          var isFullyDone = state.fullyTranslatedLangs.has(lang);
+          if (isFullyDone) {
+            return { lang: lang, count: totalKeys, retranslate: true };
+          }
+          var langData = state.jsonData[lang] || {};
+          var missing = enKeys.filter(function (k) {
+            return langData[k] === undefined || langData[k] === '';
+          }).length;
+          return { lang: lang, count: missing, retranslate: false };
+        });
+      }
+
+      function showTranslateConfirm() {
+        var summary = buildTranslationSummary();
+        dom.translateConfirmTitle.textContent = t('confirmTranslateTitle');
+        dom.translateConfirmCancel.textContent = t('confirmCancel');
+        dom.translateConfirmOk.textContent = t('confirmTranslate');
+
+        var html = '<table class="translate-confirm-table"><thead><tr>'
+          + '<th>' + t('confirmLangHeader') + '</th>'
+          + '<th>' + t('confirmCountHeader') + '</th>'
+          + '</tr></thead><tbody>';
+        summary.forEach(function (item) {
+          var langName = langCodeToName(item.lang);
+          var badge = item.retranslate
+            ? '<span class="retranslate-badge">(' + t('confirmRetranslateAll') + ')</span>'
+            : '';
+          html += '<tr><td>' + langName + ' (' + item.lang.toUpperCase() + ')' + badge + '</td>'
+            + '<td>' + item.count + '</td></tr>';
+        });
+        html += '</tbody></table>';
+        dom.translateConfirmBody.innerHTML = html;
+        dom.translateConfirmOverlay.classList.add('active');
+      }
+
+      function closeTranslateConfirm() {
+        dom.translateConfirmOverlay.classList.remove('active');
+      }
+
+      dom.translateConfirmCancel.addEventListener('click', closeTranslateConfirm);
+      dom.translateConfirmOverlay.addEventListener('click', function (e) {
+        if (e.target === dom.translateConfirmOverlay) closeTranslateConfirm();
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && dom.translateConfirmOverlay.classList.contains('active')) {
+          closeTranslateConfirm();
+        }
+      });
+      dom.translateConfirmOk.addEventListener('click', function () {
+        closeTranslateConfirm();
+        startTranslation();
+      });
+
       // ── Translation ──
       dom.translateBtn.addEventListener('click', function () {
         if (state.translating) return;
-        startTranslation();
+        showTranslateConfirm();
       });
 
       async function startTranslation() {
@@ -2540,8 +2764,18 @@
       }
 
       function langCodeToName(code) {
-        var lower = code.toLowerCase();
-        return LANG_CODE_TO_NAME[lower] || code.toUpperCase();
+        var normalized = code.toLowerCase().replace(/_/g, '-');
+        var uiLang = state.uiLang || 'en';
+        var dict = LANG_CODE_TO_NAME[uiLang] || LANG_CODE_TO_NAME.en;
+        if (dict[normalized]) return dict[normalized];
+        // Try base code (e.g. 'ko-kr' → 'ko')
+        var base = normalized.split('-')[0];
+        if (dict[base]) return dict[base];
+        // Fallback to English dict
+        var enDict = LANG_CODE_TO_NAME.en;
+        if (enDict[normalized]) return enDict[normalized];
+        if (enDict[base]) return enDict[base];
+        return code.toUpperCase();
       }
 
       // ── Shared fetch helper ──
@@ -2607,6 +2841,9 @@
         return data.translations.map(function (t) { return t.text; });
       }
 
+      // ── Translation prompt rules (English for best LLM performance) ──
+      var TRANSLATION_RULES = '\n\nRULES:\n1. Preserve all placeholders exactly as-is: {0}, {1}, {{name}}, %s, %d, ${variable}, etc.\n2. Use natural, formal-polite register for the target language. Do not use slang.\n3. Do not add punctuation, words, or content that is not present in the source text.';
+
       // ── OpenAI ──
       async function callOpenAI(texts, targetLang) {
         var langName = langCodeToName(targetLang);
@@ -2625,7 +2862,7 @@
             messages: [
               {
                 role: 'system',
-                content: 'You are a professional translator. ' + contextPrefix + 'Translate the following JSON array of strings from English to ' + langName + '. Return ONLY a JSON array of translated strings in the same order. Do not add explanations.',
+                content: 'You are a professional translator. ' + contextPrefix + 'Translate the following JSON array of strings from English to ' + langName + '. Return ONLY a JSON array of translated strings in the same order. Do not add explanations.' + TRANSLATION_RULES,
               },
               {
                 role: 'user',
@@ -2662,7 +2899,7 @@
           body: JSON.stringify({
             contents: [{
               parts: [{
-                text: 'You are a professional translator. ' + contextPrefix + 'Translate the following JSON array of strings from English to ' + langName + '. Return ONLY a JSON array of translated strings in the same order. Do not add explanations.\n\n' + JSON.stringify(texts),
+                text: 'You are a professional translator. ' + contextPrefix + 'Translate the following JSON array of strings from English to ' + langName + '. Return ONLY a JSON array of translated strings in the same order. Do not add explanations.' + TRANSLATION_RULES + '\n\n' + JSON.stringify(texts),
               }],
             }],
             generationConfig: { temperature: 0.3 },
