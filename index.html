@@ -335,15 +335,17 @@
       align-items: center;
     }
 
-    .api-key-row input {
+    .api-key-row input,
+    .api-key-input {
       flex: 1;
       padding: 0.5rem 0.75rem;
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
       font-size: 0.875rem;
+      font-family: inherit;
       outline: none;
       transition: border-color var(--transition-base), box-shadow var(--transition-base);
-      background: var(--card);
+      background: var(--bg);
       color: var(--text);
     }
 
@@ -480,6 +482,18 @@
     .lang-item--checked {
       border-color: var(--primary);
       box-shadow: var(--focus-ring);
+    }
+
+    .lang-item--warning {
+      border-color: var(--warning) !important;
+      box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.2) !important;
+    }
+
+    .lang-item--warning .lang-warning-hint {
+      font-size: 0.6875rem;
+      color: var(--warning);
+      display: block;
+      line-height: 1.3;
     }
 
     .lang-item input[type="checkbox"] {
@@ -629,19 +643,6 @@
       height: 0.75rem;
     }
 
-    /* Download */
-    .download-section { display: none; }
-
-    .download-section.download-section--visible {
-      display: block;
-      animation: slide-up-fade 0.3s ease-out;
-    }
-
-    .download-section .btn {
-      padding: 0.875rem;
-      font-size: 0.9375rem;
-    }
-
     /* Error */
     .error-msg {
       display: none;
@@ -675,6 +676,10 @@
       align-items: center;
       gap: 0.25rem;
       cursor: pointer;
+    }
+
+    .key-options input[type="checkbox"] {
+      accent-color: var(--primary);
     }
 
     /* Provider row */
@@ -1217,7 +1222,7 @@
     }
 
     .lang-switcher button {
-      padding: 0.25rem 0.625rem;
+      padding: 0.25rem 0.75rem;
       border: none;
       border-right: 1px solid var(--border);
       background: var(--card);
@@ -1303,9 +1308,9 @@
       <h1 data-i18n="title">Frontitude One-Click Translator</h1>
       <p data-i18n="subtitle">Upload your language.json, pick target languages, translate via DeepL / OpenAI / Gemini.</p>
       <div class="lang-switcher" id="lang-switcher">
-        <button data-lang="en" class="active">EN</button>
-        <button data-lang="zh-TW">ZH-TW</button>
-        <button data-lang="ko">KO</button>
+        <button data-lang="en" class="active">English</button>
+        <button data-lang="zh-TW">繁體中文</button>
+        <button data-lang="ko">한국어</button>
       </div>
     </header>
 
@@ -1334,7 +1339,7 @@
         <table class="editor-table" id="editor-table"></table>
       </div>
       <div class="editor-count" id="editor-count"></div>
-      <button class="btn btn-success" id="export-btn" data-i18n="exportBtn" style="margin-top:0.75rem">Export Language File</button>
+      <button class="btn btn-success" id="export-btn" style="margin-top:0.75rem"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span data-i18n="exportBtn">Export Language File</span></button>
     </div>
   </div>
 
@@ -1355,7 +1360,7 @@
               <option value="openai">OpenAI</option>
               <option value="gemini">Gemini</option>
             </select>
-            <input type="password" id="api-key" placeholder="Paste your DeepL API key here" style="flex:1" />
+            <input type="password" id="api-key" class="api-key-input" placeholder="Paste your DeepL API key here" style="flex:1" />
           </div>
           <div class="api-key-actions">
             <span class="badge badge-none" id="key-badge">No Key</span>
@@ -1412,10 +1417,7 @@
         <div class="error-msg" id="translate-error"></div>
       </div>
 
-      <!-- Download -->
-      <div class="card download-section" id="download-section">
-        <button class="btn btn-success" id="download-btn" data-i18n="downloadBtn">Download language.json</button>
-      </div>
+      <!-- Download section removed: export-btn is the sole download entry point -->
     </div>
   </div>
 
@@ -1497,6 +1499,8 @@
           contextPromptLabel: 'Context Prompt',
           contextPromptPlaceholder: 'e.g. dental implant software',
           contextPromptDeeplNote: 'Context prompt is only used with OpenAI and Gemini.',
+          defaultContextPrompt: 'Multilingual translation for dental implant software UI',
+          langFullyTranslated: 'Fully translated. Re-translating will overwrite all content.',
           reselectJson: 'Re-select JSON',
           themeToggle: 'Toggle theme',
           toastFileLoaded: 'File loaded: {0} keys, {1} languages',
@@ -1518,7 +1522,7 @@
           cellEditSuccess: 'Cell updated successfully.',
           cellEditSource: 'Source (EN):',
           exportBtn: 'Export Language File',
-          cellEditSourceCurrent: 'English Source (Current):',
+          cellEditSourceCurrent: 'Editing Original Text',
         },
         'zh-TW': {
           title: 'Frontitude 一鍵翻譯器',
@@ -1566,6 +1570,8 @@
           contextPromptLabel: '情境提示',
           contextPromptPlaceholder: '例如：齒科植牙軟體',
           contextPromptDeeplNote: '情境提示僅適用於 OpenAI 和 Gemini。',
+          defaultContextPrompt: '齒科植牙軟體介面多國語系翻譯',
+          langFullyTranslated: '已翻譯完成，重新翻譯將覆蓋全部內容。',
           reselectJson: '重新選擇 JSON',
           themeToggle: '切換主題',
           toastFileLoaded: '檔案已載入：{0} 個鍵，{1} 種語言',
@@ -1587,7 +1593,7 @@
           cellEditSuccess: '儲存格更新成功。',
           cellEditSource: '原文 (EN)：',
           exportBtn: '匯出語言檔',
-          cellEditSourceCurrent: '英文原文（目前）：',
+          cellEditSourceCurrent: '編輯原文',
         },
         ko: {
           title: 'Frontitude 원클릭 번역기',
@@ -1635,6 +1641,8 @@
           contextPromptLabel: '컨텍스트 프롬프트',
           contextPromptPlaceholder: '예: 치과 임플란트 소프트웨어',
           contextPromptDeeplNote: '컨텍스트 프롬프트는 OpenAI 및 Gemini에서만 사용됩니다.',
+          defaultContextPrompt: '치과 임플란트 소프트웨어 UI 다국어 번역',
+          langFullyTranslated: '번역 완료됨. 재번역 시 모든 내용을 덮어씁니다.',
           reselectJson: 'JSON 다시 선택',
           themeToggle: '테마 전환',
           toastFileLoaded: '파일 로드됨: {0}개 키, {1}개 언어',
@@ -1656,7 +1664,7 @@
           cellEditSuccess: '셀 업데이트 완료.',
           cellEditSource: '원문 (EN):',
           exportBtn: '언어 파일 내보내기',
-          cellEditSourceCurrent: '영문 원문 (현재):',
+          cellEditSourceCurrent: '원문 편집',
         },
       };
 
@@ -1706,6 +1714,14 @@
           btns[b].classList.toggle('active', btns[b].getAttribute('data-lang') === lang);
         }
 
+        // Update context prompt if still on a default value
+        var savedCtx = localStorage.getItem('translate_context_prompt');
+        if (savedCtx === null || isDefaultContextPrompt(savedCtx)) {
+          var newDefault = t('defaultContextPrompt');
+          dom.contextPrompt.value = newDefault;
+          setState({ contextPrompt: newDefault });
+        }
+
         // Re-apply provider-specific dynamic strings
         applyProviderUI(state.provider);
 
@@ -1722,6 +1738,7 @@
         // Re-apply editor count if visible
         if (state.jsonData && dom.editorSection.style.display !== 'none') {
           renderEditorTable();
+          renderLanguages();
         }
       }
 
@@ -1776,6 +1793,7 @@
         contextPrompt: '',
         theme: 'light',
         editedCells: new Set(),
+        fullyTranslatedLangs: new Set(),
       };
 
       function setState(patch) {
@@ -1821,8 +1839,6 @@
         progressText:  document.getElementById('progress-text'),
         progressChips: document.getElementById('progress-chips'),
         translateError: document.getElementById('translate-error'),
-        downloadSection: document.getElementById('download-section'),
-        downloadBtn:   document.getElementById('download-btn'),
         themeToggle:   document.getElementById('theme-toggle'),
         toastContainer: document.getElementById('toast-container'),
         providerCollapsible: document.getElementById('provider-collapsible'),
@@ -2127,7 +2143,7 @@
       });
 
       dom.reselectBtn.addEventListener('click', function () {
-        setState({ jsonData: null, languages: [], selected: new Set(), editedCells: new Set() });
+        setState({ jsonData: null, languages: [], selected: new Set(), editedCells: new Set(), fullyTranslatedLangs: new Set() });
         dom.fileInput.value = '';
         dom.fileInfo.style.display = 'none';
         dom.uploadError.style.display = 'none';
@@ -2136,7 +2152,7 @@
         dom.sidebarToggle.style.display = 'none';
         dom.progressSection.style.display = 'none';
         dom.translateError.style.display = 'none';
-        dom.downloadSection.classList.remove('download-section--visible');
+
         dom.uploadCard.style.display = '';
         dom.container.classList.remove('container--wide');
       });
@@ -2175,7 +2191,7 @@
       function handleFile(file) {
         hideError(dom.uploadError);
         hideError(dom.translateError);
-        dom.downloadSection.classList.remove('download-section--visible');
+
 
         if (!file.name.endsWith('.json')) {
           showError(dom.uploadError, t('errJsonFile'));
@@ -2234,10 +2250,13 @@
         var langs = Object.keys(parsed).filter(function (k) { return k !== 'en'; }).sort();
         var keyCount = Object.keys(parsed.en).length;
 
+        var fullyDone = getFullyTranslatedLanguages(parsed);
+        var defaultSelected = langs.filter(function (l) { return !fullyDone.has(l); });
         setState({
           jsonData: parsed,
           languages: langs,
-          selected: new Set(langs),
+          selected: new Set(defaultSelected),
+          fullyTranslatedLangs: fullyDone,
         });
 
         // Show file info
@@ -2308,34 +2327,80 @@
       });
 
       // ── Language Selection ──
+      function getFullyTranslatedLanguages(jsonData) {
+        var enKeys = Object.keys(jsonData.en).filter(function (k) {
+          return jsonData.en[k] !== undefined && jsonData.en[k] !== '';
+        });
+        var fullyTranslated = new Set();
+        var langs = Object.keys(jsonData).filter(function (k) { return k !== 'en'; });
+        langs.forEach(function (lang) {
+          var langData = jsonData[lang];
+          if (!langData) return;
+          var allDone = enKeys.every(function (k) {
+            return langData[k] !== undefined && langData[k] !== '';
+          });
+          if (allDone) fullyTranslated.add(lang);
+        });
+        return fullyTranslated;
+      }
+
       function renderLanguages() {
         dom.langGrid.innerHTML = '';
         state.languages.forEach(function (lang) {
+          var isFullyDone = state.fullyTranslatedLangs.has(lang);
+          var isChecked = state.selected.has(lang);
+          var showWarning = isFullyDone && isChecked;
+
           var label = document.createElement('label');
-          label.className = 'lang-item' + (state.selected.has(lang) ? ' lang-item--checked' : '');
+          label.className = 'lang-item'
+            + (isChecked ? ' lang-item--checked' : '')
+            + (showWarning ? ' lang-item--warning' : '');
+          label.style.flexDirection = 'column';
+          label.style.alignItems = 'flex-start';
+
+          var row = document.createElement('div');
+          row.style.display = 'flex';
+          row.style.alignItems = 'center';
+          row.style.gap = '0.375rem';
 
           var cb = document.createElement('input');
           cb.type = 'checkbox';
           cb.value = lang;
-          cb.checked = state.selected.has(lang);
+          cb.checked = isChecked;
+
+          var span = document.createElement('span');
+          span.textContent = lang.toUpperCase();
+
+          row.appendChild(cb);
+          row.appendChild(span);
+          label.appendChild(row);
+
+          // Warning hint for fully translated langs
+          var hint = document.createElement('span');
+          hint.className = 'lang-warning-hint';
+          hint.textContent = t('langFullyTranslated');
+          hint.style.display = showWarning ? 'block' : 'none';
+          label.appendChild(hint);
+
           cb.addEventListener('change', function () {
             var next = new Set(state.selected);
             if (cb.checked) {
               next.add(lang);
               label.classList.add('lang-item--checked');
+              if (isFullyDone) {
+                label.classList.add('lang-item--warning');
+                hint.style.display = 'block';
+              }
             } else {
               next.delete(lang);
               label.classList.remove('lang-item--checked');
+              label.classList.remove('lang-item--warning');
+              hint.style.display = 'none';
             }
             setState({ selected: next });
             updateTranslateBtn();
           });
 
-          var span = document.createElement('span');
-          span.textContent = lang.toUpperCase();
-
-          label.appendChild(cb);
-          label.appendChild(span);
           dom.langGrid.appendChild(label);
         });
       }
@@ -2367,7 +2432,7 @@
         setState({ translating: true });
         updateTranslateBtn();
         hideError(dom.translateError);
-        dom.downloadSection.classList.remove('download-section--visible');
+
         dom.progressSection.style.display = 'block';
 
         var enEntries = Object.entries(state.jsonData.en);
@@ -2437,7 +2502,6 @@
           dom.progressBar.style.width = '100%';
           setState({ jsonData: result });
           renderEditorTable();
-          dom.downloadSection.classList.add('download-section--visible');
           showToast(t('toastTranslateComplete', totalSteps), 'success');
         } catch (err) {
           showError(dom.translateError, err.message);
@@ -2648,7 +2712,6 @@
         URL.revokeObjectURL(url);
       }
 
-      dom.downloadBtn.addEventListener('click', downloadJsonData);
       dom.exportBtn.addEventListener('click', downloadJsonData);
 
       // ── Helpers ──
@@ -2878,15 +2941,22 @@
         }
         applyI18n();
       })();
+      function isDefaultContextPrompt(val) {
+        var langs = Object.keys(UI_TRANSLATIONS);
+        for (var i = 0; i < langs.length; i++) {
+          if (UI_TRANSLATIONS[langs[i]].defaultContextPrompt === val) return true;
+        }
+        return false;
+      }
       (function initContextPrompt() {
-        var DEFAULT_CONTEXT = '齒科植牙軟體介面多國語系翻譯';
         var saved = localStorage.getItem('translate_context_prompt');
         if (saved !== null) {
           dom.contextPrompt.value = saved;
           setState({ contextPrompt: saved });
         } else {
-          dom.contextPrompt.value = DEFAULT_CONTEXT;
-          setState({ contextPrompt: DEFAULT_CONTEXT });
+          var defaultVal = t('defaultContextPrompt');
+          dom.contextPrompt.value = defaultVal;
+          setState({ contextPrompt: defaultVal });
         }
       })();
       initProvider();

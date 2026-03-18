@@ -1,3 +1,5 @@
+## MODIFIED Requirements
+
 ### Requirement: English source text cells SHALL be editable via the same click-confirm-edit flow
 Users SHALL be able to click on English source text cells (en column) to edit them, following the same interaction pattern as editing translated cells: click → confirmation dialog → edit modal.
 

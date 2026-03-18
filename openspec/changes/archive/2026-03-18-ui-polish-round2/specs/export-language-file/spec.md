@@ -1,3 +1,5 @@
+## MODIFIED Requirements
+
 ### Requirement: An "匯出語言檔" button SHALL be available at all times in the editor phase
 一個匯出按鈕 SHALL 始終顯示在 editor phase 的 Content Preview 區域，作為唯一的檔案匯出入口。移除翻譯完成後額外顯示的 download section，避免重複按鈕造成使用者混淆。按鈕 SHALL 包含下載 icon 以強化視覺暗示。
 
