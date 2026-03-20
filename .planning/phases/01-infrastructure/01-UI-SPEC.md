@@ -34,17 +34,18 @@ Declared values (must be multiples of 4):
 | Token | Value | Usage |
 |-------|-------|-------|
 | xs | 4px (0.25rem) | Inline badge padding-block, icon gaps |
-| sm | 8px (0.5rem) | Compact element spacing, gap between badge and test button |
-| md | 12px (0.75rem) | Input padding, card internal row spacing |
-| lg | 16px (1rem) | Error message margin, section margins within drawer |
-| xl | 24px (1.5rem) | Card padding (existing `.card` uses 1.5rem) |
-| 2xl | 32px (2rem) | Container padding, upload section spacing |
+| sm | 8px (0.5rem) | Compact element spacing, gap between badge and test button, input vertical padding |
+| md | 16px (1rem) | Field group margin-bottom, input horizontal padding, error message margin, section margins within drawer |
+| lg | 24px (1.5rem) | Card padding (existing `.card` uses 1.5rem) |
+| xl | 32px (2rem) | Container padding, upload section spacing |
+| 2xl | 48px (3rem) | Reserved for large vertical separators if needed |
+| 3xl | 64px (4rem) | Reserved for page-level spacing if needed |
 
 Exceptions:
-- Input padding uses 8px vertical / 12px horizontal (0.5rem / 0.75rem) matching existing `select` and `input` patterns.
-- `.btn-test-key` uses 8px / 12px (0.5rem / 0.75rem) padding. The existing codebase uses 6px vertical padding for this button, which is a pre-existing deviation from the 4px grid. This phase corrects it to 8px (0.5rem) to align with the spacing contract.
+- `.btn-test-key` uses 8px / 16px (0.5rem / 1rem) padding. The existing codebase uses 6px vertical padding for this button, which is a pre-existing deviation from the 4px grid. This phase corrects it to 8px (0.5rem) to align with the spacing contract.
+- Pre-existing codebase value: existing non-Bitbucket CSS (e.g. `.provider-row`, `select`, `input`) uses 12px (0.75rem) spacing in several places. This is unchanged and out of phase scope. The Bitbucket section uses 16px for new components; existing 12px usage in other sections is unchanged.
 
-**Source:** Extracted from existing CSS patterns in `index.html` lines 251, 334, 341, 360, 375, 706-711.
+**Source:** Extracted from existing CSS patterns in `index.html` lines 251, 334, 341, 360, 375, 706-711. Spacing scale aligned to standard set {4, 8, 16, 24, 32, 48, 64}.
 
 ---
 
@@ -216,7 +217,7 @@ Each `.bb-field-group` follows this pattern:
 
 ```css
 .bb-field-group {
-  margin-bottom: 0.75rem;  /* 12px, matches existing .provider-row spacing */
+  margin-bottom: 1rem;  /* 16px — md token, standard spacing scale */
 }
 .bb-field-group label {
   display: block;
@@ -229,7 +230,7 @@ Each `.bb-field-group` follows this pattern:
 }
 .bb-field-group input {
   width: 100%;
-  padding: 0.5rem 0.75rem;  /* 8px 12px, matches existing select/input */
+  padding: 0.5rem 1rem;  /* 8px 16px — sm vertical, md horizontal */
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   font-size: 0.875rem;      /* 14px */
@@ -243,6 +244,8 @@ Each `.bb-field-group` follows this pattern:
   box-shadow: var(--focus-ring);
 }
 ```
+
+**Note on existing codebase spacing:** The existing Provider section and other non-Bitbucket components use 12px (0.75rem) for input padding and field spacing. This is a pre-existing codebase value and is out of scope for this phase. The Bitbucket section uses 16px (1rem) from the standard spacing scale for new components. Existing 12px usage in other sections is unchanged.
 
 ---
 
