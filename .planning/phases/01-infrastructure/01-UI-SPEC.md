@@ -21,9 +21,9 @@ created: 2026-03-20
 | Preset | not applicable |
 | Component library | none (vanilla HTML/CSS/JS) |
 | Icon library | Inline SVG (existing pattern -- chevron, theme toggle, etc.) |
-| Font | Inter via Google Fonts CDN (`wght@400;500;600;700`) |
+| Font | Inter via Google Fonts CDN (`wght@400;600`) |
 
-**Source:** Existing `index.html` lines 7-9; CONTEXT.md locked decision (no frameworks, no build step).
+**Source:** Existing `index.html` lines 7-9; CONTEXT.md locked decision (no frameworks, no build step). Font weight range reduced to 400 and 600 only -- the two weights actively used in this phase.
 
 ---
 
@@ -42,7 +42,7 @@ Declared values (must be multiples of 4):
 
 Exceptions:
 - Input padding uses 8px vertical / 12px horizontal (0.5rem / 0.75rem) matching existing `select` and `input` patterns.
-- `.btn-test-key` uses 6px / 12px (0.375rem / 0.75rem) matching existing test button padding.
+- `.btn-test-key` uses 8px / 12px (0.5rem / 0.75rem) padding. The existing codebase uses 6px vertical padding for this button, which is a pre-existing deviation from the 4px grid. This phase corrects it to 8px (0.5rem) to align with the spacing contract.
 
 **Source:** Extracted from existing CSS patterns in `index.html` lines 251, 334, 341, 360, 375, 706-711.
 
@@ -55,11 +55,12 @@ Exceptions:
 | Body | 14px (0.875rem) | 400 (regular) | 1.5 |
 | Label | 12px (0.75rem) | 600 (semibold) | 1.5 |
 | Heading (card title) | 12px (0.75rem) | 600 (semibold) | 1.5 |
-| Display (page title) | 28px (1.75rem) | 700 (bold) | 1.2 |
 
-**Note:** This phase does NOT add new display text. The Bitbucket connection section uses Label (12px/600) for `.card-title` and Body (14px/400) for input text, matching the existing Provider section exactly.
+**Active weights:** 2 -- regular (400) and semibold (600). No other weights are loaded or used in this phase.
 
-**Source:** Existing CSS -- `.card-title` at 0.75rem/600 (line 262-263), `.btn` and inputs at 0.875rem (line 344, 514, 718), page title at 1.75rem/700 (line 231-232).
+**Note:** This phase does NOT add new display text. The Bitbucket connection section uses Label (12px/600) for `.card-title` and Body (14px/400) for input text, matching the existing Provider section exactly. A Display role (28px/700) may be declared in a later phase if needed for page titles.
+
+**Source:** Existing CSS -- `.card-title` at 0.75rem/600 (line 262-263), `.btn` and inputs at 0.875rem (line 344, 514, 718), page title at 1.75rem/700 (line 231-232, not used by Phase 1 components).
 
 ---
 
@@ -194,6 +195,8 @@ sidebar-drawer
 
 ### Bitbucket Section Internal Layout
 
+Primary visual anchor: the Test Connection button at the bottom of the collapsible body -- it is the only interactive control that validates the entire configuration.
+
 ```
 .card.bitbucket-section
   .card-title-collapsible        (flex row: title + chevron)
@@ -204,7 +207,7 @@ sidebar-drawer
     .bb-field-group              (Branch: label + input, default "main")
     .bb-field-group              (Access Token: label + password input)
     .bb-disclaimer               (muted text disclaimer)
-    .bb-actions                  (flex row: badge + test button)
+    .bb-actions                  (flex row: badge + test button)  <-- focal point
 ```
 
 ### Field Group Styling
