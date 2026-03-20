@@ -1131,6 +1131,14 @@
       cursor: not-allowed;
     }
 
+    .btn-test-key.test-key-success {
+      background: var(--success-light);
+      color: var(--success);
+      border-color: var(--success);
+      opacity: 1;
+      cursor: default;
+    }
+
     a.btn-test-key {
       text-decoration: none;
       display: inline-flex;
@@ -1631,7 +1639,7 @@
           sidebarToggle: 'Toggle settings panel',
           sidebarTitle: 'Translation Settings',
           testApiKey: 'Test Key',
-          testApiKeySuccess: 'API key is valid!',
+          testApiKeySuccess: '✓ Valid',
           testApiKeyNoKey: 'Please enter an API key first.',
           testApiKeyTesting: 'Testing...',
           cellEditConfirm: 'This cell already has a translation. Do you want to modify it?',
@@ -1719,7 +1727,7 @@
           sidebarToggle: '開關設定面板',
           sidebarTitle: '翻譯設定',
           testApiKey: '測試金鑰',
-          testApiKeySuccess: 'API 金鑰有效！',
+          testApiKeySuccess: '✓ 測試成功',
           testApiKeyNoKey: '請先輸入 API 金鑰。',
           testApiKeyTesting: '測試中...',
           cellEditConfirm: '此儲存格已有翻譯。是否要修改？',
@@ -1807,7 +1815,7 @@
           sidebarToggle: '설정 패널 전환',
           sidebarTitle: '번역 설정',
           testApiKey: '키 테스트',
-          testApiKeySuccess: 'API 키가 유효합니다!',
+          testApiKeySuccess: '✓ 유효',
           testApiKeyNoKey: '먼저 API 키를 입력해 주세요.',
           testApiKeyTesting: '테스트 중...',
           cellEditConfirm: '이 셀에 이미 번역이 있습니다. 수정하시겠습니까?',
@@ -3128,6 +3136,8 @@
       // ── Test API Key ──
       function updateTestKeyBtn() {
         dom.testApiKeyBtn.disabled = !dom.apiKey.value.trim();
+        dom.testApiKeyBtn.classList.remove('test-key-success');
+        dom.testApiKeyBtn.textContent = t('testApiKey');
       }
 
       dom.testApiKeyBtn.addEventListener('click', async function () {
@@ -3144,10 +3154,11 @@
 
         try {
           await callTranslateAPI(['hello'], 'de');
-          showToast(t('testApiKeySuccess'), 'success');
+          btn.textContent = t('testApiKeySuccess');
+          btn.classList.add('test-key-success');
+          btn.disabled = true;
         } catch (err) {
           showToast(t('toastError', err.message), 'error');
-        } finally {
           btn.textContent = originalText;
           updateTestKeyBtn();
         }
@@ -3378,7 +3389,9 @@
             newJsonData[lang] = {};
           }
           newJsonData[lang][key] = translated;
-          setState({ jsonData: newJsonData });
+          var newAiCells = new Set(state.aiTranslatedCells);
+          newAiCells.add(lang + ':' + key);
+          setState({ jsonData: newJsonData, aiTranslatedCells: newAiCells });
           renderEditorTable();
           showToast(t('cellTranslateSuccess'), 'success');
         } catch (err) {
