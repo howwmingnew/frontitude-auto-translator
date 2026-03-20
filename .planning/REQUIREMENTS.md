@@ -67,28 +67,28 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INFRA-01 | — | Pending |
-| INFRA-02 | — | Pending |
-| INFRA-03 | — | Pending |
-| INFRA-04 | — | Pending |
-| SRCH-01 | — | Pending |
-| SRCH-02 | — | Pending |
-| SRCH-03 | — | Pending |
-| SRCH-04 | — | Pending |
-| SRCH-05 | — | Pending |
-| ACTX-01 | — | Pending |
-| ACTX-02 | — | Pending |
-| UEXP-01 | — | Pending |
-| UEXP-02 | — | Pending |
-| UEXP-03 | — | Pending |
-| UEXP-04 | — | Pending |
-| UEXP-05 | — | Pending |
+| INFRA-01 | Phase 1 | Pending |
+| INFRA-02 | Phase 1 | Pending |
+| INFRA-03 | Phase 1 | Pending |
+| INFRA-04 | Phase 1 | Pending |
+| SRCH-01 | Phase 2 | Pending |
+| SRCH-02 | Phase 2 | Pending |
+| SRCH-03 | Phase 2 | Pending |
+| SRCH-04 | Phase 2 | Pending |
+| SRCH-05 | Phase 2 | Pending |
+| ACTX-01 | Phase 3 | Pending |
+| ACTX-02 | Phase 3 | Pending |
+| UEXP-01 | Phase 4 | Pending |
+| UEXP-02 | Phase 4 | Pending |
+| UEXP-03 | Phase 4 | Pending |
+| UEXP-04 | Phase 4 | Pending |
+| UEXP-05 | Phase 4 | Pending |
 
 **Coverage:**
 - v1 requirements: 16 total
-- Mapped to phases: 0
-- Unmapped: 16 ⚠️
+- Mapped to phases: 16
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-20*
-*Last updated: 2026-03-20 after initial definition*
+*Last updated: 2026-03-20 after roadmap creation*
