@@ -29,6 +29,8 @@
 - ✓ 多檔案架構（IIFE + window.App namespace）— Validated in Phase 1: Infrastructure
 - ✓ Bitbucket Code Search pipeline（.xaml-first/.cs-fallback, concurrency limiter, cache）— Validated in Phase 2: Code Search Pipeline
 - ✓ 右鍵選單搜尋情境 + 搜尋進度顯示 — Validated in Phase 2: Code Search Pipeline
+- ✓ AI 生成非工程師能懂的情境說明（語言跟隨 app 介面語言）— Validated in Phase 3: AI Context Generation
+- ✓ 情境說明注入翻譯 prompt，提升翻譯精準度 — Validated in Phase 3: AI Context Generation
 
 ### Active
 
@@ -76,7 +78,7 @@
 | 只查未翻譯 key 的情境 | 節省 API 配額與時間 | — Pending |
 | 分快速/精準兩種翻譯模式 | 解決批次翻譯效能與情境查詢的矛盾 | — Pending |
 | 允許拆分多檔案架構 | 功能增加後單檔太複雜 | ✓ Phase 1 |
-| AI 生成情境說明 | 給非工程師看，需要自然語言描述 | — Pending |
+| AI 生成情境說明 | 給非工程師看，需要自然語言描述 | ✓ Phase 3 |
 
 ---
-*Last updated: 2026-03-21 after Phase 2 completion*
+*Last updated: 2026-03-21 after Phase 3 completion*
