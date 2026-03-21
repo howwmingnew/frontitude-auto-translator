@@ -687,6 +687,99 @@
     }
   }
 
+  // ── Stepper UI ──
+  function showStepper() {
+    App.dom.progressStepper.style.display = 'flex';
+    var steps = App.dom.progressStepper.querySelectorAll('.stepper-step');
+    for (var i = 0; i < steps.length; i++) {
+      steps[i].classList.remove('stepper-step--active');
+      steps[i].classList.remove('stepper-step--done');
+      steps[i].querySelector('.stepper-indicator').textContent = '\u25CB';
+    }
+  }
+
+  function hideStepper() {
+    App.dom.progressStepper.style.display = 'none';
+    App.setState({ currentStep: null });
+  }
+
+  function updateStepper(activeStep) {
+    App.setState({ currentStep: activeStep });
+    var stepOrder = ['search', 'generate', 'translate'];
+    var activeIndex = stepOrder.indexOf(activeStep);
+    var steps = App.dom.progressStepper.querySelectorAll('.stepper-step');
+    for (var i = 0; i < steps.length; i++) {
+      var stepName = steps[i].getAttribute('data-step');
+      var idx = stepOrder.indexOf(stepName);
+      var indicator = steps[i].querySelector('.stepper-indicator');
+      if (idx < activeIndex) {
+        steps[i].classList.add('stepper-step--done');
+        steps[i].classList.remove('stepper-step--active');
+        indicator.textContent = '\u2713';
+      } else if (idx === activeIndex) {
+        steps[i].classList.add('stepper-step--active');
+        steps[i].classList.remove('stepper-step--done');
+        indicator.textContent = '\u25CF';
+      } else {
+        steps[i].classList.remove('stepper-step--active');
+        steps[i].classList.remove('stepper-step--done');
+        indicator.textContent = '\u25CB';
+      }
+    }
+  }
+
+  function completeStepper() {
+    var steps = App.dom.progressStepper.querySelectorAll('.stepper-step');
+    for (var i = 0; i < steps.length; i++) {
+      steps[i].classList.add('stepper-step--done');
+      steps[i].classList.remove('stepper-step--active');
+      steps[i].querySelector('.stepper-indicator').textContent = '\u2713';
+    }
+  }
+
+  function markFailedCells(failedKeys) {
+    var table = App.dom.editorTable;
+    var headerCells = table.querySelectorAll('thead th');
+    var langMap = [];
+    for (var h = 0; h < headerCells.length; h++) {
+      langMap.push(headerCells[h].textContent.toLowerCase());
+    }
+
+    var rows = table.querySelectorAll('tbody tr');
+    for (var r = 0; r < rows.length; r++) {
+      var keyCell = rows[r].children[0];
+      var rowKey = keyCell.getAttribute('title') || keyCell.textContent;
+      for (var f = 0; f < failedKeys.length; f++) {
+        if (failedKeys[f].key !== rowKey) continue;
+        var colIdx = langMap.indexOf(failedKeys[f].lang);
+        if (colIdx === -1) continue;
+        var td = rows[r].children[colIdx];
+        if (td) {
+          td.classList.add('cell-error');
+          td.title = failedKeys[f].error;
+          td.textContent = App.t('cellFailed');
+        }
+      }
+    }
+  }
+
+  function showRetryButton(count) {
+    App.dom.retryCount.textContent = App.t('retryCount', count);
+    App.dom.retrySection.style.display = 'flex';
+  }
+
+  function hideRetryButton() {
+    App.dom.retrySection.style.display = 'none';
+  }
+
+  App.showStepper = showStepper;
+  App.hideStepper = hideStepper;
+  App.updateStepper = updateStepper;
+  App.completeStepper = completeStepper;
+  App.markFailedCells = markFailedCells;
+  App.showRetryButton = showRetryButton;
+  App.hideRetryButton = hideRetryButton;
+
   App.initModeToggle = initModeToggle;
   App.setTranslateMode = setTranslateMode;
   App.updateDeeplWarning = updateDeeplWarning;
