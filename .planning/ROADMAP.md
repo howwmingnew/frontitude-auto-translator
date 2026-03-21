@@ -45,11 +45,11 @@ Plans:
   3. When multiple files reference the same key, all locations are aggregated and shown together
   4. Only keys that lack translations in the target language trigger Bitbucket searches, preserving API quota for already-translated keys
   5. Search results are cached in-memory for the session so repeated lookups for the same key do not re-query the API
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 02-01: TBD
-- [ ] 02-02: TBD
+- [ ] 02-01-PLAN.md -- Core search pipeline module (js/search.js): Bitbucket Code Search API integration, concurrency limiter, .xaml-first/.cs-fallback, in-memory cache, LocExtension detection, result aggregation
+- [ ] 02-02-PLAN.md -- Search UI integration: right-click context menu on key rows, search progress display, i18n strings, script wiring, human verification
 
 ### Phase 3: AI Context Generation
 **Goal**: Raw code context is transformed into human-readable descriptions and injected into translation prompts for higher-quality results
@@ -88,6 +88,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Infrastructure | 3/3 | Complete   | 2026-03-21 |
-| 2. Code Search Pipeline | 0/? | Not started | - |
+| 2. Code Search Pipeline | 0/2 | Not started | - |
 | 3. AI Context Generation | 0/? | Not started | - |
 | 4. Context UX | 0/? | Not started | - |
