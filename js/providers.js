@@ -33,11 +33,11 @@
   }
 
   // ── API Dispatcher ──
-  function callTranslateAPI(texts, targetLang) {
+  function callTranslateAPI(texts, targetLang, contexts) {
     var s = App.getState();
     switch (s.provider) {
-      case 'openai': return callOpenAI(texts, targetLang);
-      case 'gemini': return callGemini(texts, targetLang);
+      case 'openai': return callOpenAI(texts, targetLang, contexts);
+      case 'gemini': return callGemini(texts, targetLang, contexts);
       default:       return callDeepL(texts, App.mapToDeepLLang(targetLang));
     }
   }
@@ -75,22 +75,49 @@
   }
 
   // ── OpenAI ──
-  async function callOpenAI(texts, targetLang) {
+  async function callOpenAI(texts, targetLang, contexts) {
     var s = App.getState();
     var langName = App.langCodeToName(targetLang);
     var contextPrefix = s.contextPrompt.trim()
       ? 'The content is from: ' + s.contextPrompt.trim() + '. '
       : '';
+
+    var hasAnyContext = contexts && contexts.some(function (c) { return c !== ''; });
+
+    var systemContent;
+    if (hasAnyContext) {
+      systemContent = 'You are a professional translator. ' + contextPrefix
+        + 'Translate the following items from English to ' + langName + '. '
+        + 'Each item has a "text" to translate and optionally a "context" describing where it appears in the UI. '
+        + 'Use the context to choose the most appropriate translation for the usage scenario. '
+        + 'Return ONLY a JSON array of translated strings in the same order. '
+        + 'Do not add explanations.' + App.TRANSLATION_RULES;
+    } else {
+      systemContent = 'You are a professional translator. ' + contextPrefix
+        + 'Translate the following JSON array of strings from English to ' + langName + '. '
+        + 'Return ONLY a JSON array of translated strings in the same order. '
+        + 'Do not add explanations.' + App.TRANSLATION_RULES;
+    }
+
+    var userContent;
+    if (hasAnyContext) {
+      userContent = JSON.stringify(texts.map(function (text, idx) {
+        return { text: text, context: (contexts && contexts[idx]) || '' };
+      }));
+    } else {
+      userContent = JSON.stringify(texts);
+    }
+
     var requestBody = {
         model: s.model,
         messages: [
           {
             role: 'system',
-            content: 'You are a professional translator. ' + contextPrefix + 'Translate the following JSON array of strings from English to ' + langName + '. Return ONLY a JSON array of translated strings in the same order. Do not add explanations.' + App.TRANSLATION_RULES,
+            content: systemContent,
           },
           {
             role: 'user',
-            content: JSON.stringify(texts),
+            content: userContent,
           },
         ],
     };
@@ -119,7 +146,7 @@
   }
 
   // ── Gemini ──
-  async function callGemini(texts, targetLang) {
+  async function callGemini(texts, targetLang, contexts) {
     var s = App.getState();
     var langName = App.langCodeToName(targetLang);
     var contextPrefix = s.contextPrompt.trim()
@@ -128,13 +155,34 @@
     var url = 'https://generativelanguage.googleapis.com/v1beta/models/' +
       s.model + ':generateContent?key=' + s.apiKey;
 
+    var hasAnyContext = contexts && contexts.some(function (c) { return c !== ''; });
+
+    var promptText;
+    if (hasAnyContext) {
+      promptText = 'You are a professional translator. ' + contextPrefix
+        + 'Translate the following items from English to ' + langName + '. '
+        + 'Each item has a "text" to translate and optionally a "context" describing where it appears in the UI. '
+        + 'Use the context to choose the most appropriate translation for the usage scenario. '
+        + 'Return ONLY a JSON array of translated strings in the same order. '
+        + 'Do not add explanations.' + App.TRANSLATION_RULES
+        + '\n\n' + JSON.stringify(texts.map(function (text, idx) {
+          return { text: text, context: (contexts && contexts[idx]) || '' };
+        }));
+    } else {
+      promptText = 'You are a professional translator. ' + contextPrefix
+        + 'Translate the following JSON array of strings from English to ' + langName + '. '
+        + 'Return ONLY a JSON array of translated strings in the same order. '
+        + 'Do not add explanations.' + App.TRANSLATION_RULES
+        + '\n\n' + JSON.stringify(texts);
+    }
+
     var response = await fetchWithTimeout(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         contents: [{
           parts: [{
-            text: 'You are a professional translator. ' + contextPrefix + 'Translate the following JSON array of strings from English to ' + langName + '. Return ONLY a JSON array of translated strings in the same order. Do not add explanations.' + App.TRANSLATION_RULES + '\n\n' + JSON.stringify(texts),
+            text: promptText,
           }],
         }],
         generationConfig: { temperature: 0.3 },
