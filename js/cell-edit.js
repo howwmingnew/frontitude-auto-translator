@@ -40,13 +40,32 @@
 
     App.dom.cellEditTextarea.value = value || '';
 
-    // Context description from cache
+    // Context description from cache or auto-fetch
     if (App.dom.cellEditContext) {
       var cachedCtx = App.getContextCache().get(key);
       var ctxDesc = cachedCtx && cachedCtx.description ? cachedCtx.description : '';
       if (ctxDesc) {
         App.dom.cellEditContext.style.display = '';
         App.dom.cellEditContextText.textContent = ctxDesc;
+      } else if (App.getState().bitbucketConnected && App.getState().provider !== 'deepl') {
+        // Auto-fetch context in background
+        App.dom.cellEditContext.style.display = '';
+        App.dom.cellEditContextText.textContent = App.t('contextPanelLoading');
+        App.getContextCache().delete(key);
+        App.searchBatchContext([key], function () {}).then(function () {
+          return App.generateBatchContext([key], function () {});
+        }).then(function () {
+          var updated = App.getContextCache().get(key);
+          if (updated && updated.description && App.dom.cellEditContext) {
+            App.dom.cellEditContextText.textContent = updated.description;
+          } else if (App.dom.cellEditContext) {
+            App.dom.cellEditContext.style.display = 'none';
+          }
+        }).catch(function () {
+          if (App.dom.cellEditContext) {
+            App.dom.cellEditContext.style.display = 'none';
+          }
+        });
       } else {
         App.dom.cellEditContext.style.display = 'none';
         App.dom.cellEditContextText.textContent = '';
