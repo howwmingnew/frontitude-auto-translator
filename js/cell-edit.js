@@ -23,8 +23,15 @@
     App.dom.cellEditRevert.disabled = App.dom.cellEditTextarea.value === importedVal;
   }
 
+  var editModalOriginalValue = '';
+
+  function updateSaveBtn() {
+    App.dom.cellEditSave.disabled = (App.dom.cellEditTextarea.value === editModalOriginalValue);
+  }
+
   function openEditModal(key, lang, value, sourceText, isSourceEdit) {
     editModalState = { key: key, lang: lang };
+    editModalOriginalValue = value || '';
     App.dom.cellEditTitle.textContent = App.t('cellEditTitle');
 
     var sourceBlock = App.dom.cellEditSourceLabel.parentElement;
@@ -82,6 +89,9 @@
       App.dom.cellEditAiTranslate.style.display = '';
       App.dom.cellEditAiTranslate.disabled = !App.getState().apiKey;
     }
+
+    // Save button: disabled when value matches original
+    updateSaveBtn();
 
     App.dom.cellEditOverlay.classList.add('active');
     App.dom.cellEditTextarea.focus();
@@ -150,7 +160,10 @@
   }
 
   function initCellEditEvents() {
-    App.dom.cellEditTextarea.addEventListener('input', updateRevertBtn);
+    App.dom.cellEditTextarea.addEventListener('input', function () {
+      updateRevertBtn();
+      updateSaveBtn();
+    });
 
     App.dom.cellEditCancel.addEventListener('click', closeEditModal);
 
@@ -195,6 +208,7 @@
       var originalVal = getImportedValue(key, lang);
       App.dom.cellEditTextarea.value = originalVal;
       updateRevertBtn();
+      updateSaveBtn();
       App.dom.cellEditTextarea.focus();
     });
 
@@ -222,6 +236,9 @@
         var ctxDesc = (cachedCtx && cachedCtx.description) || '';
         var translated = await translateSingleText(sourceText, lang, ctxDesc);
         App.dom.cellEditTextarea.value = translated;
+        editModalOriginalValue = translated;
+        updateSaveBtn();
+        updateRevertBtn();
       } catch (err) {
         App.showToast(App.t('cellTranslateError', err.message), 'error');
       } finally {
