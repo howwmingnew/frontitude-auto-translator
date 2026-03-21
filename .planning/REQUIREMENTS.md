@@ -16,11 +16,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Code Search
 
-- [ ] **SRCH-01**: 透過 Bitbucket Code Search API 搜尋 key 在 WPF 檔案（.xaml / .cs）中的使用位置
-- [ ] **SRCH-02**: 識別 LocExtension markup extension 模式，精準匹配 key 使用
-- [ ] **SRCH-03**: 只對未翻譯的 key 查詢情境，節省 API 配額
-- [ ] **SRCH-04**: 擷取 key 所在檔案名稱及周圍程式碼行作為使用情境
-- [ ] **SRCH-05**: 聚合同一 key 在多個檔案中的使用位置，完整呈現所有情境
+- [x] **SRCH-01**: 透過 Bitbucket Code Search API 搜尋 key 在 WPF 檔案（.xaml / .cs）中的使用位置
+- [x] **SRCH-02**: 識別 LocExtension markup extension 模式，精準匹配 key 使用
+- [x] **SRCH-03**: 只對未翻譯的 key 查詢情境，節省 API 配額
+- [x] **SRCH-04**: 擷取 key 所在檔案名稱及周圍程式碼行作為使用情境
+- [x] **SRCH-05**: 聚合同一 key 在多個檔案中的使用位置，完整呈現所有情境
 
 ### AI Context
 
@@ -71,11 +71,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INFRA-02 | Phase 1 | Complete |
 | INFRA-03 | Phase 1 | Complete |
 | INFRA-04 | Phase 1 | Complete |
-| SRCH-01 | Phase 2 | Pending |
-| SRCH-02 | Phase 2 | Pending |
-| SRCH-03 | Phase 2 | Pending |
-| SRCH-04 | Phase 2 | Pending |
-| SRCH-05 | Phase 2 | Pending |
+| SRCH-01 | Phase 2 | Complete |
+| SRCH-02 | Phase 2 | Complete |
+| SRCH-03 | Phase 2 | Complete |
+| SRCH-04 | Phase 2 | Complete |
+| SRCH-05 | Phase 2 | Complete |
 | ACTX-01 | Phase 3 | Pending |
 | ACTX-02 | Phase 3 | Pending |
 | UEXP-01 | Phase 4 | Pending |
