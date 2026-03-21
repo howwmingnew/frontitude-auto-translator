@@ -67,7 +67,7 @@
     });
 
     // Collapsible section
-    App.initCollapsible(App.dom.bbCollapsible, App.dom.bbCollapsibleBody, 'bitbucket');
+    App.initCollapsible(App.dom.bbCollapsible, App.dom.bbCollapsibleBody, 'collapse_bitbucket', true);
 
     // Initial button state
     updateTestBtnState();
@@ -103,6 +103,13 @@
     }
   }
 
+  function updateCollapseStatus(connected) {
+    var el = App.dom.bbCollapseStatus;
+    if (!el) return;
+    el.className = 'collapse-status ' + (connected ? 'status-connected' : 'status-disconnected');
+    el.textContent = connected ? App.t('bbConnected') : App.t('bbNotConnected');
+  }
+
   function testBitbucketConnection() {
     var s = App.getState();
     if (!s.proxyUrl || !s.bitbucketWorkspace || !s.bitbucketRepo || !s.bitbucketToken) {
@@ -128,12 +135,18 @@
     .then(function () {
       App.setState({ bitbucketConnected: true });
       updateBadge('connected');
+      updateCollapseStatus(true);
       App.showToast(App.t('bbConnectSuccess'), 'success');
       if (App.updatePreciseButtonState) App.updatePreciseButtonState();
+      // Auto-collapse on successful connection
+      if (App.collapseSection) {
+        App.collapseSection(App.dom.bbCollapsible, App.dom.bbCollapsibleBody, 'collapse_bitbucket');
+      }
     })
     .catch(function (err) {
       App.setState({ bitbucketConnected: false });
       updateBadge('error');
+      updateCollapseStatus(false);
       App.showToast(App.t('bbConnectFailed', err.message), 'error');
       if (App.updatePreciseButtonState) App.updatePreciseButtonState();
     })

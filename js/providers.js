@@ -219,6 +219,16 @@
   }
 
   // ── Test API Key ──
+  function updateProviderCollapseStatus(connected) {
+    var el = App.dom.providerCollapseStatus;
+    if (!el) return;
+    var provider = App.getState().provider || '';
+    el.className = 'collapse-status ' + (connected ? 'status-connected' : 'status-disconnected');
+    el.textContent = connected
+      ? provider.charAt(0).toUpperCase() + provider.slice(1) + ' ✓'
+      : App.t('testApiKeyNoKey');
+  }
+
   async function testApiKey() {
     var key = App.dom.apiKey.value.trim();
     if (!key) {
@@ -236,10 +246,16 @@
       btn.textContent = App.t('testApiKeySuccess');
       btn.classList.add('test-key-success');
       btn.disabled = true;
+      // Update collapse status and auto-collapse
+      updateProviderCollapseStatus(true);
+      if (App.collapseSection) {
+        App.collapseSection(App.dom.providerCollapsible, App.dom.providerCollapsibleBody, 'collapse_provider');
+      }
     } catch (err) {
       App.showToast(App.t('toastError', err.message), 'error');
       btn.textContent = originalText;
       App.updateTestKeyBtn();
+      updateProviderCollapseStatus(false);
     }
   }
 

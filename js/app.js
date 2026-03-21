@@ -39,7 +39,7 @@
     App.initModeToggle();
 
     // ── Collapsible sections ──
-    App.initCollapsible(App.dom.providerCollapsible, App.dom.providerCollapsibleBody, 'collapse_provider');
+    App.initCollapsible(App.dom.providerCollapsible, App.dom.providerCollapsibleBody, 'collapse_provider', true);
     App.initCollapsible(App.dom.langCollapsible, App.dom.langCollapsibleBody, 'collapse_lang');
 
     // ── Cell edit events ──

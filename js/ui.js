@@ -56,7 +56,7 @@
   }
 
   // ── Collapsible Sections (mobile) ──
-  function initCollapsible(headerEl, bodyEl, storageKey) {
+  function initCollapsible(headerEl, bodyEl, storageKey, alwaysCollapsible) {
     var savedState = sessionStorage.getItem(storageKey);
     if (savedState === 'collapsed') {
       headerEl.classList.add('collapsed');
@@ -67,26 +67,40 @@
     }
 
     headerEl.addEventListener('click', function () {
-      // Only act as collapsible on mobile
-      if (window.innerWidth >= 768) return;
+      // Only act as collapsible on mobile, unless alwaysCollapsible
+      if (!alwaysCollapsible && window.innerWidth >= 768) return;
 
-      var isCollapsed = headerEl.classList.contains('collapsed');
-      if (isCollapsed) {
-        headerEl.classList.remove('collapsed');
-        bodyEl.classList.remove('collapsed');
-        bodyEl.style.maxHeight = bodyEl.scrollHeight + 'px';
-        setTimeout(function () { bodyEl.style.maxHeight = 'none'; }, 300);
-        sessionStorage.setItem(storageKey, 'expanded');
-      } else {
-        bodyEl.style.maxHeight = bodyEl.scrollHeight + 'px';
-        // Force reflow
-        bodyEl.offsetHeight;
-        bodyEl.style.maxHeight = '0';
-        headerEl.classList.add('collapsed');
-        bodyEl.classList.add('collapsed');
-        sessionStorage.setItem(storageKey, 'collapsed');
-      }
+      toggleCollapsible(headerEl, bodyEl, storageKey);
     });
+  }
+
+  function toggleCollapsible(headerEl, bodyEl, storageKey) {
+    var isCollapsed = headerEl.classList.contains('collapsed');
+    if (isCollapsed) {
+      headerEl.classList.remove('collapsed');
+      bodyEl.classList.remove('collapsed');
+      bodyEl.style.maxHeight = bodyEl.scrollHeight + 'px';
+      setTimeout(function () { bodyEl.style.maxHeight = 'none'; }, 300);
+      if (storageKey) sessionStorage.setItem(storageKey, 'expanded');
+    } else {
+      bodyEl.style.maxHeight = bodyEl.scrollHeight + 'px';
+      bodyEl.offsetHeight;
+      bodyEl.style.maxHeight = '0';
+      headerEl.classList.add('collapsed');
+      bodyEl.classList.add('collapsed');
+      if (storageKey) sessionStorage.setItem(storageKey, 'collapsed');
+    }
+  }
+
+  function collapseSection(headerEl, bodyEl, storageKey) {
+    if (!headerEl.classList.contains('collapsed')) {
+      bodyEl.style.maxHeight = bodyEl.scrollHeight + 'px';
+      bodyEl.offsetHeight;
+      bodyEl.style.maxHeight = '0';
+      headerEl.classList.add('collapsed');
+      bodyEl.classList.add('collapsed');
+      if (storageKey) sessionStorage.setItem(storageKey, 'collapsed');
+    }
   }
 
   // ── Sidebar Drawer ──
@@ -514,6 +528,7 @@
   App.showError = showError;
   App.hideError = hideError;
   App.initCollapsible = initCollapsible;
+  App.collapseSection = collapseSection;
   App.openDrawer = openDrawer;
   App.closeDrawer = closeDrawer;
   App.toggleSidebarVisibility = toggleSidebarVisibility;

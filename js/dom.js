@@ -45,6 +45,8 @@
     toastContainer: document.getElementById('toast-container'),
     providerCollapsible: document.getElementById('provider-collapsible'),
     providerCollapsibleBody: document.getElementById('provider-collapsible-body'),
+    providerCollapseStatus: document.getElementById('provider-collapse-status'),
+    bbCollapseStatus: document.getElementById('bb-collapse-status'),
     langCollapsible: document.getElementById('lang-collapsible'),
     langCollapsibleBody: document.getElementById('lang-collapsible-body'),
     testApiKeyBtn: document.getElementById('test-api-key-btn'),
