@@ -27,6 +27,8 @@
 - ✓ Cloudflare Worker CORS proxy for Bitbucket API — Validated in Phase 1: Infrastructure
 - ✓ Bitbucket 連線 UI（Workspace, Repo, Branch, Token, Proxy URL）— Validated in Phase 1: Infrastructure
 - ✓ 多檔案架構（IIFE + window.App namespace）— Validated in Phase 1: Infrastructure
+- ✓ Bitbucket Code Search pipeline（.xaml-first/.cs-fallback, concurrency limiter, cache）— Validated in Phase 2: Code Search Pipeline
+- ✓ 右鍵選單搜尋情境 + 搜尋進度顯示 — Validated in Phase 2: Code Search Pipeline
 
 ### Active
 
@@ -77,4 +79,4 @@
 | AI 生成情境說明 | 給非工程師看，需要自然語言描述 | — Pending |
 
 ---
-*Last updated: 2026-03-21 after Phase 1 completion*
+*Last updated: 2026-03-21 after Phase 2 completion*
