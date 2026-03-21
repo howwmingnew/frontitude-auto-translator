@@ -25,7 +25,7 @@ Requirements for initial release. Each maps to roadmap phases.
 ### AI Context
 
 - [x] **ACTX-01**: 使用 AI（OpenAI/Gemini）根據程式碼片段生成非工程師能懂的情境說明，語言跟隨 app 介面語言（EN/zh-TW/ko）
-- [ ] **ACTX-02**: 將情境資訊（檔名、程式碼片段、AI 說明）注入翻譯 prompt，提升翻譯精準度
+- [x] **ACTX-02**: 將情境資訊（檔名、程式碼片段、AI 說明）注入翻譯 prompt，提升翻譯精準度
 
 ### User Experience
 
@@ -77,7 +77,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SRCH-04 | Phase 2 | Complete |
 | SRCH-05 | Phase 2 | Complete |
 | ACTX-01 | Phase 3 | Complete |
-| ACTX-02 | Phase 3 | Pending |
+| ACTX-02 | Phase 3 | Complete |
 | UEXP-01 | Phase 4 | Pending |
 | UEXP-02 | Phase 4 | Pending |
 | UEXP-03 | Phase 4 | Pending |
