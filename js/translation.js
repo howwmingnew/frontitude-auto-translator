@@ -123,6 +123,35 @@
     App.dom.progressBar.style.width = '0%';
     App.dom.progressTranslatedCount.textContent = App.t('progressTranslatedCount', 0, totalTexts);
 
+    // ── Phase A: Search code context (precise mode) ──
+    var allKeysToSearch = [];
+    if (s.bitbucketConnected && s.provider !== 'deepl') {
+      // Collect all untranslated keys across all target languages (deduplicated)
+      var keySet = {};
+      for (var si = 0; si < langBatchInfo.length; si++) {
+        var searchInfo = langBatchInfo[si];
+        for (var sk = 0; sk < searchInfo.keys.length; sk++) {
+          keySet[searchInfo.keys[sk]] = true;
+        }
+      }
+      allKeysToSearch = Object.keys(keySet);
+
+      if (allKeysToSearch.length > 0) {
+        App.dom.progressText.textContent = App.t('progressSearching', allKeysToSearch.length);
+        await App.searchBatchContext(allKeysToSearch, function (p) {
+          // Search progress -- leave progress bar at 0% during search (translation progress is separate)
+        });
+      }
+    }
+
+    // ── Phase B: Generate context descriptions (precise mode) ──
+    if (s.bitbucketConnected && s.provider !== 'deepl' && allKeysToSearch.length > 0) {
+      App.dom.progressText.textContent = App.t('progressGeneratingContext', allKeysToSearch.length);
+      await App.generateBatchContext(allKeysToSearch, function (p) {
+        // Context generation progress -- leave progress bar at 0% during generation
+      });
+    }
+
     try {
       for (var i = 0; i < langBatchInfo.length; i++) {
         var info = langBatchInfo[i];
@@ -153,7 +182,13 @@
               var nextRealPct = totalBatches === 0 ? 100 : Math.round(((completedBatches + 1) / totalBatches) * 100);
               var simTarget = simulatedPct + Math.round((nextRealPct - simulatedPct) * 0.85);
               startSimulatedProgress(simTarget);
-              var translated = await App.callTranslateAPI(batch, lang);
+              // Look up context descriptions for this batch's keys
+              var batchKeys = keysToTranslate.slice(batchStart, batchStart + batchSize);
+              var batchContexts = batchKeys.map(function (key) {
+                var cached = App.getContextCache().get(key);
+                return (cached && cached.description) || '';
+              });
+              var translated = await App.callTranslateAPI(batch, lang, batchContexts);
               translatedTexts = translatedTexts.concat(translated);
               translatedCount += batch.length;
               completedBatches++;
