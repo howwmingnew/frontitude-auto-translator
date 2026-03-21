@@ -7,6 +7,10 @@
   var MAX_SNIPPETS_PER_KEY = 3;
   var MAX_SNIPPET_CHARS = 300;
   var MAX_RETRIES = 2;
+  var LANG_INSTRUCTIONS = {
+    'zh-TW': ' Respond entirely in Traditional Chinese (繁體中文).',
+    'ko': ' Respond entirely in Korean (한국어).'
+  };
 
   // ── System prompt for context generation ──
   var SYSTEM_PROMPT = 'You are a UI context analyzer. Given translation keys and code snippets showing where each key is used in a WPF desktop application, generate a brief 1-2 sentence description of HOW and WHERE each key is used in the UI. Describe in terms a non-engineer translator would understand (e.g., "Button label on the login screen", "Error message shown when file upload fails", "Column header in the patient list table"). Return ONLY a JSON array of strings in the same order as the input keys. If a snippet is unclear, provide your best guess based on the key name and surrounding code.';
@@ -98,12 +102,14 @@
   async function callContextGeneration(batchKeys, cache) {
     var userContent = buildUserContent(batchKeys, cache);
     var s = App.getState();
+    var langSuffix = LANG_INSTRUCTIONS[s.uiLang] || '';
+    var effectivePrompt = SYSTEM_PROMPT + langSuffix;
     var rawContent;
 
     if (s.provider === 'openai') {
-      rawContent = await callContextOpenAI(SYSTEM_PROMPT, userContent);
+      rawContent = await callContextOpenAI(effectivePrompt, userContent);
     } else if (s.provider === 'gemini') {
-      rawContent = await callContextGemini(SYSTEM_PROMPT, userContent);
+      rawContent = await callContextGemini(effectivePrompt, userContent);
     } else {
       throw new Error('Context generation not supported for provider: ' + s.provider);
     }
