@@ -59,10 +59,11 @@ Plans:
   1. Given code snippets from Phase 2, the app generates a 1-2 sentence natural language description of where and how the key is used (e.g., "Button label on the login settings screen"), in the current app interface language (EN/zh-TW/ko)
   2. When translating with context, the translation prompt sent to OpenAI/Gemini includes both the user's custom context prompt and the per-key AI-generated context description
   3. Translations produced with context injection are observably different from (and more contextually appropriate than) translations without context for UI-specific terms
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 03-01: TBD
+- [ ] 03-01-PLAN.md -- AI context generation module (js/context.js): batch LLM calls to generate descriptions from code snippets, reuse search.js utilities
+- [ ] 03-02-PLAN.md -- Translation prompt injection and three-phase pipeline: modify providers.js for context-aware prompts, wire search-generate-translate flow
 
 ### Phase 4: Context UX
 **Goal**: Users have a complete, polished interface for context-aware translation with clear mode selection, visual context display, and graceful error handling
@@ -89,5 +90,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 |-------|----------------|--------|-----------|
 | 1. Infrastructure | 3/3 | Complete   | 2026-03-21 |
 | 2. Code Search Pipeline | 2/2 | Complete   | 2026-03-21 |
-| 3. AI Context Generation | 0/? | Not started | - |
+| 3. AI Context Generation | 0/2 | Not started | - |
 | 4. Context UX | 0/? | Not started | - |
