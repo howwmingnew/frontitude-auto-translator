@@ -10,8 +10,8 @@ Requirements for initial release. Each maps to roadmap phases.
 ### Infrastructure
 
 - [x] **INFRA-01**: 部署 Cloudflare Workers CORS proxy，轉發 Bitbucket API 請求並處理 CORS headers
-- [ ] **INFRA-02**: 使用者可輸入 Bitbucket workspace/repo 資訊，透過 Access Token 連接 Bitbucket Cloud
-- [ ] **INFRA-03**: Access Token 安全存儲於 Cloudflare Worker 端（非瀏覽器 localStorage），避免 XSS 風險
+- [x] **INFRA-02**: 使用者可輸入 Bitbucket workspace/repo 資訊，透過 Access Token 連接 Bitbucket Cloud
+- [x] **INFRA-03**: Access Token 安全存儲於 Cloudflare Worker 端（非瀏覽器 localStorage），避免 XSS 風險
 - [x] **INFRA-04**: 現有 index.html 單檔架構拆分為 ES Modules 多檔案結構（無需 bundler）
 
 ### Code Search
@@ -68,8 +68,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | INFRA-01 | Phase 1 | Complete |
-| INFRA-02 | Phase 1 | Pending |
-| INFRA-03 | Phase 1 | Pending |
+| INFRA-02 | Phase 1 | Complete |
+| INFRA-03 | Phase 1 | Complete |
 | INFRA-04 | Phase 1 | Complete |
 | SRCH-01 | Phase 2 | Pending |
 | SRCH-02 | Phase 2 | Pending |
