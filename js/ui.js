@@ -793,7 +793,9 @@
     var hasContext = cached && cached.matches && cached.matches.length > 0;
 
     if (!hasContext) {
-      html += '<div class="context-panel-empty">' + App.t('contextPanelEmpty') + '</div>';
+      html += '<div class="context-panel-empty">' + App.t('contextPanelEmpty')
+        + ' <button class="context-panel-retry-btn" data-key="' + escapeHtml(key).replace(/"/g, '&quot;') + '">' + App.t('contextPanelRetry') + '</button>'
+        + '</div>';
     } else {
       // Code snippet section -- first match only
       var first = cached.matches[0];
@@ -859,6 +861,38 @@
     return html;
   }
 
+  function fetchKeyContext(key, panelDiv) {
+    var s = App.getState();
+    if (!s.bitbucketConnected || s.provider === 'deepl') return;
+
+    // Clear cache for this key so searchKeyContext does a fresh API call
+    App.getContextCache().delete(key);
+
+    // Show loading state
+    var contextSection = panelDiv.querySelector('.context-panel-empty, .context-panel-snippet, .context-panel-description');
+    var panelContent = panelDiv.querySelector('.context-panel');
+    if (panelContent) {
+      // Replace context area with loading, keep key title and translations
+      var keyTitle = panelContent.querySelector('.context-panel-key-title');
+      var translations = panelContent.querySelector('.context-panel-translations');
+      var loadingHtml = '<div class="context-panel">';
+      if (keyTitle) { loadingHtml += keyTitle.outerHTML; }
+      loadingHtml += '<div class="context-panel-empty"><span class="context-panel-loading-spinner"></span> ' + App.t('contextPanelLoading') + '</div>';
+      if (translations) { loadingHtml += translations.outerHTML; }
+      loadingHtml += '</div>';
+      panelDiv.innerHTML = loadingHtml;
+    }
+
+    App.searchBatchContext([key], function () {}).then(function () {
+      return App.generateBatchContext([key], function () {});
+    }).then(function () {
+      var updated = App.getContextCache().get(key);
+      panelDiv.innerHTML = buildPanelHTML(key, updated);
+    }).catch(function () {
+      panelDiv.innerHTML = buildPanelHTML(key, null);
+    });
+  }
+
   function expandContextPanel(keyRow, key) {
     collapseCurrentPanel();
 
@@ -872,6 +906,13 @@
 
     var cached = App.getContextCache().get(key);
     panelDiv.innerHTML = buildPanelHTML(key, cached);
+
+    // Auto-fetch context if not cached and Bitbucket connected
+    var hasContext = cached && cached.matches && cached.matches.length > 0;
+    if (!hasContext && App.getState().bitbucketConnected) {
+      // Defer fetch so panel renders first
+      setTimeout(function () { fetchKeyContext(key, panelDiv); }, 50);
+    }
 
     // Insert spacer row in table to push subsequent rows down
     var colCount = keyRow.children.length;
@@ -1173,6 +1214,22 @@
         allHtml += '<pre class="context-panel-code">' + escapeHtml(match.snippet) + '</pre>';
       }
       snippetDiv.innerHTML = allHtml;
+      return;
+    }
+
+    var retryBtn = e.target.closest('.context-panel-retry-btn');
+    if (retryBtn) {
+      var retryKey = retryBtn.getAttribute('data-key');
+      if (!retryKey) return;
+
+      // Clear cached entry so it re-fetches
+      var cache = App.getContextCache();
+      cache.delete(retryKey);
+
+      var panel = retryBtn.closest('.context-panel-floating');
+      if (panel) {
+        fetchKeyContext(retryKey, panel);
+      }
       return;
     }
   });

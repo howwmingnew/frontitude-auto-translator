@@ -6,7 +6,7 @@
  * passes it through to Bitbucket, adding CORS headers to responses.
  */
 
-var ALLOWED_PATH_RE = /^2\.0\/(workspaces\/[^/]+\/search\/code|repositories\/[^/]+\/[^/]+(\/src\/.+)?)$/;
+var ALLOWED_PATH_RE = /^2\.0\/(workspaces\/[^/]+\/search\/code|repositories\/[^/]+\/[^/]+(\/src(\/.*)?|\/refs\/branches\/.+)?)?$/;
 
 function isAllowedPath(path) {
   return ALLOWED_PATH_RE.test(path);

@@ -51,28 +51,140 @@
     }
   }
 
-  // ── 4. Search API call ──
-  async function doSearch(query) {
+  // ── 4. File index cache (session-level) ──
+  var fileIndexCache = null; // { files: [{path, ext}], fetchedAt }
+  var fileContentCache = new Map(); // path -> content string
+
+  var resolvedCommitHash = null;
+
+  async function resolveBranchToCommit(branch) {
+    if (resolvedCommitHash) return resolvedCommitHash;
+
     var s = App.getState();
-    var url = s.proxyUrl.replace(/\/+$/, '') + '/bitbucket/2.0/workspaces/'
-      + encodeURIComponent(s.bitbucketWorkspace) + '/search/code'
-      + '?search_query=' + encodeURIComponent(query) + '&pagelen=20';
+    var url = s.proxyUrl.replace(/\/+$/, '') + '/bitbucket/2.0/repositories/'
+      + encodeURIComponent(s.bitbucketWorkspace) + '/'
+      + encodeURIComponent(s.bitbucketRepo) + '/refs/branches/' + encodeURIComponent(branch);
 
     var res = await App.fetchWithTimeout(url, {
       headers: { 'Authorization': 'Bearer ' + s.bitbucketToken }
     });
-
-    if (res.status === 429) {
-      var retryAfter = res.headers.get('Retry-After');
-      throw { type: 'rate_limit', retryAfter: parseInt(retryAfter) || 60 };
-    }
-
-    if (!res.ok) {
-      throw new Error('Search API error: HTTP ' + res.status);
-    }
-
+    if (!res.ok) throw new Error('Branch resolve failed: HTTP ' + res.status);
     var data = await res.json();
-    return data.values || [];
+    resolvedCommitHash = data.target && data.target.hash ? data.target.hash : null;
+    return resolvedCommitHash;
+  }
+
+  async function buildFileIndex() {
+    if (fileIndexCache) return fileIndexCache;
+
+    var s = App.getState();
+    var branch = s.bitbucketBranch || 'main';
+
+    // Resolve branch to commit hash (handles branches with / in name)
+    var commit = await resolveBranchToCommit(branch);
+    if (!commit) throw new Error('Could not resolve branch: ' + branch);
+
+    var repoBase = s.proxyUrl.replace(/\/+$/, '') + '/bitbucket/2.0/repositories/'
+      + encodeURIComponent(s.bitbucketWorkspace) + '/'
+      + encodeURIComponent(s.bitbucketRepo);
+    var baseUrl = repoBase + '/src/' + commit + '/';
+
+
+    var allFiles = [];
+    var nextUrl = baseUrl + '?pagelen=100&max_depth=20';
+
+    while (nextUrl) {
+      var res = await App.fetchWithTimeout(nextUrl, {
+        headers: { 'Authorization': 'Bearer ' + s.bitbucketToken }
+      });
+      if (!res.ok) throw new Error('File listing failed: HTTP ' + res.status);
+      var data = await res.json();
+
+      if (data.values) {
+        for (var i = 0; i < data.values.length; i++) {
+          var entry = data.values[i];
+          var path = entry.path || '';
+          if (entry.type === 'commit_file') {
+            var ext = path.split('.').pop().toLowerCase();
+            if (ext === 'xaml' || ext === 'cs') {
+              allFiles.push({ path: path, ext: ext });
+            }
+          }
+        }
+      }
+
+      // Follow pagination
+      if (data.next) {
+        // Replace direct Bitbucket URL with proxy URL
+        nextUrl = data.next.replace('https://api.bitbucket.org/', s.proxyUrl.replace(/\/+$/, '') + '/bitbucket/');
+      } else {
+        nextUrl = null;
+      }
+    }
+
+    fileIndexCache = { files: allFiles, fetchedAt: Date.now() };
+    return fileIndexCache;
+  }
+
+  async function fetchFileContent(filePath) {
+    if (fileContentCache.has(filePath)) return fileContentCache.get(filePath);
+
+    var s = App.getState();
+    var commit = resolvedCommitHash || 'main';
+    var url = s.proxyUrl.replace(/\/+$/, '') + '/bitbucket/2.0/repositories/'
+      + encodeURIComponent(s.bitbucketWorkspace) + '/'
+      + encodeURIComponent(s.bitbucketRepo) + '/src/' + commit + '/' + filePath;
+
+    var res = await App.fetchWithTimeout(url, {
+      headers: { 'Authorization': 'Bearer ' + s.bitbucketToken }
+    });
+    if (!res.ok) return '';
+
+    var content = await res.text();
+    fileContentCache.set(filePath, content);
+    return content;
+  }
+
+  // ── 4b. Search by scanning file contents (works with Repository Access Token) ──
+  async function doSearch(key) {
+    var index = await buildFileIndex();
+    var results = [];
+    var limit = createConcurrencyLimiter(5);
+
+    var promises = index.files.map(function (file) {
+      return limit(function () {
+        return fetchFileContent(file.path).then(function (content) {
+          if (content.indexOf(key) !== -1) {
+            // Find matching lines
+            var lines = content.split('\n');
+            var matchedLines = [];
+            for (var i = 0; i < lines.length; i++) {
+              if (lines[i].indexOf(key) !== -1) {
+                // Get surrounding context (1 line before and after)
+                var snippetLines = [];
+                if (i > 0) snippetLines.push(lines[i - 1]);
+                snippetLines.push(lines[i]);
+                if (i < lines.length - 1) snippetLines.push(lines[i + 1]);
+                matchedLines.push({ line: i + 1, snippet: snippetLines.join('\n') });
+              }
+            }
+            if (matchedLines.length > 0) {
+              results.push({
+                file: { path: file.path },
+                content_matches: [{
+                  lines: matchedLines.map(function (m) {
+                    return { line: m.line, segments: [{ text: m.snippet }] };
+                  })
+                }]
+              });
+            }
+          }
+        }).catch(function () { /* skip failed files */ });
+      });
+    });
+
+    await Promise.all(promises);
+    return results;
   }
 
   // ── 5. Parse search results ──
@@ -131,11 +243,15 @@
   // ── 8. Query length safety check ──
   function buildSafeQuery(key, ext) {
     var s = App.getState();
-    var fullQuery = '"' + key + '" ext:' + ext + ' repo:' + s.bitbucketRepo;
-    if (fullQuery.length > 250) {
-      return '"' + key + '"';
-    }
-    return fullQuery;
+    // Try progressively simpler queries to find what Bitbucket API accepts
+    var queries = [
+      '"' + key + '" ext:' + ext + ' repo:' + s.bitbucketRepo,
+      '"' + key + '" repo:' + s.bitbucketRepo,
+      '"' + key + '"',
+      key
+    ];
+    // Test: try without quotes
+    return key;
   }
 
   // ── 9. Single-key search ──
@@ -145,15 +261,8 @@
       return contextCache.get(key);
     }
 
-    // Search .xaml first
-    var xamlQuery = buildSafeQuery(key, 'xaml');
-    var results = await withRetry(function () { return doSearch(xamlQuery); });
-
-    // Fallback to .cs if no .xaml results
-    if (!results || results.length === 0) {
-      var csQuery = buildSafeQuery(key, 'cs');
-      results = await withRetry(function () { return doSearch(csQuery); });
-    }
+    // Search all .xaml and .cs files for the key
+    var results = await withRetry(function () { return doSearch(key); });
 
     var result = buildKeyResult(key, results || []);
 

@@ -71,6 +71,11 @@
 
     // Initial button state
     updateTestBtnState();
+
+    // Auto-test connection on page load if all required fields are saved
+    if (proxyUrl && workspace && repo && token) {
+      testBitbucketConnection();
+    }
   }
 
   function updateTestBtnState() {
