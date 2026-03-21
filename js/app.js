@@ -34,6 +34,7 @@
 
     // ── Provider ──
     App.initProvider();
+    App.initBitbucket();
 
     // ── Collapsible sections ──
     App.initCollapsible(App.dom.providerCollapsible, App.dom.providerCollapsibleBody, 'collapse_provider');

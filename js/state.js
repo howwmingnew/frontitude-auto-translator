@@ -19,6 +19,12 @@
     aiTranslatedCells: new Set(),
     originalTranslations: {},
     importedJsonData: null,
+    proxyUrl: '',
+    bitbucketWorkspace: '',
+    bitbucketRepo: '',
+    bitbucketBranch: 'main',
+    bitbucketToken: '',
+    bitbucketConnected: false,
   };
 
   function setState(patch) {

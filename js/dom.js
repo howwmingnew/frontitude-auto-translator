@@ -65,5 +65,14 @@
     translateConfirmBody: document.getElementById('translate-confirm-body'),
     translateConfirmCancel: document.getElementById('translate-confirm-cancel'),
     translateConfirmOk: document.getElementById('translate-confirm-ok'),
+    bbProxyUrl: document.getElementById('bb-proxy-url'),
+    bbWorkspace: document.getElementById('bb-workspace'),
+    bbRepo: document.getElementById('bb-repo'),
+    bbBranch: document.getElementById('bb-branch'),
+    bbToken: document.getElementById('bb-token'),
+    bbBadge: document.getElementById('bb-badge'),
+    bbTestBtn: document.getElementById('bb-test-btn'),
+    bbCollapsible: document.getElementById('bb-collapsible'),
+    bbCollapsibleBody: document.getElementById('bb-collapsible-body'),
   };
 })();

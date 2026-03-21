@@ -23,7 +23,8 @@ A pure static Web App for translating Frontitude-exported `language.json` files 
 6. `js/providers.js` -- `App.fetchWithTimeout`, `App.callDeepL/OpenAI/Gemini`, `App.callTranslateAPI`, `App.testApiKey`
 7. `js/translation.js` -- `App.doTranslate`, `App.showTranslateConfirm`, batch logic, progress
 8. `js/cell-edit.js` -- Cell edit modal, single-cell translate
-9. `js/app.js` -- Entry point: `App.init` (calls all init functions, wires event listeners)
+9. `js/bitbucket.js` -- `App.initBitbucket`, `App.testBitbucketConnection`, Bitbucket connection UI logic
+10. `js/app.js` -- Entry point: `App.init` (calls all init functions, wires event listeners)
 
 ## UI Flow
 
@@ -57,6 +58,7 @@ js/ui.js            - Theme, toast, drawer, collapsible, editor table, language 
 js/providers.js     - fetchWithTimeout, callDeepL/OpenAI/Gemini, testApiKey
 js/translation.js   - doTranslate, batch logic, progress, download
 js/cell-edit.js     - Cell edit modal, single-cell translate
+js/bitbucket.js     - Bitbucket connection UI, test connection, localStorage persistence
 js/app.js           - Entry point: init sequence, event wiring
 proxy/              - Cloudflare Worker CORS proxy for Bitbucket API
 README.md           - English README
