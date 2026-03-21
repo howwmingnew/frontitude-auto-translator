@@ -789,6 +789,7 @@
 
   function buildPanelHTML(key, cached) {
     var html = '<div class="context-panel">';
+    html += '<div class="context-panel-key-title">' + escapeHtml(key) + '</div>';
     var hasContext = cached && cached.matches && cached.matches.length > 0;
 
     if (!hasContext) {
@@ -815,21 +816,39 @@
       html += '</div>';
     }
 
-    // Translation fields
-    var jsonData = App.getState().jsonData;
+    // Translation fields (all languages including EN)
+    var s = App.getState();
+    var jsonData = s.jsonData;
     if (jsonData) {
-      var targetLangs = Object.keys(jsonData).filter(function (k) { return k !== 'en'; }).sort();
-      if (targetLangs.length > 0) {
+      var allLangs = ['en'].concat(Object.keys(jsonData).filter(function (k) { return k !== 'en'; }).sort());
+      if (allLangs.length > 0) {
         html += '<div class="context-panel-translations">';
-        for (var i = 0; i < targetLangs.length; i++) {
-          var lang = targetLangs[i];
+        for (var i = 0; i < allLangs.length; i++) {
+          var lang = allLangs[i];
           var val = (jsonData[lang] && jsonData[lang][key] !== undefined) ? jsonData[lang][key] : '';
           var escapedVal = escapeHtml(String(val)).replace(/"/g, '&quot;');
           var escapedKey = escapeHtml(key).replace(/"/g, '&quot;');
+
+          // Determine input color state
+          var isEdited = s.editedCells.has(key + '::' + lang);
+          var isAiTranslated = s.aiTranslatedCells.has(lang + ':' + key);
+          var inputCls = 'context-panel-input';
+          if (isAiTranslated) { inputCls += ' context-panel-input-ai'; }
+          else if (isEdited) { inputCls += ' context-panel-input-edited'; }
+
+          // Check if revert should be disabled
+          var importedData = s.importedJsonData;
+          var importedVal = (importedData && importedData[lang] && importedData[lang][key] !== undefined) ? importedData[lang][key] : '';
+          var revertDisabled = (String(val) === String(importedVal)) ? ' disabled' : '';
+
           html += '<div class="context-panel-lang-row">';
           html += '<label>' + escapeHtml(lang.toUpperCase()) + '</label>';
-          html += '<input type="text" class="context-panel-input" data-lang="' + escapeHtml(lang) + '" data-key="' + escapedKey + '" value="' + escapedVal + '">';
-          html += '<button class="context-panel-save" data-lang="' + escapeHtml(lang) + '" data-key="' + escapedKey + '">' + App.t('cellEditSave') + '</button>';
+          html += '<input type="text" class="' + inputCls + '" data-lang="' + escapeHtml(lang) + '" data-key="' + escapedKey + '" data-original="' + escapedVal + '" value="' + escapedVal + '">';
+          html += '<div class="context-panel-actions">';
+          html += '<button class="context-panel-save" data-lang="' + escapeHtml(lang) + '" data-key="' + escapedKey + '" disabled>' + App.t('cellEditSave') + '</button>';
+          html += '<button class="context-panel-revert" data-lang="' + escapeHtml(lang) + '" data-key="' + escapedKey + '"' + revertDisabled + '>' + App.t('cellEditRevert') + '</button>';
+          html += '<button class="context-panel-ai-translate" data-lang="' + escapeHtml(lang) + '" data-key="' + escapedKey + '">' + App.t('cellEditAiTranslate') + '</button>';
+          html += '</div>';
           html += '</div>';
         }
         html += '</div>';
@@ -843,25 +862,59 @@
   function expandContextPanel(keyRow, key) {
     collapseCurrentPanel();
 
-    var colCount = keyRow.children.length;
-    var tr = document.createElement('tr');
-    tr.className = 'context-panel-row';
+    var wrap = document.getElementById('editor-table-wrap');
+    if (!wrap) return;
 
-    var td = document.createElement('td');
-    td.colSpan = colCount;
-    td.className = 'context-panel-cell';
+    // Create floating panel outside the table scroll container
+    var panelDiv = document.createElement('div');
+    panelDiv.className = 'context-panel-floating';
+    panelDiv.setAttribute('data-panel-key', key);
 
     var cached = App.getContextCache().get(key);
-    td.innerHTML = buildPanelHTML(key, cached);
+    panelDiv.innerHTML = buildPanelHTML(key, cached);
 
-    tr.appendChild(td);
-    keyRow.parentNode.insertBefore(tr, keyRow.nextSibling);
+    // Insert spacer row in table to push subsequent rows down
+    var colCount = keyRow.children.length;
+    var spacerTr = document.createElement('tr');
+    spacerTr.className = 'context-panel-row';
+    var spacerTd = document.createElement('td');
+    spacerTd.colSpan = colCount;
+    spacerTd.className = 'context-panel-spacer';
+    spacerTr.appendChild(spacerTd);
+    keyRow.parentNode.insertBefore(spacerTr, keyRow.nextSibling);
+
+    // Insert panel right after the table wrap — it's in normal document flow,
+    // so it's always fully visible regardless of table horizontal scroll.
+    wrap.parentNode.insertBefore(panelDiv, wrap.nextSibling);
+
+    // Enable/disable save button based on input changes
+    panelDiv.addEventListener('input', function (evt) {
+      var inp = evt.target.closest('.context-panel-input');
+      if (!inp) return;
+      var langRow = inp.closest('.context-panel-lang-row');
+      var sBtn = langRow ? langRow.querySelector('.context-panel-save') : null;
+      if (sBtn) {
+        sBtn.disabled = (inp.value === inp.getAttribute('data-original'));
+      }
+    });
+
+    // Scroll key row into view so user sees both the row and the panel
+    requestAnimationFrame(function () {
+      keyRow.scrollIntoView({ block: 'nearest' });
+    });
 
     App.setState({ expandedPanelKey: key });
     keyRow.classList.add('context-panel-expanded');
   }
 
   function collapseCurrentPanel() {
+    // Remove floating panel
+    var floatingPanel = document.querySelector('.context-panel-floating');
+    if (floatingPanel) {
+      floatingPanel.parentNode.removeChild(floatingPanel);
+    }
+
+    // Remove spacer row from table
     var existing = App.dom.editorTable.querySelector('.context-panel-row');
     if (existing) {
       if (existing.previousElementSibling) {
@@ -881,8 +934,12 @@
     }
   }
 
-  // Panel event delegation -- save and show-more buttons
-  App.dom.editorTable.addEventListener('click', function (e) {
+  // Panel event delegation -- save, revert, AI translate, show-more buttons
+  // Uses document because the floating panel is outside the table element
+  document.addEventListener('click', function (e) {
+    // Only handle clicks inside floating panel
+    if (!e.target.closest('.context-panel-floating')) return;
+
     var saveBtn = e.target.closest('.context-panel-save');
     if (saveBtn) {
       var lang = saveBtn.getAttribute('data-lang');
@@ -896,25 +953,47 @@
 
       var newVal = input.value;
 
-      // Immutable state update
-      var newJsonData = JSON.parse(JSON.stringify(App.getState().jsonData));
+      // Immutable state update with editedCells tracking
+      var curS = App.getState();
+      var newJsonData = JSON.parse(JSON.stringify(curS.jsonData));
       if (!newJsonData[lang]) { newJsonData[lang] = {}; }
+
+      var cellKey = key + '::' + lang;
+      var newEditedCells = new Map(curS.editedCells);
+      if (!newEditedCells.has(cellKey)) {
+        newEditedCells.set(cellKey, newJsonData[lang][key] !== undefined ? newJsonData[lang][key] : '');
+      }
+
       newJsonData[lang][key] = newVal;
-      App.setState({ jsonData: newJsonData });
+      App.setState({ jsonData: newJsonData, editedCells: newEditedCells });
+
+      // Update input style to reflect edited state
+      input.classList.remove('context-panel-input-ai');
+      input.classList.add('context-panel-input-edited');
+
+      // Update revert button state
+      var revertBtn = row.querySelector('.context-panel-revert');
+      if (revertBtn) {
+        var impData = App.getState().importedJsonData;
+        var impVal = (impData && impData[lang] && impData[lang][key] !== undefined) ? impData[lang][key] : '';
+        revertBtn.disabled = (String(newVal) === String(impVal));
+      }
 
       // Update the corresponding table cell directly without full re-render
       var tableRows = App.dom.editorTable.querySelectorAll('tbody tr:not(.context-panel-row)');
       for (var ri = 0; ri < tableRows.length; ri++) {
-        var keyCell = tableRows[ri].children[0];
-        if (keyCell && (keyCell.getAttribute('title') === key || keyCell.textContent === key)) {
-          var curState = App.getState();
-          var langs = ['en'].concat(Object.keys(curState.jsonData).filter(function (k) { return k !== 'en'; }).sort());
+        var kCell = tableRows[ri].children[0];
+        if (kCell && (kCell.getAttribute('title') === key || kCell.textContent === key)) {
+          var sNow = App.getState();
+          var langs = ['en'].concat(Object.keys(sNow.jsonData).filter(function (k) { return k !== 'en'; }).sort());
           var langIdx = langs.indexOf(lang);
           if (langIdx !== -1) {
             var targetCell = tableRows[ri].children[langIdx + 1]; // +1 for key column
             if (targetCell) {
               targetCell.textContent = newVal;
               targetCell.setAttribute('title', newVal);
+              targetCell.classList.add('cell-edited');
+              targetCell.classList.remove('ai-translated');
               if (newVal) {
                 targetCell.classList.remove('empty-cell');
               }
@@ -924,7 +1003,154 @@
         }
       }
 
+      // Disable save button and update original value
+      saveBtn.disabled = true;
+      input.setAttribute('data-original', newVal);
+
       showToast(App.t('cellEditSuccess'), 'success');
+      return;
+    }
+
+    var revertBtn = e.target.closest('.context-panel-revert');
+    if (revertBtn) {
+      var rLang = revertBtn.getAttribute('data-lang');
+      var rKey = revertBtn.getAttribute('data-key');
+      if (!rLang || !rKey) return;
+
+      var row = revertBtn.closest('.context-panel-lang-row');
+      var input = row ? row.querySelector('.context-panel-input[data-lang="' + rLang + '"]') : null;
+      if (!input) return;
+
+      // Get imported (original) value
+      var curS = App.getState();
+      var importedData = curS.importedJsonData;
+      var originalVal = (importedData && importedData[rLang] && importedData[rLang][rKey] !== undefined) ? importedData[rLang][rKey] : '';
+      input.value = originalVal;
+
+      // Also save immediately and remove edited/ai tracking
+      var newJsonData = JSON.parse(JSON.stringify(curS.jsonData));
+      if (!newJsonData[rLang]) { newJsonData[rLang] = {}; }
+      newJsonData[rLang][rKey] = originalVal;
+
+      var newEditedCells = new Map(curS.editedCells);
+      newEditedCells.delete(rKey + '::' + rLang);
+      var newAiCells = new Set(curS.aiTranslatedCells);
+      newAiCells.delete(rLang + ':' + rKey);
+      App.setState({ jsonData: newJsonData, editedCells: newEditedCells, aiTranslatedCells: newAiCells });
+
+      // Update input style — remove edited/ai state
+      input.classList.remove('context-panel-input-edited', 'context-panel-input-ai');
+
+      // Disable revert button (now matches imported)
+      revertBtn.disabled = true;
+
+      // Update table cell
+      var tableRows = App.dom.editorTable.querySelectorAll('tbody tr:not(.context-panel-row)');
+      for (var ri = 0; ri < tableRows.length; ri++) {
+        var kCell = tableRows[ri].children[0];
+        if (kCell && (kCell.getAttribute('title') === rKey || kCell.textContent === rKey)) {
+          var sNow = App.getState();
+          var langs = ['en'].concat(Object.keys(sNow.jsonData).filter(function (k) { return k !== 'en'; }).sort());
+          var langIdx = langs.indexOf(rLang);
+          if (langIdx !== -1 && tableRows[ri].children[langIdx + 1]) {
+            var tc = tableRows[ri].children[langIdx + 1];
+            tc.textContent = originalVal;
+            tc.setAttribute('title', originalVal);
+            tc.classList.remove('cell-edited', 'ai-translated');
+            if (!originalVal) { tc.classList.add('empty-cell'); }
+          }
+          break;
+        }
+      }
+
+      // Update data-original and disable save
+      input.setAttribute('data-original', originalVal);
+      var rSaveBtn = row.querySelector('.context-panel-save');
+      if (rSaveBtn) { rSaveBtn.disabled = true; }
+
+      showToast(App.t('cellEditRevertSuccess'), 'success');
+      return;
+    }
+
+    var aiBtn = e.target.closest('.context-panel-ai-translate');
+    if (aiBtn) {
+      var aLang = aiBtn.getAttribute('data-lang');
+      var aKey = aiBtn.getAttribute('data-key');
+      if (!aLang || !aKey) return;
+      if (!App.getState().apiKey) {
+        showToast(App.t('testApiKeyNoKey'), 'error');
+        return;
+      }
+
+      var sourceText = App.getState().jsonData.en ? (App.getState().jsonData.en[aKey] || '') : '';
+      if (!sourceText) return;
+
+      var aRow = aiBtn.closest('.context-panel-lang-row');
+      var aInput = aRow ? aRow.querySelector('.context-panel-input[data-lang="' + aLang + '"]') : null;
+
+      // Loading state
+      var origText = aiBtn.textContent;
+      aiBtn.disabled = true;
+      aiBtn.textContent = App.t('cellEditAiTranslating');
+
+      App.translateSingleText(sourceText, aLang).then(function (translated) {
+        if (aInput) {
+          aInput.value = translated;
+          // Update input style to reflect AI translated state
+          aInput.classList.remove('context-panel-input-edited');
+          aInput.classList.add('context-panel-input-ai');
+        }
+
+        // Auto-save to state
+        var curS = App.getState();
+        var newJsonData = JSON.parse(JSON.stringify(curS.jsonData));
+        if (!newJsonData[aLang]) { newJsonData[aLang] = {}; }
+        newJsonData[aLang][aKey] = translated;
+
+        var newAiCells = new Set(curS.aiTranslatedCells);
+        newAiCells.add(aLang + ':' + aKey);
+        App.setState({ jsonData: newJsonData, aiTranslatedCells: newAiCells });
+
+        // Update save button — disable and set new original
+        var aRowForBtns = aiBtn.closest('.context-panel-lang-row');
+        var aSaveBtn = aRowForBtns ? aRowForBtns.querySelector('.context-panel-save') : null;
+        if (aSaveBtn) { aSaveBtn.disabled = true; }
+        if (aInput) { aInput.setAttribute('data-original', translated); }
+
+        // Update revert button state
+        var aRevertBtn = aRowForBtns ? aRowForBtns.querySelector('.context-panel-revert') : null;
+        if (aRevertBtn) {
+          var impData = App.getState().importedJsonData;
+          var impVal = (impData && impData[aLang] && impData[aLang][aKey] !== undefined) ? impData[aLang][aKey] : '';
+          aRevertBtn.disabled = (String(translated) === String(impVal));
+        }
+
+        // Update table cell
+        var tableRows = App.dom.editorTable.querySelectorAll('tbody tr:not(.context-panel-row)');
+        for (var ri = 0; ri < tableRows.length; ri++) {
+          var kCell = tableRows[ri].children[0];
+          if (kCell && (kCell.getAttribute('title') === aKey || kCell.textContent === aKey)) {
+            var sNow = App.getState();
+            var langs = ['en'].concat(Object.keys(sNow.jsonData).filter(function (k) { return k !== 'en'; }).sort());
+            var langIdx = langs.indexOf(aLang);
+            if (langIdx !== -1 && tableRows[ri].children[langIdx + 1]) {
+              var tc = tableRows[ri].children[langIdx + 1];
+              tc.textContent = translated;
+              tc.setAttribute('title', translated);
+              tc.classList.remove('empty-cell', 'cell-edited');
+              tc.classList.add('ai-translated');
+            }
+            break;
+          }
+        }
+
+        showToast(App.t('cellEditSuccess'), 'success');
+      }).catch(function (err) {
+        showToast(App.t('cellTranslateError', err.message), 'error');
+      }).finally(function () {
+        aiBtn.disabled = false;
+        aiBtn.textContent = origText;
+      });
       return;
     }
 
