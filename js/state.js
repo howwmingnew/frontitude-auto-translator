@@ -25,6 +25,8 @@
     bitbucketBranch: 'main',
     bitbucketToken: '',
     bitbucketConnected: false,
+    contextResults: new Map(),
+    searchProgress: null,
   };
 
   function setState(patch) {
