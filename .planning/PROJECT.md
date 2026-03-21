@@ -31,21 +31,16 @@
 - ✓ 右鍵選單搜尋情境 + 搜尋進度顯示 — Validated in Phase 2: Code Search Pipeline
 - ✓ AI 生成非工程師能懂的情境說明（語言跟隨 app 介面語言）— Validated in Phase 3: AI Context Generation
 - ✓ 情境說明注入翻譯 prompt，提升翻譯精準度 — Validated in Phase 3: AI Context Generation
+- ✓ Quick/Precise 模式切換 + DeepL 不相容提示 — Validated in Phase 4: Context UX
+- ✓ 點擊 key 展開情境面板（程式碼片段 + AI 說明 + inline 翻譯編輯）— Validated in Phase 4: Context UX
+- ✓ 三階段進度 stepper（搜尋 → 生成 → 翻譯）— Validated in Phase 4: Context UX
+- ✓ Per-key 錯誤追蹤 + 批次重試 — Validated in Phase 4: Context UX
 
 ### Active
 
-<!-- 這次要做的新功能 -->
+<!-- 所有 v1 功能已完成 -->
 
-- [ ] Bitbucket Cloud 整合（Access Token 認證）
-- [ ] 掃描 WPF 檔案（.xaml / .cs）搜尋 key 使用位置（LocExtension markup extension）
-- [ ] 只對未翻譯 key 查詢情境（節省 API 配額）
-- [ ] 擷取檔名 + 周圍程式碼作為使用情境
-- [ ] AI 生成非工程師能懂的情境說明（語言跟隨 app 介面語言）
-- [ ] 點擊 key 展開面板，顯示使用情境 + 程式碼片段 + AI 說明
-- [ ] 展開面板中可編輯翻譯結果
-- [ ] 編輯後的翻譯結果回饋到 prompt 中
-- [ ] 兩種翻譯模式：快速翻譯（不查情境，同現有）vs 精準翻譯（帶情境，較慢）
-- [ ] 精磨 UX：loading 狀態、錯誤處理、進度顯示
+None — all v1 requirements delivered.
 
 ### Out of Scope
 
@@ -76,9 +71,9 @@
 | 使用 Bitbucket Cloud API（非 Server） | 團隊使用 Cloud 版本 | — Pending |
 | 只掃描 WPF 檔案 | MFC 部分不需要翻譯 | — Pending |
 | 只查未翻譯 key 的情境 | 節省 API 配額與時間 | — Pending |
-| 分快速/精準兩種翻譯模式 | 解決批次翻譯效能與情境查詢的矛盾 | — Pending |
+| 分快速/精準兩種翻譯模式 | 解決批次翻譯效能與情境查詢的矛盾 | ✓ Phase 4 |
 | 允許拆分多檔案架構 | 功能增加後單檔太複雜 | ✓ Phase 1 |
 | AI 生成情境說明 | 給非工程師看，需要自然語言描述 | ✓ Phase 3 |
 
 ---
-*Last updated: 2026-03-21 after Phase 3 completion*
+*Last updated: 2026-03-21 after Phase 4 completion (v1.0 milestone complete)*
