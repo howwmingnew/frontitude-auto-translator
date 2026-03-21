@@ -154,13 +154,20 @@
   }
 
   function initProvider() {
-    var savedProvider = localStorage.getItem('translate_provider') || 'deepl';
+    var savedProvider = localStorage.getItem('translate_provider') || 'openai';
+    // Migrate from removed deepl to openai
+    if (savedProvider === 'deepl') { savedProvider = 'openai'; }
     App.dom.providerSelect.value = savedProvider;
     App.setState({ provider: savedProvider });
     applyProviderUI(savedProvider);
     loadProviderKey(savedProvider);
     loadProviderModel(savedProvider);
     App.updateTestKeyBtn();
+
+    // Auto-test API key on init if key is saved
+    if (App.getState().apiKey) {
+      App.testApiKey();
+    }
   }
 
   function applyProviderUI(provider) {
@@ -168,8 +175,8 @@
     App.dom.apiKey.placeholder = App.t(provider + 'Placeholder');
     App.dom.disclaimer.textContent = App.t(provider + 'Disclaimer');
 
-    // DeepL note for context prompt
-    App.dom.deeplNote.style.display = (provider === 'deepl') ? 'block' : 'none';
+    // DeepL note for context prompt (hidden since DeepL removed)
+    if (App.dom.deeplNote) { App.dom.deeplNote.style.display = 'none'; }
 
     // Model selector
     if (config.models.length === 0) {

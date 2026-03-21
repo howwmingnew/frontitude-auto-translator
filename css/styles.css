@@ -309,6 +309,14 @@ header p {
   overflow: hidden;
 }
 
+.provider-section .card-title-collapsible,
+.bitbucket-section .card-title-collapsible {
+  cursor: pointer;
+}
+.provider-section .card-title-collapsible .chevron-icon,
+.bitbucket-section .card-title-collapsible .chevron-icon {
+  display: block;
+}
 @media (max-width: 767px) {
   .card-title-collapsible {
     cursor: pointer;

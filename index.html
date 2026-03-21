@@ -61,6 +61,50 @@
   <div id="sidebar-overlay" class="sidebar-overlay"></div>
   <div id="sidebar-drawer" class="sidebar-drawer" role="dialog" aria-label="Translation settings">
     <div class="sidebar-drawer-inner">
+      <!-- Provider + API Key -->
+      <div class="card provider-section" id="provider-section">
+        <div class="card-title-collapsible" id="provider-collapsible">
+          <div class="card-title" data-i18n="providerTitle">Translation Provider</div>
+          <svg class="chevron-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </div>
+        <div class="collapsible-body" id="provider-collapsible-body">
+          <div class="provider-row">
+            <select id="provider-select">
+              <option value="openai">OpenAI</option>
+              <option value="gemini">Gemini</option>
+            </select>
+            <input type="password" id="api-key" class="api-key-input" placeholder="Paste your DeepL API key here" style="flex:1" />
+          </div>
+          <div class="api-key-actions">
+            <span class="badge badge-none" id="key-badge">No Key</span>
+            <button class="btn-test-key" id="test-api-key-btn" data-i18n="testApiKey" disabled>Test Key</button>
+            <a class="btn-test-key" id="get-api-key-link" href="https://www.deepl.com/pro#developer" target="_blank" rel="noopener noreferrer" data-i18n="getApiKey">Get API Key</a>
+          </div>
+          <div class="model-row" id="model-row" style="display:none">
+            <label for="model-select" data-i18n="modelLabel">Model:</label>
+            <select id="model-select"></select>
+          </div>
+          <div class="key-options">
+            <label>
+              <input type="checkbox" id="remember-key" />
+              <span data-i18n="rememberKey">Remember key across sessions</span>
+            </label>
+            <button id="clear-key" data-i18n="clearSavedKey" style="border:none;background:none;color:var(--error);cursor:pointer;font-size:0.8125rem;display:none;">Clear saved key</button>
+          </div>
+          <div class="disclaimer" id="disclaimer">
+            Your API key is sent directly from your browser to DeepL and is visible in the browser Network tab. It is never sent to any other server.
+          </div>
+          <div class="prompt-row" id="prompt-row">
+            <label class="prompt-label" data-i18n="contextPromptLabel">Context Prompt</label>
+            <textarea id="context-prompt" class="context-prompt" rows="2" data-i18n-placeholder="contextPromptPlaceholder" placeholder="e.g. dental implant software"></textarea>
+            <div class="deepl-note" id="deepl-note" data-i18n="contextPromptDeeplNote">Context prompt is only used with OpenAI and Gemini.</div>
+          </div>
+          <div class="deepl-context-warning" id="deepl-context-warning" style="display:none">
+            <span data-i18n="deeplContextWarning"></span>
+          </div>
+        </div>
+      </div>
+
       <!-- Bitbucket Connection -->
       <div class="card bitbucket-section" id="bitbucket-section">
         <div class="card-title-collapsible" id="bb-collapsible">
@@ -94,51 +138,6 @@
           <div class="bb-actions">
             <span class="badge badge-none" id="bb-badge" data-i18n="bbNotConnected">Not Connected</span>
             <button class="btn-test-key" id="bb-test-btn" data-i18n="bbTestConnection" disabled>Test Connection</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Provider + API Key -->
-      <div class="card provider-section" id="provider-section">
-        <div class="card-title-collapsible" id="provider-collapsible">
-          <div class="card-title" data-i18n="providerTitle">Translation Provider</div>
-          <svg class="chevron-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-        </div>
-        <div class="collapsible-body" id="provider-collapsible-body">
-          <div class="provider-row">
-            <select id="provider-select">
-              <option value="deepl">DeepL</option>
-              <option value="openai">OpenAI</option>
-              <option value="gemini">Gemini</option>
-            </select>
-            <input type="password" id="api-key" class="api-key-input" placeholder="Paste your DeepL API key here" style="flex:1" />
-          </div>
-          <div class="api-key-actions">
-            <span class="badge badge-none" id="key-badge">No Key</span>
-            <button class="btn-test-key" id="test-api-key-btn" data-i18n="testApiKey" disabled>Test Key</button>
-            <a class="btn-test-key" id="get-api-key-link" href="https://www.deepl.com/pro#developer" target="_blank" rel="noopener noreferrer" data-i18n="getApiKey">Get API Key</a>
-          </div>
-          <div class="model-row" id="model-row" style="display:none">
-            <label for="model-select" data-i18n="modelLabel">Model:</label>
-            <select id="model-select"></select>
-          </div>
-          <div class="key-options">
-            <label>
-              <input type="checkbox" id="remember-key" />
-              <span data-i18n="rememberKey">Remember key across sessions</span>
-            </label>
-            <button id="clear-key" data-i18n="clearSavedKey" style="border:none;background:none;color:var(--error);cursor:pointer;font-size:0.8125rem;display:none;">Clear saved key</button>
-          </div>
-          <div class="disclaimer" id="disclaimer">
-            Your API key is sent directly from your browser to DeepL and is visible in the browser Network tab. It is never sent to any other server.
-          </div>
-          <div class="prompt-row" id="prompt-row">
-            <label class="prompt-label" data-i18n="contextPromptLabel">Context Prompt</label>
-            <textarea id="context-prompt" class="context-prompt" rows="2" data-i18n-placeholder="contextPromptPlaceholder" placeholder="e.g. dental implant software"></textarea>
-            <div class="deepl-note" id="deepl-note" data-i18n="contextPromptDeeplNote">Context prompt is only used with OpenAI and Gemini.</div>
-          </div>
-          <div class="deepl-context-warning" id="deepl-context-warning" style="display:none">
-            <span data-i18n="deeplContextWarning"></span>
           </div>
         </div>
       </div>
