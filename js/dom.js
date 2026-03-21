@@ -74,5 +74,12 @@
     bbTestBtn: document.getElementById('bb-test-btn'),
     bbCollapsible: document.getElementById('bb-collapsible'),
     bbCollapsibleBody: document.getElementById('bb-collapsible-body'),
+    searchProgressSection: document.getElementById('search-progress-section'),
+    searchProgressBar: document.getElementById('search-progress-bar'),
+    searchProgressLabel: document.getElementById('search-progress-label'),
+    searchProgressText: document.getElementById('search-progress-text'),
+    searchProgressCount: document.getElementById('search-progress-count'),
+    contextMenu: document.getElementById('context-menu'),
+    contextMenuSearch: document.getElementById('context-menu-search'),
   };
 })();

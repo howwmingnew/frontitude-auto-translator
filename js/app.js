@@ -35,6 +35,7 @@
     // ── Provider ──
     App.initProvider();
     App.initBitbucket();
+    App.initSearchUI();
 
     // ── Collapsible sections ──
     App.initCollapsible(App.dom.providerCollapsible, App.dom.providerCollapsibleBody, 'collapse_provider');
@@ -126,6 +127,8 @@
     // Re-select JSON button
     App.dom.reselectBtn.addEventListener('click', function () {
       App.setState({ jsonData: null, importedJsonData: null, languages: [], selected: new Set(), editedCells: new Map(), fullyTranslatedLangs: new Set(), aiTranslatedCells: new Set(), originalTranslations: {} });
+      App.clearContextCache();
+      App.hideSearchProgress();
       App.dom.fileInput.value = '';
       App.dom.fileInfo.style.display = 'none';
       App.dom.uploadError.style.display = 'none';
@@ -223,7 +226,9 @@
     // Escape key handlers
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape') {
-        if (App.dom.cellEditOverlay.classList.contains('active')) {
+        if (App.dom.contextMenu.style.display !== 'none') {
+          App.dismissContextMenu();
+        } else if (App.dom.cellEditOverlay.classList.contains('active')) {
           App.closeEditModal();
         } else if (App.dom.translateConfirmOverlay.classList.contains('active')) {
           App.closeTranslateConfirm();

@@ -526,4 +526,126 @@
   App.downloadLanguageFile = downloadJsonData;
   App.loadProviderKey = loadProviderKey;
   App.loadProviderModel = loadProviderModel;
+
+  // ── Context Menu ──
+  var activeContextMenuKey = null;
+
+  function showSearchContextMenu(x, y, key) {
+    activeContextMenuKey = key;
+    var menu = App.dom.contextMenu;
+    menu.style.display = 'block';
+    menu.style.left = x + 'px';
+    menu.style.top = y + 'px';
+
+    // Ensure menu stays within viewport
+    var rect = menu.getBoundingClientRect();
+    if (rect.right > window.innerWidth) {
+      menu.style.left = (window.innerWidth - rect.width - 8) + 'px';
+    }
+    if (rect.bottom > window.innerHeight) {
+      menu.style.top = (window.innerHeight - rect.height - 8) + 'px';
+    }
+  }
+
+  function dismissContextMenu() {
+    App.dom.contextMenu.style.display = 'none';
+    activeContextMenuKey = null;
+  }
+
+  function getActiveContextMenuKey() {
+    return activeContextMenuKey;
+  }
+
+  // ── Search UI Init ──
+  function initSearchUI() {
+    // Right-click context menu via event delegation (survives table re-renders)
+    App.dom.editorTable.addEventListener('contextmenu', function (e) {
+      var row = e.target.closest('tr');
+      if (!row || !row.parentElement || row.parentElement.tagName === 'THEAD') return;
+
+      var keyCell = row.querySelector('td:first-child');
+      if (!keyCell) return;
+
+      var key = keyCell.getAttribute('title') || keyCell.textContent;
+      e.preventDefault();
+      showSearchContextMenu(e.clientX, e.clientY, key);
+    });
+
+    // Context menu search button click
+    App.dom.contextMenuSearch.addEventListener('click', function () {
+      var key = activeContextMenuKey;
+      dismissContextMenu();
+      if (!key) return;
+
+      var s = App.getState();
+      if (!s.bitbucketConnected) {
+        App.showToast(App.t('searchNoConnection'), 'error');
+        return;
+      }
+
+      // Show loading indicator on the row
+      setRowSearchLoading(key, true);
+
+      App.searchKeyContext(key).then(function (result) {
+        setRowSearchLoading(key, false);
+        var matchCount = result && result.matches ? result.matches.length : 0;
+        if (matchCount > 0) {
+          App.showToast(App.t('searchSingleFound', matchCount), 'success');
+        } else {
+          App.showToast(App.t('searchSingleNone'), 'info');
+        }
+      }).catch(function (err) {
+        setRowSearchLoading(key, false);
+        App.showToast(App.t('searchError', err.message || String(err)), 'error');
+      });
+    });
+
+    // Dismiss context menu on click anywhere and on scroll
+    document.addEventListener('click', dismissContextMenu);
+    App.dom.editorTable.addEventListener('scroll', dismissContextMenu);
+  }
+
+  // ── Row Loading Indicator ──
+  function setRowSearchLoading(key, isLoading) {
+    var table = App.dom.editorTable;
+    var rows = table.querySelectorAll('tbody tr');
+    for (var i = 0; i < rows.length; i++) {
+      var cell = rows[i].querySelector('td:first-child');
+      if (cell && (cell.getAttribute('title') === key || cell.textContent === key)) {
+        if (isLoading) {
+          rows[i].classList.add('search-loading');
+        } else {
+          rows[i].classList.remove('search-loading');
+        }
+        break;
+      }
+    }
+  }
+
+  // ── Batch Search Progress Display ──
+  function showSearchProgress(progress) {
+    var section = App.dom.searchProgressSection;
+    if (!progress || progress.status === 'idle') {
+      section.style.display = 'none';
+      return;
+    }
+    section.style.display = 'block';
+    var pct = progress.total === 0 ? 100 : Math.round((progress.completed / progress.total) * 100);
+    App.dom.searchProgressBar.style.width = pct + '%';
+    App.dom.searchProgressLabel.textContent = pct + '%';
+    App.dom.searchProgressText.textContent = App.t('searchProgressSearching', progress.completed, progress.total);
+    App.dom.searchProgressCount.textContent = '';
+  }
+
+  function hideSearchProgress() {
+    App.dom.searchProgressSection.style.display = 'none';
+  }
+
+  App.showSearchContextMenu = showSearchContextMenu;
+  App.dismissContextMenu = dismissContextMenu;
+  App.getActiveContextMenuKey = getActiveContextMenuKey;
+  App.initSearchUI = initSearchUI;
+  App.setRowSearchLoading = setRowSearchLoading;
+  App.showSearchProgress = showSearchProgress;
+  App.hideSearchProgress = hideSearchProgress;
 })();
