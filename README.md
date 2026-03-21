@@ -1,17 +1,18 @@
 English | [中文](README.zh-TW.md) | [한국어](README.ko.md)
 
-# Frontitude One-Click Translator
+# Frontitude Context-Aware Translator
 
 > **[Try it online](https://howwmingnew.github.io/frontitude-auto-translator/)** — no install needed, runs entirely in your browser.
 
-A browser-based tool that batch-translates Frontitude `language.json` files using DeepL, OpenAI, or Gemini — no backend, no build step, fully client-side.
+A browser-based tool that batch-translates Frontitude `language.json` files using OpenAI or Gemini — with optional Bitbucket integration for context-aware translation. No backend, no build step, fully client-side.
 
 ## Features
 
-- **Multi-provider support** — choose between DeepL, OpenAI, and Gemini
+### Core Translation
+- **Multi-provider support** — choose between OpenAI and Gemini
 - **Drag-and-drop upload** — drop your `language.json` and start translating
 - **Content preview** — full-width Excel-like table to inspect keys and translations
-- **Context prompt** — provide domain context (e.g. "dental implant software") for more accurate OpenAI/Gemini translations
+- **Context prompt** — provide domain context (e.g. "dental implant software") for more accurate translations
 - **Re-select JSON** — switch to a different file without reloading the page
 - **35+ languages** — from Arabic to Vietnamese
 - **Batch translation** — translate all selected languages in one click
@@ -22,21 +23,57 @@ A browser-based tool that batch-translates Frontitude `language.json` files usin
 - **100% client-side** — API calls go directly from your browser to the provider
 - **API key persistence** — optionally save your key in `localStorage`
 
+### Context-Aware Translation (Bitbucket Integration)
+- **Quick / Precise mode toggle** — choose between fast translation or context-enhanced translation
+- **Bitbucket code search** — scans your WPF repo (.xaml / .cs files) to find where each translation key is used
+- **AI context generation** — converts code snippets into human-readable descriptions (e.g. "Button label on the login screen")
+- **Context-aware prompts** — injects per-key context into translation prompts for more accurate, UI-appropriate translations
+- **Expandable context panel** — click any key to see code snippets, AI description, and edit translations inline
+- **Context in edit modal** — context description shown when editing individual cells
+- **Three-phase progress stepper** — shows distinct Search → Generate → Translate phases during Precise mode
+- **Per-key error handling** — failed keys don't block the batch; retry button for failed translations
+- **Multi-language context** — AI descriptions follow app UI language (EN / 繁體中文 / 한국어)
+- **Auto-connect on load** — saved Bitbucket credentials are tested automatically on page load
+
 ## Supported Providers
 
 | Provider | Models | Key Format |
 |----------|--------|------------|
-| DeepL | — (single endpoint) | DeepL API key |
 | OpenAI | `gpt-5.4-mini`, `gpt-5.4`, `gpt-5.4-nano`, `gpt-5-mini` | `sk-...` |
 | Gemini | `gemini-3-flash`, `gemini-3.1-flash-lite`, `gemini-2.5-flash`, `gemini-3.1-pro-preview` | Gemini API key |
 
 ## Quick Start
 
-1. **Open** `index.html` in your browser
+### Basic Translation
+
+1. **Open** the app in your browser
 2. **Upload** your `language.json`
 3. **Select a provider**, paste your API key, and optionally choose a model
-4. *(Optional)* Add a **context prompt** to guide translations (OpenAI/Gemini only)
+4. *(Optional)* Add a **context prompt** to guide translations
 5. Select target languages → click **Translate** → **Download**
+
+### Context-Aware Translation (Precise Mode)
+
+1. **Deploy the CORS proxy** — see [Proxy Setup](#proxy-setup)
+2. **Connect Bitbucket** — enter your workspace, repo, branch, and access token in the sidebar
+3. **Switch to Precise mode** — click the Precise button above Translate
+4. **Translate** — the app will search code context, generate descriptions, then translate with context
+5. **Review context** — click any key to expand the context panel with code snippets and AI descriptions
+
+## Proxy Setup
+
+Bitbucket Cloud requires a CORS proxy for browser-to-API calls. A Cloudflare Worker proxy is included:
+
+```bash
+cd proxy
+npm install
+npx wrangler login
+npx wrangler deploy
+npx wrangler secret put ALLOWED_ORIGIN
+# Enter your app URL (e.g. http://localhost:8080 or your GitHub Pages URL)
+```
+
+Then enter the deployed Worker URL in the app's Bitbucket Connection settings.
 
 ## JSON Format
 
@@ -68,19 +105,27 @@ The translator fills in each empty target-language value using the corresponding
 ## Privacy & Security
 
 - All API calls are made **directly from your browser** to the selected provider
-- There is **no backend server** — the entire app is a single HTML file
-- Your API key is **never sent to any third-party server**
-- Key storage uses `localStorage` and stays on your machine
+- Bitbucket API calls go through **your own CORS proxy** (Cloudflare Worker)
+- There is **no shared backend server** — the app is a static site
+- Your API keys and Bitbucket tokens are stored in `localStorage` and **never sent to any third-party server**
 
 ## Tech Stack
 
-- **Single-file** HTML / CSS / JavaScript
-- **Zero dependencies** — no frameworks, no npm, no build step
-- Works in any modern browser — just open `index.html`
+- **Multi-file architecture** — HTML skeleton + CSS + 9 JavaScript IIFE modules
+- **Zero external JS dependencies** — only Google Fonts (Inter) via CDN
+- **Cloudflare Worker** — CORS proxy for Bitbucket API (optional, for Precise mode)
+- Works in any modern browser — serve via HTTP server for full functionality
 
-## Change History
+## Development
 
-See [openspec/changes/archive/](openspec/changes/archive/) for past design documents, specs, and task lists.
+```bash
+# Serve locally
+python -m http.server 8080
+# or
+npx serve .
+```
+
+Then open http://localhost:8080 in a browser.
 
 ## License
 
