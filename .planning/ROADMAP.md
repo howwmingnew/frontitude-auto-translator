@@ -14,8 +14,8 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Infrastructure** - CORS proxy deployment, Bitbucket connection UI, token storage, and multi-file restructure (completed 2026-03-21)
 - [x] **Phase 2: Code Search Pipeline** - Search Bitbucket for key usage in WPF source code with LocExtension-aware parsing (completed 2026-03-21)
-- [ ] **Phase 3: AI Context Generation** - Generate human-readable context descriptions and inject them into translation prompts
-- [ ] **Phase 4: Context UX** - Mode toggle, expandable context panel, progress indicators, and error handling
+- [x] **Phase 3: AI Context Generation** - Generate human-readable context descriptions and inject them into translation prompts (completed 2026-03-21)
+- [x] **Phase 4: Context UX** - Mode toggle, expandable context panel, progress indicators, and error handling (completed 2026-03-21)
 
 ## Phase Details
 
@@ -92,5 +92,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 |-------|----------------|--------|-----------|
 | 1. Infrastructure | 3/3 | Complete   | 2026-03-21 |
 | 2. Code Search Pipeline | 2/2 | Complete   | 2026-03-21 |
-| 3. AI Context Generation | 2/3 | In Progress|  |
-| 4. Context UX | 1/3 | In Progress|  |
+| 3. AI Context Generation | 3/3 | Complete   | 2026-03-21 |
+| 4. Context UX | 3/3 | Complete   | 2026-03-21 |

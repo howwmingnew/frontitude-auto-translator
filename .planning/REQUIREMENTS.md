@@ -32,8 +32,8 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **UEXP-01**: 使用者可切換快速翻譯（不查情境，同現有）與精準翻譯（帶情境，較慢）兩種模式
 - [x] **UEXP-02**: 點擊 key 行可展開情境面板，顯示程式碼片段、AI 說明，並可行內編輯翻譯結果
 - [x] **UEXP-03**: 精準模式選擇 DeepL 時顯示不相容提示，引導使用 OpenAI/Gemini
-- [ ] **UEXP-04**: 情境搜尋過程顯示 loading 進度指示器，區分搜尋/生成/翻譯階段
-- [ ] **UEXP-05**: 單一 key 的 API 失敗不阻斷整批翻譯，顯示個別錯誤狀態並允許重試
+- [x] **UEXP-04**: 情境搜尋過程顯示 loading 進度指示器，區分搜尋/生成/翻譯階段
+- [x] **UEXP-05**: 單一 key 的 API 失敗不阻斷整批翻譯，顯示個別錯誤狀態並允許重試
 
 ## v2 Requirements
 
@@ -81,8 +81,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | UEXP-01 | Phase 4 | Complete |
 | UEXP-02 | Phase 4 | Complete |
 | UEXP-03 | Phase 4 | Complete |
-| UEXP-04 | Phase 4 | Pending |
-| UEXP-05 | Phase 4 | Pending |
+| UEXP-04 | Phase 4 | Complete |
+| UEXP-05 | Phase 4 | Complete |
 
 **Coverage:**
 - v1 requirements: 16 total
