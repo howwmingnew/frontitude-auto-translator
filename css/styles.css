@@ -1115,8 +1115,12 @@ table.editor-table {
   color: white;
 }
 
-.cell-edit-modal-actions .btn-save:hover {
+.cell-edit-modal-actions .btn-save:hover:not(:disabled) {
   background: var(--primary-hover);
+}
+.cell-edit-modal-actions .btn-save:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* Test API Key button */

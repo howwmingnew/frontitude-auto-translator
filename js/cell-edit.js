@@ -172,6 +172,7 @@
     });
 
     App.dom.cellEditSave.addEventListener('click', function () {
+      if (App.dom.cellEditSave.disabled) return;
       var key = editModalState.key;
       var lang = editModalState.lang;
       if (!key || !lang) return;
