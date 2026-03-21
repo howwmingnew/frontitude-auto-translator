@@ -12,7 +12,7 @@ This milestone adds context-aware translation to the existing Frontitude transla
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Infrastructure** - CORS proxy deployment, Bitbucket connection UI, token security, and ES Modules file split
+- [ ] **Phase 1: Infrastructure** - CORS proxy deployment, Bitbucket connection UI, token storage, and multi-file restructure
 - [ ] **Phase 2: Code Search Pipeline** - Search Bitbucket for key usage in WPF source code with LocExtension-aware parsing
 - [ ] **Phase 3: AI Context Generation** - Generate human-readable context descriptions and inject them into translation prompts
 - [ ] **Phase 4: Context UX** - Mode toggle, expandable context panel, progress indicators, and error handling
@@ -28,11 +28,12 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. User can enter Bitbucket workspace, repo slug, and access token in the app UI and the connection is validated with a test API call
   3. The access token is stored server-side in the Cloudflare Worker, not in browser localStorage or sessionStorage
   4. The app loads as ES Modules served from a local HTTP server, with existing translation functionality (upload, translate, download) still working identically
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 01-01: TBD
-- [ ] 01-02: TBD
+- [ ] 01-01-PLAN.md -- Cloudflare Worker CORS proxy for Bitbucket API forwarding
+- [ ] 01-02-PLAN.md -- Split monolithic index.html into multi-file structure (CSS + 9 JS files)
+- [ ] 01-03-PLAN.md -- Bitbucket connection UI in sidebar drawer with Test Connection
 
 ### Phase 2: Code Search Pipeline
 **Goal**: The app can search a Bitbucket repo for where each translation key is used in WPF code and display structured results
@@ -86,7 +87,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Infrastructure | 0/? | Not started | - |
+| 1. Infrastructure | 0/3 | Planning complete | - |
 | 2. Code Search Pipeline | 0/? | Not started | - |
 | 3. AI Context Generation | 0/? | Not started | - |
 | 4. Context UX | 0/? | Not started | - |
