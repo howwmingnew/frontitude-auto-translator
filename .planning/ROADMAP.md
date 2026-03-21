@@ -26,12 +26,12 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Success Criteria** (what must be TRUE):
   1. A Cloudflare Worker CORS proxy is deployed and successfully forwards a Bitbucket API request from the browser, returning valid data
   2. User can enter Bitbucket workspace, repo slug, and access token in the app UI and the connection is validated with a test API call
-  3. The access token is stored server-side in the Cloudflare Worker, not in browser localStorage or sessionStorage
-  4. The app loads as ES Modules served from a local HTTP server, with existing translation functionality (upload, translate, download) still working identically
+  3. Token stored in localStorage for v1 (server-side storage deferred) -- per CONTEXT.md locked decision, token follows the same localStorage pattern as existing API keys; server-side Cloudflare Worker storage (INFRA-03 formal requirement) is deferred to a future version
+  4. The app loads as multi-file structure (IIFE + script tags) served from a local HTTP server, with existing translation functionality (upload, translate, download) still working identically
 **Plans**: 3 plans
 
 Plans:
-- [ ] 01-01-PLAN.md -- Cloudflare Worker CORS proxy for Bitbucket API forwarding
+- [ ] 01-01-PLAN.md -- Cloudflare Worker CORS proxy for Bitbucket API forwarding (pure CORS passthrough, forwards browser Authorization header)
 - [ ] 01-02-PLAN.md -- Split monolithic index.html into multi-file structure (CSS + 9 JS files)
 - [ ] 01-03-PLAN.md -- Bitbucket connection UI in sidebar drawer with Test Connection
 
