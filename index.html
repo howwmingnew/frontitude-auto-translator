@@ -137,6 +137,9 @@
             <textarea id="context-prompt" class="context-prompt" rows="2" data-i18n-placeholder="contextPromptPlaceholder" placeholder="e.g. dental implant software"></textarea>
             <div class="deepl-note" id="deepl-note" data-i18n="contextPromptDeeplNote">Context prompt is only used with OpenAI and Gemini.</div>
           </div>
+          <div class="deepl-context-warning" id="deepl-context-warning" style="display:none">
+            <span data-i18n="deeplContextWarning"></span>
+          </div>
         </div>
       </div>
 
@@ -157,6 +160,16 @@
 
       <!-- Action -->
       <div class="card action-section" id="action-section">
+        <div class="mode-toggle" id="mode-toggle">
+          <button class="mode-btn mode-btn--active" data-mode="quick" id="mode-quick">
+            <span class="mode-icon">&#9889;</span>
+            <span data-i18n="modeQuick">Quick</span>
+          </button>
+          <button class="mode-btn" data-mode="precise" id="mode-precise" title="">
+            <span class="mode-icon">&#128269;</span>
+            <span data-i18n="modePrecise">Precise</span>
+          </button>
+        </div>
         <button class="btn btn-primary" id="translate-btn" data-i18n="translateBtn" disabled>Translate</button>
         <div id="search-progress-section" class="progress-section" style="display:none">
           <div class="progress-header">
@@ -169,6 +182,22 @@
           </div>
         </div>
         <div class="progress-section" id="progress-section">
+          <div class="progress-stepper" id="progress-stepper" style="display:none">
+            <div class="stepper-step" data-step="search">
+              <span class="stepper-indicator">&#9675;</span>
+              <span data-i18n="stepSearch">Search Context</span>
+            </div>
+            <div class="stepper-divider"></div>
+            <div class="stepper-step" data-step="generate">
+              <span class="stepper-indicator">&#9675;</span>
+              <span data-i18n="stepGenerate">Generate Descriptions</span>
+            </div>
+            <div class="stepper-divider"></div>
+            <div class="stepper-step" data-step="translate">
+              <span class="stepper-indicator">&#9675;</span>
+              <span data-i18n="stepTranslate">Translate</span>
+            </div>
+          </div>
           <div class="progress-label" id="progress-label">0%</div>
           <div class="progress-bar-container">
             <div class="progress-bar" id="progress-bar"></div>
@@ -178,6 +207,10 @@
           <div class="progress-chips" id="progress-chips"></div>
         </div>
         <div class="error-msg" id="translate-error"></div>
+        <div class="retry-section" id="retry-section" style="display:none">
+          <span class="retry-count" id="retry-count"></span>
+          <button class="btn btn-retry" id="retry-btn" data-i18n="retryFailed">Retry Failed</button>
+        </div>
       </div>
 
       <!-- Download section removed: export-btn is the sole download entry point -->

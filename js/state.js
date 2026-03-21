@@ -27,6 +27,10 @@
     bitbucketConnected: false,
     contextResults: new Map(),
     searchProgress: null,
+    translateMode: 'quick',
+    expandedPanelKey: null,
+    failedKeys: [],
+    currentStep: null,
   };
 
   function setState(patch) {

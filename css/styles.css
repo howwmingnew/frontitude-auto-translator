@@ -1486,3 +1486,266 @@ a.btn-test-key {
 
 /* Hidden file input */
 #file-input { display: none; }
+
+/* ── Phase 4: Mode Toggle ── */
+.mode-toggle {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+.mode-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: var(--text);
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.mode-btn--active {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+.mode-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.mode-icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+/* ── Phase 4: DeepL Context Warning ── */
+.deepl-context-warning {
+  background: #fef3cd;
+  color: #856404;
+  border: 1px solid #ffc107;
+  border-radius: 0.375rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.8125rem;
+  margin-top: 0.5rem;
+}
+[data-theme="dark"] .deepl-context-warning {
+  background: #332d1a;
+  color: #ffda6a;
+  border-color: #665d2b;
+}
+
+/* ── Phase 4: Progress Stepper ── */
+.progress-stepper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+.stepper-step {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  white-space: nowrap;
+}
+.stepper-indicator {
+  font-size: 0.875rem;
+  line-height: 1;
+}
+.stepper-divider {
+  flex: 1;
+  height: 2px;
+  background: var(--border);
+  min-width: 1rem;
+}
+.stepper-step--active {
+  color: var(--primary);
+  font-weight: 600;
+}
+.stepper-step--active .stepper-indicator::before {
+  content: '\25CF';
+}
+.stepper-step--active .stepper-indicator {
+  font-size: 0;
+}
+.stepper-step--active .stepper-indicator::before {
+  font-size: 0.875rem;
+}
+.stepper-step--done {
+  color: var(--success);
+}
+.stepper-step--done .stepper-indicator {
+  font-size: 0;
+}
+.stepper-step--done .stepper-indicator::before {
+  content: '\2713';
+  font-size: 0.875rem;
+}
+
+/* ── Phase 4: Context Panel Accordion ── */
+.context-panel-row td {
+  padding: 0 !important;
+}
+.context-panel-cell {
+  padding: 0.75rem 1rem;
+}
+.context-panel {
+  border-left: 3px solid var(--primary);
+  background: var(--bg-alt);
+  padding: 0.75rem 1rem;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+[data-theme="dark"] .context-panel {
+  background: var(--bg-alt);
+}
+.context-panel-file {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-bottom: 0.375rem;
+}
+.context-panel-snippet {
+  margin-bottom: 0.5rem;
+}
+.context-panel-code {
+  background: var(--bg);
+  font-family: 'Courier New', monospace;
+  font-size: 0.8125rem;
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  overflow-x: auto;
+  white-space: pre;
+  margin: 0;
+}
+[data-theme="dark"] .context-panel-code {
+  background: var(--card);
+}
+.context-panel-description {
+  font-size: 0.8125rem;
+  color: var(--text);
+  margin-top: 0.5rem;
+  line-height: 1.5;
+}
+.context-panel-desc-icon {
+  margin-right: 0.25rem;
+}
+.context-panel-no-desc {
+  color: var(--text-muted);
+  font-style: italic;
+}
+.context-panel-empty {
+  color: var(--text-muted);
+  font-style: italic;
+  font-size: 0.8125rem;
+}
+.context-panel-translations {
+  margin-top: 0.75rem;
+}
+.context-panel-lang-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.375rem;
+}
+.context-panel-lang-row label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  min-width: 3rem;
+  text-transform: uppercase;
+}
+.context-panel-input {
+  flex: 1;
+  padding: 0.375rem 0.625rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 0.8125rem;
+  background: var(--card);
+  color: var(--text);
+  outline: none;
+  transition: border-color var(--transition-base), box-shadow var(--transition-base);
+}
+.context-panel-input:focus {
+  border-color: var(--primary);
+  box-shadow: var(--focus-ring);
+}
+.context-panel-save {
+  padding: 0.25rem 0.625rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--card);
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transition-base), color var(--transition-base);
+}
+.context-panel-save:hover {
+  background: var(--primary-light);
+  color: var(--primary);
+}
+.context-panel-more {
+  background: none;
+  border: none;
+  color: var(--primary);
+  cursor: pointer;
+  font-size: 0.75rem;
+  padding: 0.25rem 0;
+  margin-top: 0.25rem;
+}
+.context-panel-more:hover {
+  text-decoration: underline;
+}
+
+/* ── Phase 4: Error Cell Styling ── */
+.editor-table td.cell-error {
+  background: #fff0f0;
+  color: #c53030;
+  position: relative;
+}
+[data-theme="dark"] .editor-table td.cell-error {
+  background: #2d1b1b;
+  color: #feb2b2;
+}
+.editor-table td.cell-error::before {
+  content: '\2717 ';
+}
+
+/* ── Phase 4: Retry Section ── */
+.retry-section {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+.retry-count {
+  font-size: 0.8125rem;
+  color: var(--error);
+  font-weight: 600;
+}
+.btn-retry {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: #e53e3e;
+  color: #fff;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transition-base);
+}
+.btn-retry:hover {
+  background: #c53030;
+}
+
+/* ── Phase 4: Key Column Hover ── */
+.editor-table tbody td:first-child {
+  cursor: pointer;
+}
+.editor-table tbody tr:hover td:first-child {
+  background: var(--primary-light);
+}

@@ -81,5 +81,13 @@
     searchProgressCount: document.getElementById('search-progress-count'),
     contextMenu: document.getElementById('context-menu'),
     contextMenuSearch: document.getElementById('context-menu-search'),
+    modeToggle: document.getElementById('mode-toggle'),
+    modeQuick: document.getElementById('mode-quick'),
+    modePrecise: document.getElementById('mode-precise'),
+    deeplWarning: document.getElementById('deepl-context-warning'),
+    progressStepper: document.getElementById('progress-stepper'),
+    retrySection: document.getElementById('retry-section'),
+    retryCount: document.getElementById('retry-count'),
+    retryBtn: document.getElementById('retry-btn'),
   };
 })();
