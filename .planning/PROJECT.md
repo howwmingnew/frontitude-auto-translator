@@ -24,6 +24,9 @@
 - ✓ Content Preview Excel 風格表格 — existing
 - ✓ 單格點擊翻譯 — existing
 - ✓ 翻譯結果 JSON 下載 — existing
+- ✓ Cloudflare Worker CORS proxy for Bitbucket API — Validated in Phase 1: Infrastructure
+- ✓ Bitbucket 連線 UI（Workspace, Repo, Branch, Token, Proxy URL）— Validated in Phase 1: Infrastructure
+- ✓ 多檔案架構（IIFE + window.App namespace）— Validated in Phase 1: Infrastructure
 
 ### Active
 
@@ -52,7 +55,7 @@
 - 專案使用 WPF + MFC 混合架構，i18n 透過自訂 LocExtension markup extension 實現
 - Bitbucket Cloud，使用 Repository Access Token 認證
 - 目標使用者包含非工程師（翻譯人員），情境說明需要淺顯易懂
-- 現有 app 是單一 index.html 架構，這次可以拆分成多個 JS/CSS 檔案
+- 現有 app 已拆分為多檔案架構（Phase 1 完成），使用 IIFE + window.App namespace
 - 現有 app 已有三語言 UI（EN / zh-TW / ko），情境說明需跟隨 app 語言
 
 ## Constraints
@@ -70,8 +73,8 @@
 | 只掃描 WPF 檔案 | MFC 部分不需要翻譯 | — Pending |
 | 只查未翻譯 key 的情境 | 節省 API 配額與時間 | — Pending |
 | 分快速/精準兩種翻譯模式 | 解決批次翻譯效能與情境查詢的矛盾 | — Pending |
-| 允許拆分多檔案架構 | 功能增加後單檔太複雜 | — Pending |
+| 允許拆分多檔案架構 | 功能增加後單檔太複雜 | ✓ Phase 1 |
 | AI 生成情境說明 | 給非工程師看，需要自然語言描述 | — Pending |
 
 ---
-*Last updated: 2026-03-20 after initialization*
+*Last updated: 2026-03-21 after Phase 1 completion*
