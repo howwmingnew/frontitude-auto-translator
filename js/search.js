@@ -245,4 +245,7 @@
   App.getContextCache = getContextCache;
   App.detectLocExtension = detectLocExtension;
   App.initSearch = initSearch;
+  App._createConcurrencyLimiter = createConcurrencyLimiter;
+  App._withRetry = withRetry;
+  App._wait = wait;
 })();
