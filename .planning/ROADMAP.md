@@ -13,7 +13,7 @@ This milestone adds context-aware translation to the existing Frontitude transla
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Infrastructure** - CORS proxy deployment, Bitbucket connection UI, token storage, and multi-file restructure (completed 2026-03-21)
-- [ ] **Phase 2: Code Search Pipeline** - Search Bitbucket for key usage in WPF source code with LocExtension-aware parsing
+- [x] **Phase 2: Code Search Pipeline** - Search Bitbucket for key usage in WPF source code with LocExtension-aware parsing (completed 2026-03-21)
 - [ ] **Phase 3: AI Context Generation** - Generate human-readable context descriptions and inject them into translation prompts
 - [ ] **Phase 4: Context UX** - Mode toggle, expandable context panel, progress indicators, and error handling
 
@@ -88,6 +88,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Infrastructure | 3/3 | Complete   | 2026-03-21 |
-| 2. Code Search Pipeline | 0/2 | Not started | - |
+| 2. Code Search Pipeline | 2/2 | Complete   | 2026-03-21 |
 | 3. AI Context Generation | 0/? | Not started | - |
 | 4. Context UX | 0/? | Not started | - |
