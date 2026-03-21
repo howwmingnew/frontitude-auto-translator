@@ -211,6 +211,9 @@
       App.startTranslation();
     });
 
+    // Retry failed keys button
+    App.dom.retryBtn.addEventListener('click', function () { App.retryFailedKeys(); });
+
     // Export button
     App.dom.exportBtn.addEventListener('click', App.downloadJsonData);
 

@@ -53,9 +53,12 @@
   // ── Translation ──
   async function startTranslation() {
     var s = App.getState();
-    App.setState({ translating: true });
+    App.setState({ translating: true, failedKeys: [] });
     App.updateTranslateBtn();
     App.hideError(App.dom.translateError);
+    App.hideRetryButton();
+
+    var isPrecise = App.getState().translateMode === 'precise';
 
     App.dom.progressSection.style.display = 'block';
 
@@ -89,6 +92,7 @@
     var completedBatches = 0;
     var simulatedPct = 0;
     var simTimer = null;
+    var failedKeys = [];
 
     function updateProgress(jumpTo) {
       if (simTimer) { clearInterval(simTimer); simTimer = null; }
@@ -125,7 +129,12 @@
 
     // ── Phase A: Search code context (precise mode) ──
     var allKeysToSearch = [];
-    if (s.bitbucketConnected && s.provider !== 'deepl') {
+    if (isPrecise && s.bitbucketConnected && s.provider !== 'deepl') {
+      if (isPrecise) {
+        App.showStepper();
+        App.updateStepper('search');
+      }
+
       // Collect all untranslated keys across all target languages (deduplicated)
       var keySet = {};
       for (var si = 0; si < langBatchInfo.length; si++) {
@@ -145,11 +154,22 @@
     }
 
     // ── Phase B: Generate context descriptions (precise mode) ──
-    if (s.bitbucketConnected && s.provider !== 'deepl' && allKeysToSearch.length > 0) {
+    if (isPrecise && s.bitbucketConnected && s.provider !== 'deepl' && allKeysToSearch.length > 0) {
+      if (isPrecise) {
+        App.updateStepper('generate');
+      }
       App.dom.progressText.textContent = App.t('progressGeneratingContext', allKeysToSearch.length);
       await App.generateBatchContext(allKeysToSearch, function (p) {
         // Context generation progress -- leave progress bar at 0% during generation
       });
+    }
+
+    // ── Phase C: Translate ──
+    if (isPrecise) {
+      App.updateStepper('translate');
+      App.dom.progressBar.style.width = '0%';
+      App.dom.progressLabel.textContent = '0%';
+      simulatedPct = 0;
     }
 
     try {
@@ -184,48 +204,78 @@
               startSimulatedProgress(simTarget);
               // Look up context descriptions for this batch's keys
               var batchKeys = keysToTranslate.slice(batchStart, batchStart + batchSize);
-              var batchContexts = batchKeys.map(function (key) {
-                var cached = App.getContextCache().get(key);
-                return (cached && cached.description) || '';
-              });
-              var translated = await App.callTranslateAPI(batch, lang, batchContexts);
-              translatedTexts = translatedTexts.concat(translated);
-              translatedCount += batch.length;
+
+              try {
+                var batchContexts = batchKeys.map(function (key) {
+                  var cached = App.getContextCache().get(key);
+                  return (cached && cached.description) || '';
+                });
+                var translated = await App.callTranslateAPI(batch, lang, batchContexts);
+                translatedTexts = translatedTexts.concat(translated);
+                translatedCount += batch.length;
+              } catch (batchErr) {
+                // Mark all keys in this failed batch
+                batchKeys.forEach(function (key) {
+                  failedKeys.push({ key: key, lang: lang, error: batchErr.message || String(batchErr) });
+                });
+                // Fill with empty strings to maintain alignment
+                for (var f = 0; f < batch.length; f++) {
+                  translatedTexts.push('');
+                }
+                translatedCount += batch.length;
+              }
+
               completedBatches++;
               updateProgress();
               App.dom.progressTranslatedCount.textContent = App.t('progressTranslatedCount', translatedCount, totalTexts);
             }
-
-            // Validate translation count
-            if (translatedTexts.length !== keysToTranslate.length) {
-              throw new Error(App.t('errReturnedCount',
-                App.PROVIDER_CONFIG[App.getState().provider].label,
-                translatedTexts.length, keysToTranslate.length, lang.toUpperCase()));
-            }
           }
 
-          // Build language block: merge with existing data
-          var langBlock = isRetranslate ? {} : Object.assign({}, result[lang] || {});
-          keysToTranslate.forEach(function (key, idx) {
-            langBlock[key] = translatedTexts[idx];
-            newAiCells.add(lang + ':' + key);
-          });
-          result[lang] = langBlock;
+          // Build language block: merge with existing data (skip failed keys)
+          if (textsToTranslate.length > 0) {
+            var langBlock = isRetranslate ? {} : Object.assign({}, result[lang] || {});
+            keysToTranslate.forEach(function (key, idx) {
+              var isFailed = failedKeys.some(function (fk) { return fk.key === key && fk.lang === lang; });
+              if (!isFailed && translatedTexts[idx]) {
+                langBlock[key] = translatedTexts[idx];
+                newAiCells.add(lang + ':' + key);
+              }
+            });
+            result[lang] = langBlock;
+          }
 
-          App.updateProgressChip(lang, 'done');
+          // Determine chip state: error if any keys failed for this lang, else done
+          var langHasErrors = failedKeys.some(function (fk) { return fk.lang === lang; });
+          App.updateProgressChip(lang, langHasErrors ? 'error' : 'done');
+
         } catch (langErr) {
+          // Fatal error for this language (not a batch error)
           App.updateProgressChip(lang, 'error');
-          throw langErr;
+          keysToTranslate.forEach(function (key) {
+            failedKeys.push({ key: key, lang: lang, error: langErr.message || String(langErr) });
+          });
         }
       }
 
       if (simTimer) { clearInterval(simTimer); simTimer = null; }
-      App.dom.progressText.textContent = App.t('progressDone', targetLangs.length);
       App.dom.progressLabel.textContent = '100%';
       App.dom.progressBar.style.width = '100%';
-      App.setState({ jsonData: result, aiTranslatedCells: newAiCells, originalTranslations: newOriginals });
+      App.setState({ jsonData: result, aiTranslatedCells: newAiCells, originalTranslations: newOriginals, failedKeys: failedKeys });
       App.renderEditorTable();
-      App.showToast(App.t('toastTranslateComplete', targetLangs.length), 'success');
+
+      if (isPrecise) {
+        App.completeStepper();
+      }
+
+      if (failedKeys.length > 0) {
+        App.markFailedCells(failedKeys);
+        App.showRetryButton(failedKeys.length);
+        App.dom.progressText.textContent = App.t('progressDone', targetLangs.length);
+        App.showToast(App.t('progressDone', targetLangs.length) + ' (' + failedKeys.length + ' failed)', 'warning');
+      } else {
+        App.dom.progressText.textContent = App.t('progressDone', targetLangs.length);
+        App.showToast(App.t('toastTranslateComplete', targetLangs.length), 'success');
+      }
     } catch (err) {
       App.showError(App.dom.translateError, err.message);
       App.showToast(App.t('toastError', err.message), 'error');
@@ -233,6 +283,88 @@
       if (simTimer) { clearInterval(simTimer); simTimer = null; }
       App.setState({ translating: false });
       App.updateTranslateBtn();
+      if (isPrecise && failedKeys.length === 0) {
+        setTimeout(function () { App.hideStepper(); }, 2000);
+      }
+    }
+  }
+
+  // ── Retry Failed Keys ──
+  async function retryFailedKeys() {
+    var s = App.getState();
+    var currentFailedKeys = s.failedKeys;
+    if (!currentFailedKeys || currentFailedKeys.length === 0) return;
+
+    App.setState({ translating: true });
+    App.updateTranslateBtn();
+    App.hideRetryButton();
+    App.dom.progressSection.style.display = 'block';
+
+    var result = JSON.parse(JSON.stringify(s.jsonData));
+    var newAiCells = new Set(s.aiTranslatedCells);
+    var newFailedKeys = [];
+    var total = currentFailedKeys.length;
+    var done = 0;
+
+    // Group by lang
+    var byLang = {};
+    currentFailedKeys.forEach(function (f) {
+      if (!byLang[f.lang]) byLang[f.lang] = [];
+      byLang[f.lang].push(f.key);
+    });
+
+    App.dom.progressBar.style.width = '0%';
+    App.dom.progressLabel.textContent = '0%';
+
+    var langs = Object.keys(byLang);
+    for (var i = 0; i < langs.length; i++) {
+      var lang = langs[i];
+      var keys = byLang[lang];
+      var texts = keys.map(function (k) { return s.jsonData.en[k]; });
+      var batchSize = 10;
+
+      App.dom.progressText.textContent = App.t('progressTranslating', lang.toUpperCase(), i + 1, langs.length);
+
+      for (var batchStart = 0; batchStart < texts.length; batchStart += batchSize) {
+        var batch = texts.slice(batchStart, batchStart + batchSize);
+        var batchKeys = keys.slice(batchStart, batchStart + batchSize);
+
+        try {
+          var batchContexts = batchKeys.map(function (key) {
+            var cached = App.getContextCache().get(key);
+            return (cached && cached.description) || '';
+          });
+          var translated = await App.callTranslateAPI(batch, lang, batchContexts);
+          batchKeys.forEach(function (key, idx) {
+            if (!result[lang]) result[lang] = {};
+            result[lang][key] = translated[idx];
+            newAiCells.add(lang + ':' + key);
+          });
+          done += batchKeys.length;
+        } catch (err) {
+          batchKeys.forEach(function (key) {
+            newFailedKeys.push({ key: key, lang: lang, error: err.message || String(err) });
+          });
+          done += batchKeys.length;
+        }
+
+        var pct = Math.round((done / total) * 100);
+        App.dom.progressBar.style.width = pct + '%';
+        App.dom.progressLabel.textContent = pct + '%';
+      }
+    }
+
+    App.setState({ jsonData: result, aiTranslatedCells: newAiCells, failedKeys: newFailedKeys, translating: false });
+    App.updateTranslateBtn();
+    App.renderEditorTable();
+
+    if (newFailedKeys.length > 0) {
+      App.markFailedCells(newFailedKeys);
+      App.showRetryButton(newFailedKeys.length);
+      App.showToast(App.t('retryCount', newFailedKeys.length), 'warning');
+    } else {
+      App.hideRetryButton();
+      App.showToast(App.t('toastTranslateComplete', langs.length), 'success');
     }
   }
 
@@ -240,4 +372,5 @@
   App.closeTranslateConfirm = closeTranslateConfirm;
   App.startTranslation = startTranslation;
   App.doTranslate = startTranslation;
+  App.retryFailedKeys = retryFailedKeys;
 })();
