@@ -76,11 +76,12 @@ Plans:
   3. When Precise mode is selected with DeepL as provider, the app displays an incompatibility notice explaining that context-enhanced translation requires OpenAI or Gemini
   4. During Precise mode translation, a progress indicator shows distinct phases (searching code, generating descriptions, translating) so the user understands what is happening
   5. If a single key's context lookup or translation fails, the rest of the batch continues unblocked, and the failed key shows an error state with a retry button
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 04-01: TBD
-- [ ] 04-02: TBD
+- [ ] 04-01-PLAN.md -- Foundation: HTML scaffolding, state fields, DOM refs, i18n strings, CSS, mode toggle logic, DeepL warning
+- [ ] 04-02-PLAN.md -- Expandable context panel: accordion per key row with code snippet, AI description, inline translation editing
+- [ ] 04-03-PLAN.md -- Progress stepper, per-key error tracking, batch retry, and full phase verification
 
 ## Progress
 
@@ -92,4 +93,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 | 1. Infrastructure | 3/3 | Complete   | 2026-03-21 |
 | 2. Code Search Pipeline | 2/2 | Complete   | 2026-03-21 |
 | 3. AI Context Generation | 2/3 | In Progress|  |
-| 4. Context UX | 0/? | Not started | - |
+| 4. Context UX | 0/3 | Not started | - |
