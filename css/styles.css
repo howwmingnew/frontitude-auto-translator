@@ -1014,6 +1014,27 @@ table.editor-table {
   white-space: pre-wrap;
 }
 
+.cell-edit-context {
+  margin-bottom: 0.5rem;
+  padding: 0.5rem 0.625rem;
+  background: var(--bg-alt);
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--primary);
+}
+.cell-edit-context-label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-bottom: 0.25rem;
+}
+.cell-edit-context-text {
+  font-size: 0.8125rem;
+  color: var(--text);
+  line-height: 1.5;
+}
+
 .cell-edit-modal textarea {
   width: 100%;
   min-height: 100px;

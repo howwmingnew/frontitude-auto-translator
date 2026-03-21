@@ -54,6 +54,8 @@
     cellEditTextarea: document.getElementById('cell-edit-textarea'),
     cellEditSource: document.getElementById('cell-edit-source'),
     cellEditSourceLabel: document.getElementById('cell-edit-source-label'),
+    cellEditContext: document.getElementById('cell-edit-context'),
+    cellEditContextText: document.getElementById('cell-edit-context-text'),
     cellEditSave: document.getElementById('cell-edit-save'),
     cellEditCancel: document.getElementById('cell-edit-cancel'),
     cellEditRevert: document.getElementById('cell-edit-revert'),

@@ -40,6 +40,17 @@
 
     App.dom.cellEditTextarea.value = value || '';
 
+    // Context description from cache
+    var cachedCtx = App.getContextCache().get(key);
+    var ctxDesc = cachedCtx && cachedCtx.description ? cachedCtx.description : '';
+    if (ctxDesc) {
+      App.dom.cellEditContext.style.display = '';
+      App.dom.cellEditContextText.textContent = ctxDesc;
+    } else {
+      App.dom.cellEditContext.style.display = 'none';
+      App.dom.cellEditContextText.textContent = '';
+    }
+
     // Revert button: enabled if textarea differs from imported value
     updateRevertBtn();
 
