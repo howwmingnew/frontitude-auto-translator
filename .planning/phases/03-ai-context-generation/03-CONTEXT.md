@@ -18,7 +18,7 @@ Transform raw code search results (from Phase 2) into human-readable context des
 - Batching: 10-20 keys per API call, send code snippets in bulk and get back descriptions in bulk
 - Output format: 1-2 sentence natural language description per key (e.g., "Button label on the login settings screen")
 - Caching: store generated descriptions back into Phase 2's contextCache Map (extend the existing result object with a `description` field), same session = no re-generation
-- Language: always generate in English -- context descriptions are primarily for AI translation consumption, not human display
+- Language: generate in the current app UI language (EN/zh-TW/ko) -- context descriptions will be shown to users in Phase 4's context panel, so they must follow the interface language. English-only applies to internal batch translation text the user never sees.
 
 ### Translation Prompt Injection
 - Format: change from JSON string array to JSON object array when context is available
@@ -108,7 +108,6 @@ Transform raw code search results (from Phase 2) into human-readable context des
 <deferred>
 ## Deferred Ideas
 
-- Context description in app UI language (EN/zh-TW/ko) -- could be added later if human-facing display needs localized descriptions
 - Quality validation of AI-generated context -- could add basic format checking if issues arise
 - Translation edit feedback loop (CTXE-01) -- v2 requirement
 - Context confidence indicator (CTXE-02) -- v2 requirement
