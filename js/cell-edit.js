@@ -197,6 +197,9 @@
 
     // ── Table click handler ──
     App.dom.editorTable.addEventListener('click', function (e) {
+      // Skip clicks inside context panel accordion rows
+      if (e.target.closest('.context-panel-row')) return;
+
       // Guard: ignore text selection
       var sel = window.getSelection();
       if (sel && sel.toString().length > 0) return;
@@ -210,7 +213,13 @@
       // Determine column index (0 = Key, 1+ = languages)
       var cells = Array.prototype.slice.call(tr.children);
       var colIndex = cells.indexOf(td);
-      if (colIndex <= 0) return; // ignore Key column
+      if (colIndex === 0) {
+        // Key column click -- toggle context panel accordion
+        var keyCell = tr.children[0];
+        var key = keyCell.getAttribute('title') || keyCell.textContent;
+        App.toggleContextPanel(tr, key);
+        return;
+      }
 
       // Build langs array matching table columns
       var s = App.getState();
