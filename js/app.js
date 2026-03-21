@@ -36,6 +36,7 @@
     App.initProvider();
     App.initBitbucket();
     App.initSearchUI();
+    App.initModeToggle();
 
     // ── Collapsible sections ──
     App.initCollapsible(App.dom.providerCollapsible, App.dom.providerCollapsibleBody, 'collapse_provider');
@@ -43,6 +44,10 @@
 
     // ── Cell edit events ──
     App.initCellEditEvents();
+
+    // ── Mode toggle events ──
+    App.dom.modeQuick.addEventListener('click', function () { App.setTranslateMode('quick'); });
+    App.dom.modePrecise.addEventListener('click', function () { App.setTranslateMode('precise'); });
 
     // ── Event listeners ──
 
@@ -77,6 +82,7 @@
       App.loadProviderModel(provider);
       App.updateTranslateBtn();
       App.updateTestKeyBtn();
+      App.updateDeeplWarning();
     });
 
     // Model change

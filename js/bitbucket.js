@@ -124,11 +124,13 @@
       App.setState({ bitbucketConnected: true });
       updateBadge('connected');
       App.showToast(App.t('bbConnectSuccess'), 'success');
+      if (App.updatePreciseButtonState) App.updatePreciseButtonState();
     })
     .catch(function (err) {
       App.setState({ bitbucketConnected: false });
       updateBadge('error');
       App.showToast(App.t('bbConnectFailed', err.message), 'error');
+      if (App.updatePreciseButtonState) App.updatePreciseButtonState();
     })
     .finally(function () {
       updateTestBtnState();

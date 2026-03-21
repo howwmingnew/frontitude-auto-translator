@@ -648,4 +648,47 @@
   App.setRowSearchLoading = setRowSearchLoading;
   App.showSearchProgress = showSearchProgress;
   App.hideSearchProgress = hideSearchProgress;
+
+  // ── Mode Toggle ──
+  function initModeToggle() {
+    var saved = localStorage.getItem('translate_mode');
+    var mode = saved === 'precise' ? 'precise' : 'quick';
+    App.setState({ translateMode: mode });
+    App.dom.modeQuick.classList.toggle('mode-btn--active', mode === 'quick');
+    App.dom.modePrecise.classList.toggle('mode-btn--active', mode === 'precise');
+    if (!App.getState().bitbucketConnected) {
+      App.dom.modePrecise.disabled = true;
+      App.dom.modePrecise.title = App.t('modePreciseDisabled');
+    }
+    updateDeeplWarning();
+  }
+
+  function setTranslateMode(mode) {
+    if (mode === 'precise' && !App.getState().bitbucketConnected) return;
+    App.setState({ translateMode: mode });
+    localStorage.setItem('translate_mode', mode);
+    App.dom.modeQuick.classList.toggle('mode-btn--active', mode === 'quick');
+    App.dom.modePrecise.classList.toggle('mode-btn--active', mode === 'precise');
+    updateDeeplWarning();
+  }
+
+  function updateDeeplWarning() {
+    var s = App.getState();
+    var show = s.translateMode === 'precise' && s.provider === 'deepl';
+    App.dom.deeplWarning.style.display = show ? 'block' : 'none';
+  }
+
+  function updatePreciseButtonState() {
+    var connected = App.getState().bitbucketConnected;
+    App.dom.modePrecise.disabled = !connected;
+    App.dom.modePrecise.title = connected ? '' : App.t('modePreciseDisabled');
+    if (!connected && App.getState().translateMode === 'precise') {
+      setTranslateMode('quick');
+    }
+  }
+
+  App.initModeToggle = initModeToggle;
+  App.setTranslateMode = setTranslateMode;
+  App.updateDeeplWarning = updateDeeplWarning;
+  App.updatePreciseButtonState = updatePreciseButtonState;
 })();
