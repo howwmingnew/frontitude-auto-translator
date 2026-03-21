@@ -784,4 +784,174 @@
   App.setTranslateMode = setTranslateMode;
   App.updateDeeplWarning = updateDeeplWarning;
   App.updatePreciseButtonState = updatePreciseButtonState;
+
+  // ── Context Panel Accordion ──
+
+  function buildPanelHTML(key, cached) {
+    var html = '<div class="context-panel">';
+    var hasContext = cached && cached.matches && cached.matches.length > 0;
+
+    if (!hasContext) {
+      html += '<div class="context-panel-empty">' + App.t('contextPanelEmpty') + '</div>';
+    } else {
+      // Code snippet section -- first match only
+      var first = cached.matches[0];
+      html += '<div class="context-panel-snippet">';
+      html += '<div class="context-panel-file">&#128196; ' + escapeHtml(first.file) + ':' + first.line + '</div>';
+      html += '<pre class="context-panel-code">' + escapeHtml(first.snippet) + '</pre>';
+      if (cached.matches.length > 1) {
+        html += '<button class="context-panel-more" data-key="' + escapeHtml(key).replace(/"/g, '&quot;') + '">'
+          + App.t('contextPanelMore', cached.matches.length - 1) + '</button>';
+      }
+      html += '</div>';
+
+      // AI description section
+      html += '<div class="context-panel-description">';
+      if (cached.description) {
+        html += '<span class="context-panel-desc-icon">&#128161;</span> ' + escapeHtml(cached.description);
+      } else {
+        html += '<span class="context-panel-no-desc">' + App.t('contextPanelNoDesc') + '</span>';
+      }
+      html += '</div>';
+    }
+
+    // Translation fields
+    var jsonData = App.getState().jsonData;
+    if (jsonData) {
+      var targetLangs = Object.keys(jsonData).filter(function (k) { return k !== 'en'; }).sort();
+      if (targetLangs.length > 0) {
+        html += '<div class="context-panel-translations">';
+        for (var i = 0; i < targetLangs.length; i++) {
+          var lang = targetLangs[i];
+          var val = (jsonData[lang] && jsonData[lang][key] !== undefined) ? jsonData[lang][key] : '';
+          var escapedVal = escapeHtml(String(val)).replace(/"/g, '&quot;');
+          var escapedKey = escapeHtml(key).replace(/"/g, '&quot;');
+          html += '<div class="context-panel-lang-row">';
+          html += '<label>' + escapeHtml(lang.toUpperCase()) + '</label>';
+          html += '<input type="text" class="context-panel-input" data-lang="' + escapeHtml(lang) + '" data-key="' + escapedKey + '" value="' + escapedVal + '">';
+          html += '<button class="context-panel-save" data-lang="' + escapeHtml(lang) + '" data-key="' + escapedKey + '">' + App.t('cellEditSave') + '</button>';
+          html += '</div>';
+        }
+        html += '</div>';
+      }
+    }
+
+    html += '</div>';
+    return html;
+  }
+
+  function expandContextPanel(keyRow, key) {
+    collapseCurrentPanel();
+
+    var colCount = keyRow.children.length;
+    var tr = document.createElement('tr');
+    tr.className = 'context-panel-row';
+
+    var td = document.createElement('td');
+    td.colSpan = colCount;
+    td.className = 'context-panel-cell';
+
+    var cached = App.getContextCache().get(key);
+    td.innerHTML = buildPanelHTML(key, cached);
+
+    tr.appendChild(td);
+    keyRow.parentNode.insertBefore(tr, keyRow.nextSibling);
+
+    App.setState({ expandedPanelKey: key });
+    keyRow.classList.add('context-panel-expanded');
+  }
+
+  function collapseCurrentPanel() {
+    var existing = App.dom.editorTable.querySelector('.context-panel-row');
+    if (existing) {
+      if (existing.previousElementSibling) {
+        existing.previousElementSibling.classList.remove('context-panel-expanded');
+      }
+      existing.parentNode.removeChild(existing);
+      App.setState({ expandedPanelKey: null });
+    }
+  }
+
+  function toggleContextPanel(keyRow, key) {
+    var s = App.getState();
+    if (s.expandedPanelKey === key) {
+      collapseCurrentPanel();
+    } else {
+      expandContextPanel(keyRow, key);
+    }
+  }
+
+  // Panel event delegation -- save and show-more buttons
+  App.dom.editorTable.addEventListener('click', function (e) {
+    var saveBtn = e.target.closest('.context-panel-save');
+    if (saveBtn) {
+      var lang = saveBtn.getAttribute('data-lang');
+      var key = saveBtn.getAttribute('data-key');
+      if (!lang || !key) return;
+
+      // Find sibling input with matching data-lang and data-key
+      var row = saveBtn.closest('.context-panel-lang-row');
+      var input = row ? row.querySelector('.context-panel-input[data-lang="' + lang + '"]') : null;
+      if (!input) return;
+
+      var newVal = input.value;
+
+      // Immutable state update
+      var newJsonData = JSON.parse(JSON.stringify(App.getState().jsonData));
+      if (!newJsonData[lang]) { newJsonData[lang] = {}; }
+      newJsonData[lang][key] = newVal;
+      App.setState({ jsonData: newJsonData });
+
+      // Update the corresponding table cell directly without full re-render
+      var tableRows = App.dom.editorTable.querySelectorAll('tbody tr:not(.context-panel-row)');
+      for (var ri = 0; ri < tableRows.length; ri++) {
+        var keyCell = tableRows[ri].children[0];
+        if (keyCell && (keyCell.getAttribute('title') === key || keyCell.textContent === key)) {
+          var curState = App.getState();
+          var langs = ['en'].concat(Object.keys(curState.jsonData).filter(function (k) { return k !== 'en'; }).sort());
+          var langIdx = langs.indexOf(lang);
+          if (langIdx !== -1) {
+            var targetCell = tableRows[ri].children[langIdx + 1]; // +1 for key column
+            if (targetCell) {
+              targetCell.textContent = newVal;
+              targetCell.setAttribute('title', newVal);
+              if (newVal) {
+                targetCell.classList.remove('empty-cell');
+              }
+            }
+          }
+          break;
+        }
+      }
+
+      showToast(App.t('cellEditSuccess'), 'success');
+      return;
+    }
+
+    var moreBtn = e.target.closest('.context-panel-more');
+    if (moreBtn) {
+      var moreKey = moreBtn.getAttribute('data-key');
+      if (!moreKey) return;
+
+      var cachedData = App.getContextCache().get(moreKey);
+      if (!cachedData || !cachedData.matches) return;
+
+      var snippetDiv = moreBtn.closest('.context-panel-snippet');
+      if (!snippetDiv) return;
+
+      // Render all matches
+      var allHtml = '';
+      for (var m = 0; m < cachedData.matches.length; m++) {
+        var match = cachedData.matches[m];
+        allHtml += '<div class="context-panel-file">&#128196; ' + escapeHtml(match.file) + ':' + match.line + '</div>';
+        allHtml += '<pre class="context-panel-code">' + escapeHtml(match.snippet) + '</pre>';
+      }
+      snippetDiv.innerHTML = allHtml;
+      return;
+    }
+  });
+
+  App.toggleContextPanel = toggleContextPanel;
+  App.collapseCurrentPanel = collapseCurrentPanel;
+  App.buildPanelHTML = buildPanelHTML;
 })();

@@ -1700,6 +1700,16 @@ a.btn-test-key {
 .context-panel-more:hover {
   text-decoration: underline;
 }
+.context-panel-expanded td:first-child {
+  font-weight: 600;
+  color: var(--primary);
+}
+.editor-table tbody tr:not(.context-panel-row) td:first-child {
+  cursor: pointer;
+}
+.editor-table tbody tr:not(.context-panel-row) td:first-child:hover {
+  color: var(--primary);
+}
 
 /* ── Phase 4: Error Cell Styling ── */
 .editor-table td.cell-error {
