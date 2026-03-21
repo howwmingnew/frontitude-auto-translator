@@ -1002,6 +1002,23 @@
     }
   }
 
+  // Auto-close panel when clicking outside panel and outside key column
+  document.addEventListener('click', function (e) {
+    if (!App.getState().expandedPanelKey) return;
+    // Don't close if clicking inside the floating panel
+    if (e.target.closest('.context-panel-floating')) return;
+    // Don't close if clicking a key column (toggleContextPanel handles that)
+    var td = e.target.closest('td');
+    if (td) {
+      var tr = td.closest('tr');
+      if (tr && tr.parentElement && tr.parentElement.tagName === 'TBODY' && !tr.classList.contains('context-panel-row')) {
+        var cells = Array.prototype.slice.call(tr.children);
+        if (cells.indexOf(td) === 0) return; // key column click — let toggle handle it
+      }
+    }
+    collapseCurrentPanel();
+  });
+
   // Panel event delegation -- save, revert, AI translate, show-more buttons
   // Uses document because the floating panel is outside the table element
   document.addEventListener('click', function (e) {
