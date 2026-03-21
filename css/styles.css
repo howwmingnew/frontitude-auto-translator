@@ -868,6 +868,8 @@ table.editor-table {
   font-weight: 500;
   color: var(--text-muted);
   border-right: 2px solid var(--border);
+  min-width: 260px;
+  width: 260px;
 }
 
 .editor-table th:first-child {

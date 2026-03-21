@@ -70,8 +70,9 @@
   }
 
   // ── Single text translation helper ──
-  async function translateSingleText(text, targetLang) {
-    var results = await App.callTranslateAPI([text], targetLang);
+  async function translateSingleText(text, targetLang, context) {
+    var contexts = context ? [context] : undefined;
+    var results = await App.callTranslateAPI([text], targetLang, contexts);
     return results[0];
   }
 
@@ -185,7 +186,9 @@
       btn.textContent = App.t('cellEditAiTranslating');
 
       try {
-        var translated = await translateSingleText(sourceText, lang);
+        var cachedCtx = App.getContextCache().get(key);
+        var ctxDesc = (cachedCtx && cachedCtx.description) || '';
+        var translated = await translateSingleText(sourceText, lang, ctxDesc);
         App.dom.cellEditTextarea.value = translated;
       } catch (err) {
         App.showToast(App.t('cellTranslateError', err.message), 'error');

@@ -270,6 +270,11 @@
   }
 
   function renderEditorTable() {
+    // Close floating context panel before re-render
+    var fp = document.querySelector('.context-panel-floating');
+    if (fp) { fp.parentNode.removeChild(fp); }
+    App.setState({ expandedPanelKey: null });
+
     var s = App.getState();
     if (!s.jsonData || !s.jsonData.en) return;
 
@@ -1134,7 +1139,11 @@
       aiBtn.disabled = true;
       aiBtn.textContent = App.t('cellEditAiTranslating');
 
-      App.translateSingleText(sourceText, aLang).then(function (translated) {
+      // Get context description for this key
+      var cachedCtx = App.getContextCache().get(aKey);
+      var ctxDesc = (cachedCtx && cachedCtx.description) || '';
+
+      App.translateSingleText(sourceText, aLang, ctxDesc).then(function (translated) {
         if (aInput) {
           aInput.value = translated;
           // Update input style to reflect AI translated state
